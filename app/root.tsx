@@ -8,8 +8,9 @@ import {
 import { getThemeInitScript } from "@agent-native/core/client/ui";
 import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { Links, Meta, Outlet, Scripts, ScrollRestoration } from "react-router";
+import { Links, Meta, Outlet, Scripts, ScrollRestoration, useLocation } from "react-router";
 import type { LinksFunction } from "react-router";
+import { ClientOnly } from "@agent-native/core/client/ui";
 
 import { Layout as AppLayout } from "@/components/layout/Layout";
 import { AppToolkitProvider } from "@/components/ui/toolkit-provider";
@@ -78,10 +79,14 @@ function DbSyncSetup() {
 
 export default function Root() {
   const [queryClient] = useState(() => createAgentNativeQueryClient());
+  const location = useLocation();
+  const isPublicPath = location.pathname === "/" || !location.pathname.startsWith("/admin");
   return (
     <AppToolkitProvider>
-      <AppProviders queryClient={queryClient}>
-        <DbSyncSetup />
+      <AppProviders queryClient={queryClient} isPublicPath={isPublicPath}>
+        <ClientOnly>
+          <DbSyncSetup />
+        </ClientOnly>
         <AppLayout>
           <Outlet />
         </AppLayout>
