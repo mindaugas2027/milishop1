@@ -37,9 +37,8 @@ const loginHtml = `
       <div class="brand"><span class="mark">M</span><span>milishop</span></div>
       <p class="eyebrow">Administratoriaus prieiga</p>
       <h1>Prisijunkite</h1>
-      <p>Administratoriaus paskyra: mindaugas2027@gmail.com</p>
       <form id="login-form">
-        <label>El. paštas<input id="email" type="email" value="mindaugas2027@gmail.com" autocomplete="username" required /></label>
+        <label>El. paštas<input id="email" type="email" autocomplete="username" required /></label>
         <label>Slaptažodis<input id="password" type="password" autocomplete="current-password" required /></label>
         <div id="error" role="alert"></div>
         <button id="submit" type="submit">Prisijungti</button>

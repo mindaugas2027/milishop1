@@ -2,7 +2,7 @@ import { type FormEvent, useState } from "react";
 import { Link } from "react-router";
 
 export default function LoginRoute() {
-  const [email, setEmail] = useState("mindaugas2027@gmail.com");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [isPending, setIsPending] = useState(false);
@@ -42,10 +42,6 @@ export default function LoginRoute() {
 
         <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#398b86]">Admin prisijungimas</p>
         <h1 className="mt-3 text-3xl font-semibold tracking-[-0.07em]">Prisijunkite</h1>
-        <p className="mt-3 text-sm text-[#203b40]/60">
-          Administratoriaus paskyra: mindaugas2027@gmail.com
-        </p>
-
         <form className="mt-6 space-y-4" onSubmit={onSubmit}>
           <label className="grid gap-1.5 text-sm font-medium text-[#203b40]/70">
             El. paštas
@@ -54,7 +50,7 @@ export default function LoginRoute() {
               type="email"
               value={email}
               onChange={(event) => setEmail(event.target.value)}
-              placeholder="mindaugas2027@gmail.com"
+              placeholder="El. paštas"
               autoComplete="email"
               required
             />
