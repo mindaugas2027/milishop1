@@ -96,6 +96,8 @@ export default createAuthPlugin({
   publicPaths: [
     "/login",
     "/_agent-native/auth/session",
+    "/_agent-native/actions/list-product-landings",
+    "/_agent-native/actions/get-product-landing",
     "/api/admin-auth/login",
     "/api/admin-auth/logout",
   ],

@@ -1,6 +1,8 @@
 import { useActionQuery } from "@agent-native/core/client/hooks";
 import { useLayoutEffect, useState } from "react";
-import { Link, useParams } from "react-router";
+import { Link, useNavigate, useParams } from "react-router";
+
+import { addCartItem, readCart, writeCart } from "@/lib/cart";
 
 const catalog = {
   obd2: {
@@ -162,24 +164,40 @@ function ProductPage({
   baseProduct,
   slug,
 }: {
-  baseProduct: Product;
+  baseProduct?: Product;
   slug: string;
 }) {
-  const { data: savedLanding } = useActionQuery("get-product-landing", {
+  const { data: savedLanding, isPending: isLandingPending } = useActionQuery("get-product-landing", {
     slug,
   });
+  const navigate = useNavigate();
   const [activeImage, setActiveImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [added, setAdded] = useState(false);
+  if (!baseProduct && !savedLanding && isLandingPending) {
+    return <div className="min-h-[60vh] animate-pulse bg-[#f7f8f6]" aria-label="Įkeliamas produktas" />;
+  }
+  if (!baseProduct && !savedLanding) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background px-6 text-center">
+        <div>
+          <p className="mb-3 text-xs font-semibold uppercase tracking-[0.16em] text-[#398b86]">404</p>
+          <h1 className="text-3xl font-semibold tracking-[-0.05em]">Šio produkto neradome.</h1>
+          <Link to="/" className="mt-6 inline-flex rounded-full bg-[#2f7f7b] px-5 py-3 text-sm font-semibold text-white">Grįžti į katalogą</Link>
+        </div>
+      </div>
+    );
+  }
+  const fallbackProduct = baseProduct ?? catalog.obd2;
   const product = {
-    ...baseProduct,
+    ...fallbackProduct,
     brandName: "Milishop",
     footerText: "Daiktai, kuriuos norisi turėti.",
     deliveryInfo: "Pristatymas per 1–2 d. d.",
     returnsInfo: "14 dienų grąžinimas",
     ctaText: "Pirkti dabar",
     finalCtaEyebrow: "Pasiruošę išbandyti?",
-    finalCtaTitle: baseProduct.name,
+    finalCtaTitle: fallbackProduct.name,
     finalCtaText: "Pirkti dabar",
     ...(savedLanding
       ? {
@@ -192,7 +210,7 @@ function ProductPage({
           price: savedLanding.price,
           oldPrice: savedLanding.oldPrice,
           saving: savedLanding.saving,
-          image: savedLanding.heroImage || baseProduct.image,
+          image: savedLanding.heroImage || baseProduct?.image || "",
           images: savedLanding.heroImage
             ? [
                 savedLanding.heroImage,
@@ -200,24 +218,24 @@ function ProductPage({
                   (image) => image !== savedLanding.heroImage,
                 ),
               ]
-            : baseProduct.images,
+            : baseProduct?.images ?? [],
           features: savedLanding.features.length
             ? savedLanding.features
-            : baseProduct.features,
+            : baseProduct?.features ?? [],
           steps: savedLanding.steps.length
             ? savedLanding.steps
-            : baseProduct.steps,
+            : baseProduct?.steps ?? [],
           specs: savedLanding.specs.length
             ? savedLanding.specs.map(
                 ({ label, value }) => [label, value] as [string, string],
               )
-            : baseProduct.specs,
+            : baseProduct?.specs ?? [],
           faq: savedLanding.faq.length
             ? savedLanding.faq.map(
                 ({ question, answer }) =>
                   [question, answer] as [string, string],
               )
-            : baseProduct.faq,
+            : baseProduct?.faq ?? [],
           deliveryInfo: savedLanding.deliveryInfo,
           returnsInfo: savedLanding.returnsInfo,
           ctaText: savedLanding.ctaText,
@@ -226,6 +244,17 @@ function ProductPage({
           finalCtaText: savedLanding.finalCtaText,
         }
       : {}),
+  };
+
+  const addCurrentProductToCart = () => {
+    writeCart(addCartItem(readCart(), {
+      slug,
+      name: product.name,
+      price: product.price,
+      image: product.images[0] || product.image,
+    }, quantity));
+    setAdded(true);
+    navigate("/?cart=open");
   };
 
   return (
@@ -348,7 +377,7 @@ function ProductPage({
                 </button>
               </div>
               <button
-                onClick={() => setAdded(true)}
+                onClick={addCurrentProductToCart}
                 className={`flex min-h-11 flex-1 items-center justify-center rounded-full px-6 text-sm font-semibold text-white shadow-[0_10px_24px_rgba(47,127,123,0.18)] transition-[background-color,transform] hover:-translate-y-0.5 ${added ? "bg-[#527072]" : "bg-[#2f7f7b] hover:bg-[#256d69]"}`}
               >
                 {added ? "Pridėta į krepšelį" : `${product.ctaText}  ↗`}
@@ -474,7 +503,7 @@ function ProductPage({
               {product.price}
             </span>
             <button
-              onClick={() => setAdded(true)}
+              onClick={addCurrentProductToCart}
               className="rounded-full bg-[#8ed1c7] px-6 py-3.5 text-sm font-semibold text-[#203b40] transition-[background-color,transform] hover:-translate-y-0.5 hover:bg-white"
             >
               {added ? "Pridėta ✓" : `${product.finalCtaText} ↗`}
@@ -501,7 +530,7 @@ export default function ProductRoute() {
       .querySelector<HTMLElement>(".agent-native-app-main")
       ?.scrollTo(0, 0);
   }, [slug]);
-  if (!slug || !product)
+  if (!slug)
     return (
       <div className="flex min-h-screen items-center justify-center bg-background px-6 text-center">
         <div>

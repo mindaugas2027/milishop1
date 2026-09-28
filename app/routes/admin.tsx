@@ -164,34 +164,156 @@ function DashboardOverview() {
   );
 }
 
-function DashboardProducts({ query, onQueryChange }: { query: string; onQueryChange: (value: string) => void }) {
-  const filteredProducts = useMemo(() => products.filter((product) => product.name.toLowerCase().includes(query.toLowerCase())), [query]);
+function slugifyProductName(name: string) {
+  return name
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "")
+    .slice(0, 120);
+}
+
+type ProductDraft = {
+  name: string;
+  description: string;
+  price: string;
+  imageUrl: string;
+};
+
+const emptyProductDraft: ProductDraft = {
+  name: "",
+  description: "",
+  price: "",
+  imageUrl: "",
+};
+
+function DashboardProducts({
+  query,
+  onQueryChange,
+  createOpen,
+  onCreateOpenChange,
+}: {
+  query: string;
+  onQueryChange: (value: string) => void;
+  createOpen: boolean;
+  onCreateOpenChange: (open: boolean) => void;
+}) {
+  const { data: savedLandings = [], isError: loadError } = useActionQuery("list-product-landings", {});
+  const { mutate: saveProduct, isPending: isSaving, isSuccess: saveSuccess, error: saveError } = useActionMutation("update-product-landing");
+  const { mutate: deleteProduct, isPending: isDeleting } = useActionMutation("delete-product-landing");
+  const [draft, setDraft] = useState(emptyProductDraft);
+  const [formError, setFormError] = useState("");
+
+  const productRows = useMemo(() => {
+    const rows = new Map(products.map((product) => [product.slug, { ...product, isSaved: false }]));
+    for (const landing of savedLandings) {
+      rows.set(landing.slug, {
+        name: landing.name,
+        slug: landing.slug,
+        price: landing.price,
+        stock: "—",
+        status: "Supabase",
+        statusTone: "green",
+        image: landing.heroImage,
+        isSaved: true,
+      });
+    }
+    return [...rows.values()].filter((product) => product.name.toLowerCase().includes(query.toLowerCase()));
+  }, [query, savedLandings]);
+
+  const submitProduct = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setFormError("");
+    const slug = slugifyProductName(draft.name);
+    if (!slug) {
+      setFormError("Įveskite produkto pavadinimą.");
+      return;
+    }
+    if (products.some((product) => product.slug === slug) || savedLandings.some((product) => product.slug === slug)) {
+      setFormError("Toks produkto adresas jau naudojamas.");
+      return;
+    }
+
+    const price = Number(draft.price.replace(",", "."));
+    if (!Number.isFinite(price) || price <= 0) {
+      setFormError("Įveskite teisingą kainą.");
+      return;
+    }
+
+    const description = draft.description.trim();
+    const name = draft.name.trim();
+    saveProduct({
+      slug,
+      brandName: "Milishop",
+      footerText: "Apgalvoti daiktai kasdienai.",
+      name,
+      eyebrow: "Milishop kolekcija",
+      description,
+      longDescription: description,
+      price: `${price.toFixed(2).replace(".", ",")} €`,
+      oldPrice: "",
+      saving: "",
+      heroImage: draft.imageUrl.trim(),
+      gallery: [],
+      features: [],
+      steps: [],
+      specs: [],
+      faq: [],
+      deliveryInfo: "Pristatymas per 1–2 d. d.",
+      returnsInfo: "14 dienų grąžinimas",
+      ctaText: "Pirkti dabar",
+      finalCtaEyebrow: "Pasiruošę išbandyti?",
+      finalCtaTitle: name,
+      finalCtaText: "Pirkti dabar",
+    });
+  };
+
+  const removeProduct = (slug: string, name: string) => {
+    if (!window.confirm(`Ištrinti „${name}“ iš produktų katalogo?`)) return;
+    deleteProduct({ slug });
+  };
 
   return (
     <section className="admin-panel mt-6">
-      <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center"><div><h2 className="admin-panel-title">Produktai</h2><p className="admin-panel-meta">Valdykite katalogą ir produktų puslapius</p></div><div className="flex gap-3"><label className="admin-search"><span>⌕</span><input value={query} onChange={(event) => onQueryChange(event.target.value)} placeholder="Ieškoti produkto" aria-label="Ieškoti produkto" /></label><button className="admin-filter">Filtruoti <span>⌄</span></button></div></div>
-      <div className="admin-table-wrap mt-6"><table className="admin-table"><thead><tr><th>Produktas</th><th>Statusas</th><th>Kaina</th><th>Likutis</th><th className="text-right">Veiksmai</th></tr></thead><tbody>{filteredProducts.map((product) => <tr key={product.slug}><td><div className="flex min-w-[250px] items-center gap-3"><img src={product.image} alt="" className="size-11 rounded-xl object-cover mix-blend-multiply" /><div><p className="font-semibold text-[#203b40]">{product.name}</p><p className="mt-0.5 text-xs text-[#203b40]/40">/{product.slug}</p></div></div></td><td><StatusPill tone={product.statusTone}>{product.status}</StatusPill></td><td className="font-semibold">{product.price}</td><td className={product.stock === "0 vnt." ? "font-semibold text-[#bd6659]" : "text-[#203b40]/60"}>{product.stock}</td><td><div className="flex justify-end gap-2"><Link to={`/${product.slug}`} className="admin-row-action">Peržiūrėti</Link><Link to="/admin/landing" className="admin-row-action">Redaguoti</Link></div></td></tr>)}</tbody></table>{filteredProducts.length === 0 && <p className="py-10 text-center text-sm text-[#203b40]/45">Produktų pagal šią užklausą neradome.</p>}</div>
+      <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+        <div><h2 className="admin-panel-title">Produktai</h2><p className="admin-panel-meta">Valdykite katalogą ir produktų puslapius</p></div>
+        <div className="flex gap-3">
+          <label className="admin-search"><span>⌕</span><input value={query} onChange={(event) => onQueryChange(event.target.value)} placeholder="Ieškoti produkto" aria-label="Ieškoti produkto" /></label>
+          <button type="button" className="admin-filter" onClick={() => onCreateOpenChange(!createOpen)}>{createOpen ? "Uždaryti" : "+ Naujas produktas"}</button>
+        </div>
+      </div>
+
+      {createOpen && (
+        <form className="mt-6 grid gap-4 border-y border-[#203b40]/10 py-5 sm:grid-cols-2" onSubmit={submitProduct}>
+          <label className="grid gap-1.5 text-xs font-medium text-[#203b40]/70">Pavadinimas<input className="rounded-lg border border-[#203b40]/15 bg-white px-3 py-2.5 text-sm" value={draft.name} onChange={(event) => setDraft((current) => ({ ...current, name: event.target.value }))} required maxLength={160} /></label>
+          <label className="grid gap-1.5 text-xs font-medium text-[#203b40]/70">Kaina (€)<input className="rounded-lg border border-[#203b40]/15 bg-white px-3 py-2.5 text-sm" type="number" min="0.01" step="0.01" value={draft.price} onChange={(event) => setDraft((current) => ({ ...current, price: event.target.value }))} required /></label>
+          <label className="grid gap-1.5 text-xs font-medium text-[#203b40]/70 sm:col-span-2">Trumpas aprašymas<textarea className="rounded-lg border border-[#203b40]/15 bg-white px-3 py-2.5 text-sm" value={draft.description} onChange={(event) => setDraft((current) => ({ ...current, description: event.target.value }))} required maxLength={500} rows={2} /></label>
+          <label className="grid gap-1.5 text-xs font-medium text-[#203b40]/70 sm:col-span-2">Produkto nuotraukos HTTPS adresas<input className="rounded-lg border border-[#203b40]/15 bg-white px-3 py-2.5 text-sm" type="url" value={draft.imageUrl} onChange={(event) => setDraft((current) => ({ ...current, imageUrl: event.target.value }))} required /></label>
+          <div className="flex flex-wrap items-center gap-3 sm:col-span-2">
+            <button type="submit" disabled={isSaving} className="rounded-lg bg-[#2f7f7b] px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-60">{isSaving ? "Kuriama…" : "Sukurti produktą"}</button>
+            {saveSuccess && <span className="text-sm text-[#2f7f7b]">Produktas išsaugotas Supabase.</span>}
+            {(formError || saveError) && <span role="alert" className="text-sm text-[#bd6659]">{formError || "Nepavyko išsaugoti. Patikrinkite duomenų bazės ryšį ir nuotraukos adresą."}</span>}
+          </div>
+        </form>
+      )}
+
+      {loadError && <p role="alert" className="mt-5 text-sm text-[#bd6659]">Nepavyko įkelti produktų. Patikrinkite duomenų bazės ryšį.</p>}
+      <div className="admin-table-wrap mt-6"><table className="admin-table"><thead><tr><th>Produktas</th><th>Statusas</th><th>Kaina</th><th>Likutis</th><th className="text-right">Veiksmai</th></tr></thead><tbody>{productRows.map((product) => <tr key={product.slug}><td><div className="flex min-w-[250px] items-center gap-3">{product.image && <img src={product.image} alt="" className="size-11 rounded-xl object-cover mix-blend-multiply" />}<div><p className="font-semibold text-[#203b40]">{product.name}</p><p className="mt-0.5 text-xs text-[#203b40]/40">/{product.slug}</p></div></div></td><td><StatusPill tone={product.statusTone}>{product.status}</StatusPill></td><td className="font-semibold">{product.price}</td><td className={product.stock === "0 vnt." ? "font-semibold text-[#bd6659]" : "text-[#203b40]/60"}>{product.stock}</td><td><div className="flex justify-end gap-2"><Link to={product.slug === "obd2" ? "/obd" : `/${product.slug}`} className="admin-row-action">Peržiūrėti</Link>{product.isSaved && <button type="button" disabled={isDeleting} onClick={() => removeProduct(product.slug, product.name)} className="admin-row-action text-[#bd6659] disabled:opacity-50">Ištrinti</button>}</div></td></tr>)}</tbody></table>{productRows.length === 0 && <p className="py-10 text-center text-sm text-[#203b40]/45">Produktų pagal šią užklausą neradome.</p>}</div>
       <div className="admin-mobile-products mt-5">
-        {filteredProducts.map((product) => (
+        {productRows.map((product) => (
           <article className="admin-mobile-product" key={product.slug}>
             <div className="admin-mobile-product-heading">
-              <img src={product.image} alt="" />
-              <div>
-                <p>{product.name}</p>
-                <StatusPill tone={product.statusTone}>{product.status}</StatusPill>
-              </div>
+              {product.image && <img src={product.image} alt="" />}
+              <div><p>{product.name}</p><StatusPill tone={product.statusTone}>{product.status}</StatusPill></div>
             </div>
-            <div className="admin-mobile-product-details">
-              <span>Kaina <strong>{product.price}</strong></span>
-              <span>Likutis <strong>{product.stock}</strong></span>
-            </div>
+            <div className="admin-mobile-product-details"><span>Kaina <strong>{product.price}</strong></span><span>Likutis <strong>{product.stock}</strong></span></div>
             <div className="admin-mobile-product-actions">
               <Link to={product.slug === "obd2" ? "/obd" : `/${product.slug}`} className="admin-row-action">Peržiūrėti</Link>
-              <Link to="/admin/landing" className="admin-row-action">Redaguoti</Link>
+              {product.isSaved && <button type="button" disabled={isDeleting} onClick={() => removeProduct(product.slug, product.name)} className="admin-row-action text-[#bd6659] disabled:opacity-50">Ištrinti</button>}
             </div>
           </article>
         ))}
-        {filteredProducts.length === 0 && <p className="py-8 text-center text-sm text-[#203b40]/45">Produktų neradome.</p>}
       </div>
     </section>
   );
@@ -266,7 +388,7 @@ export default function AdminRoute() {
   const navItems = getAdminTabConfig();
   const [activeNav, setActiveNav] = useState("Apžvalga");
   const [query, setQuery] = useState("");
-  const [showToast, setShowToast] = useState(false);
+  const [createProductOpen, setCreateProductOpen] = useState(false);
 
   const signOut = async () => {
     await fetch("/api/admin-auth/logout", { method: "POST" });
@@ -278,7 +400,7 @@ export default function AdminRoute() {
   const renderTabContent = () => {
     switch (activeNav) {
       case "Produktai":
-        return <DashboardProducts query={query} onQueryChange={setQuery} />;
+        return <DashboardProducts query={query} onQueryChange={setQuery} createOpen={createProductOpen} onCreateOpenChange={setCreateProductOpen} />;
       case "Užsakymai":
         return <DashboardOrders />;
       case "Nustatymai":
@@ -314,11 +436,10 @@ export default function AdminRoute() {
           ))}
         </nav>
         <main className="mx-auto max-w-[1380px] px-5 py-7 sm:px-8 sm:py-10 lg:px-12 lg:py-12">
-          <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-end"><div><p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#398b86]">{activeNav}</p><h1 className="mt-2 text-3xl font-semibold tracking-[-0.06em] sm:text-4xl">Sveiki sugrįžę.</h1></div><div className="flex items-center gap-3"><Link to="/" className="hidden rounded-full border border-[#203b40]/10 bg-white px-4 py-2.5 text-sm font-medium text-[#203b40]/65 transition-colors hover:text-[#203b40] sm:inline-flex">Peržiūrėti svetainę</Link><button onClick={() => setShowToast(true)} className="rounded-full bg-[#2f7f7b] px-5 py-2.5 text-sm font-semibold text-white shadow-[0_8px_20px_rgba(47,127,123,0.16)] transition-[background-color,transform] hover:-translate-y-0.5 hover:bg-[#256d69]">+ Naujas produktas</button></div></div>
+          <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-end"><div><p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#398b86]">{activeNav}</p><h1 className="mt-2 text-3xl font-semibold tracking-[-0.06em] sm:text-4xl">Sveiki sugrįžę.</h1></div><div className="flex items-center gap-3"><Link to="/" className="hidden rounded-full border border-[#203b40]/10 bg-white px-4 py-2.5 text-sm font-medium text-[#203b40]/65 transition-colors hover:text-[#203b40] sm:inline-flex">Peržiūrėti svetainę</Link><button onClick={() => { setActiveNav("Produktai"); setCreateProductOpen(true); }} className="rounded-full bg-[#2f7f7b] px-5 py-2.5 text-sm font-semibold text-white shadow-[0_8px_20px_rgba(47,127,123,0.16)] transition-[background-color,transform] hover:-translate-y-0.5 hover:bg-[#256d69]">+ Naujas produktas</button></div></div>
           {renderTabContent()}
         </main>
       </div>
-      {showToast && <button onClick={() => setShowToast(false)} className="fixed bottom-6 right-6 z-20 rounded-2xl bg-[#203b40] px-5 py-4 text-left text-white shadow-[0_16px_40px_rgba(32,59,64,0.22)]"><p className="text-sm font-semibold">Produkto kūrimas</p><p className="mt-1 text-xs text-white/65">Forma bus paruošta kitame žingsnyje. Uždaryti ×</p></button>}
     </div>
   );
 }

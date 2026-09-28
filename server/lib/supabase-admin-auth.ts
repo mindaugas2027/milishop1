@@ -1,3 +1,5 @@
+import { createHash } from "node:crypto";
+
 import type { AuthSession } from "@agent-native/core/server";
 import { deleteCookie, getCookie, setCookie, type H3Event } from "h3";
 
@@ -5,6 +7,10 @@ export const ADMIN_EMAIL = "mindaugas2027@gmail.com";
 
 const ACCESS_COOKIE = "milishop-supabase-access";
 const REFRESH_COOKIE = "milishop-supabase-refresh";
+const REQUEST_SESSION_KEY = "__milishopSupabaseSession";
+const VERIFIED_SESSION_TTL_MS = 5_000;
+
+const verifiedSessions = new Map<string, { session: AuthSession; expiresAt: number }>();
 
 type SupabaseUser = {
   id: string;
@@ -71,6 +77,47 @@ async function fetchUser(url: string, apiKey: string, accessToken: string) {
 }
 
 export async function getSupabaseAdminSession(event: H3Event): Promise<AuthSession | null> {
+  const context = event.context as typeof event.context & {
+    [REQUEST_SESSION_KEY]?: Promise<AuthSession | null>;
+  };
+  if (context[REQUEST_SESSION_KEY]) return context[REQUEST_SESSION_KEY];
+
+  const pending = resolveSupabaseAdminSession(event);
+  context[REQUEST_SESSION_KEY] = pending;
+  return pending;
+}
+
+function sessionCacheKey(token: string) {
+  return createHash("sha256").update(token).digest("hex");
+}
+
+function cacheVerifiedSession(token: string, session: AuthSession) {
+  const now = Date.now();
+  for (const [key, value] of verifiedSessions) {
+    if (value.expiresAt <= now) verifiedSessions.delete(key);
+  }
+  if (verifiedSessions.size >= 256) {
+    const oldestKey = verifiedSessions.keys().next().value;
+    if (oldestKey) verifiedSessions.delete(oldestKey);
+  }
+  verifiedSessions.set(sessionCacheKey(token), {
+    session,
+    expiresAt: now + VERIFIED_SESSION_TTL_MS,
+  });
+}
+
+function getCachedSession(token: string) {
+  const key = sessionCacheKey(token);
+  const entry = verifiedSessions.get(key);
+  if (!entry) return null;
+  if (entry.expiresAt <= Date.now()) {
+    verifiedSessions.delete(key);
+    return null;
+  }
+  return entry.session;
+}
+
+async function resolveSupabaseAdminSession(event: H3Event): Promise<AuthSession | null> {
   const config = getSupabaseConfig();
   if (!config) return null;
 
@@ -80,10 +127,16 @@ export async function getSupabaseAdminSession(event: H3Event): Promise<AuthSessi
 
   try {
     if (accessToken) {
+      const cachedSession = getCachedSession(accessToken);
+      if (cachedSession) return cachedSession;
+
       const user = await fetchUser(config.url, config.apiKey, accessToken);
       if (user) {
         const session = toSession(user);
-        if (session) return session;
+        if (session) {
+          cacheVerifiedSession(accessToken, session);
+          return session;
+        }
         clearSessionCookies(event);
         return null;
       }
@@ -111,6 +164,7 @@ export async function getSupabaseAdminSession(event: H3Event): Promise<AuthSessi
       return null;
     }
     saveSessionCookies(event, tokens);
+    cacheVerifiedSession(tokens.access_token, session);
     return session;
   } catch {
     return null;
@@ -137,16 +191,19 @@ export async function signInSupabaseAdmin(event: H3Event, email: string, passwor
   }
 
   const tokens = (await response.json()) as SupabaseTokenResponse;
-  if (!toSession(tokens.user)) {
+  const session = toSession(tokens.user);
+  if (!session) {
     throw new Error("Neteisingas el. paštas arba slaptažodis.");
   }
 
   saveSessionCookies(event, tokens);
+  cacheVerifiedSession(tokens.access_token, session);
 }
 
 export async function signOutSupabaseAdmin(event: H3Event) {
   const config = getSupabaseConfig();
   const accessToken = getCookie(event, ACCESS_COOKIE);
+  if (accessToken) verifiedSessions.delete(sessionCacheKey(accessToken));
 
   if (config && accessToken) {
     try {

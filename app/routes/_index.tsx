@@ -1,5 +1,6 @@
 import { Link } from "react-router";
 import { useEffect, useState } from "react";
+import { useActionQuery } from "@agent-native/core/client/hooks";
 import { IconMinus, IconPlus, IconShoppingCart, IconShoppingCartPlus, IconX } from "@tabler/icons-react";
 
 import { APP_TITLE } from "@/lib/app-config";
@@ -14,7 +15,17 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 
-const products = [
+type StorefrontProduct = {
+  slug: string;
+  name: string;
+  description: string;
+  price: string;
+  oldPrice: string;
+  tag: string;
+  image: string;
+};
+
+const products: StorefrontProduct[] = [
   {
     slug: "didelis-plepus-zaislas",
     name: "Didelis pūkus žaislas 180 cm – baltas",
@@ -169,12 +180,46 @@ export default function HomeRoute() {
   const [cartOpen, setCartOpen] = useState(false);
   const [cartItems, setCartItems] = useState<CartLine[]>([]);
   const [paymentMethod, setPaymentMethod] = useState("paysera");
+  const { data: savedProductLandings = [] } = useActionQuery("list-product-landings", {});
+  const builtInSlugs = new Set(products.map((product) => product.slug));
+  const savedProducts = new Map(savedProductLandings.map((landing) => [landing.slug, landing]));
+  const storefrontProducts: StorefrontProduct[] = [
+    ...products.map((product) => {
+      const landing = savedProducts.get(product.slug);
+      return landing
+        ? {
+            ...product,
+            name: landing.name || product.name,
+            description: landing.description || product.description,
+            price: landing.price || product.price,
+            oldPrice: landing.oldPrice,
+            tag: landing.saving || product.tag,
+            image: landing.heroImage || product.image,
+          }
+        : product;
+    }),
+    ...savedProductLandings
+      .filter((landing) => !builtInSlugs.has(landing.slug))
+      .map((landing) => ({
+        slug: landing.slug,
+        name: landing.name,
+        description: landing.description,
+        price: landing.price,
+        oldPrice: landing.oldPrice,
+        tag: landing.saving || "Naujiena",
+        image: landing.heroImage,
+      })),
+  ];
   const year = new Date().getFullYear();
   const cartCount = cartItems.reduce((total, item) => total + item.quantity, 0);
   const cartTotal = cartItems.reduce((total, item) => total + priceValue(item.price) * item.quantity, 0);
 
   useEffect(() => {
     setCartItems(readCart());
+    if (new URLSearchParams(window.location.search).get("cart") === "open") {
+      setCartOpen(true);
+      window.history.replaceState({}, "", "/");
+    }
   }, []);
 
   useEffect(() => {
@@ -187,7 +232,7 @@ export default function HomeRoute() {
     return () => window.removeEventListener("milishop-cart:open", openCart);
   }, []);
 
-  const addToCart = (product: (typeof products)[number]) => {
+  const addToCart = (product: StorefrontProduct) => {
     setCartItems((current) =>
       addCartItem(current, {
         slug: product.slug,
@@ -417,10 +462,10 @@ export default function HomeRoute() {
               <p className="levitara-kicker dark">Mūsų pasirinkimas</p>
               <h2>Mūsų produktai</h2>
             </div>
-            <span className="levitara-heading-side">03 produktai</span>
+            <span className="levitara-heading-side">{storefrontProducts.length.toString().padStart(2, "0")} produktai</span>
           </div>
           <div className="levitara-product-grid">
-            {products.map((product) => (
+            {storefrontProducts.map((product) => (
               <article key={product.slug} className="levitara-product-card">
                 <div className="levitara-product-media">
                   <Link to={product.slug === "obd2" ? "/obd" : `/${product.slug}`} className="levitara-product-image-link" aria-label={`Peržiūrėti: ${product.name}`}>

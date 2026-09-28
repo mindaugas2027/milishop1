@@ -24,14 +24,14 @@ export function writeCart(cart: CartLine[]) {
   window.localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cart));
 }
 
-export function addCartItem(current: CartLine[], item: Omit<CartLine, "quantity">) {
+export function addCartItem(current: CartLine[], item: Omit<CartLine, "quantity">, amount = 1) {
   const existing = current.find((entry) => entry.slug === item.slug);
 
   if (existing) {
     return current.map((entry) =>
-      entry.slug === item.slug ? { ...entry, quantity: entry.quantity + 1 } : entry,
+      entry.slug === item.slug ? { ...entry, quantity: entry.quantity + amount } : entry,
     );
   }
 
-  return [...current, { ...item, quantity: 1 }];
+  return [...current, { ...item, quantity: amount }];
 }
