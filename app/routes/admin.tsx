@@ -268,6 +268,11 @@ export default function AdminRoute() {
   const [query, setQuery] = useState("");
   const [showToast, setShowToast] = useState(false);
 
+  const signOut = async () => {
+    await fetch("/api/admin-auth/logout", { method: "POST" });
+    window.location.replace("/login");
+  };
+
   if (location.pathname.startsWith("/admin/landing")) return <Outlet />;
 
   const renderTabContent = () => {
@@ -289,7 +294,7 @@ export default function AdminRoute() {
       <aside className="admin-sidebar hidden border-r border-[#203b40]/8 bg-white lg:flex lg:flex-col">
         <div className="flex items-center gap-2.5 px-7 py-7"><span className="brand-mark" aria-hidden="true"><span /></span><span className="text-[17px] font-semibold tracking-[-0.04em]">milishop</span></div>
         <div className="px-5"><p className="admin-label px-3">Parduotuvė</p><nav className="mt-3 grid gap-1">{navItems.map((item, index) => <button key={item} onClick={() => setActiveNav(item)} className={`admin-nav-item ${activeNav === item ? "admin-nav-item-active" : ""}`}><span className="admin-nav-symbol">{["⌂", "□", "↗", "◌"][index]}</span>{item}{item === "Užsakymai" && <span className="ml-auto rounded-full bg-[#f5e6ce] px-2 py-0.5 text-[10px] font-bold text-[#976636]">3</span>}</button>)}</nav></div>
-        <div className="mt-auto px-5 pb-6"><div className="rounded-2xl bg-[#e4f1ed] p-4"><p className="text-xs font-semibold text-[#2f7f7b]">Parduotuvė veikia</p><p className="mt-1 text-xs leading-5 text-[#557875]">Paskutinis atnaujinimas prieš 4 min.</p><Link to="/" className="mt-3 inline-flex text-xs font-semibold text-[#2f7f7b] hover:underline">Peržiūrėti svetainę ↗</Link></div><div className="mt-6 flex items-center gap-3 border-t border-[#203b40]/8 pt-5"><span className="flex size-9 items-center justify-center rounded-full bg-[#203b40] text-xs font-semibold text-white">SI</span><div className="min-w-0"><p className="truncate text-xs font-semibold">Statybos Industrija</p><p className="text-[11px] text-[#203b40]/45">Administratorius</p></div><span className="ml-auto text-[#203b40]/35">···</span></div></div>
+        <div className="mt-auto px-5 pb-6"><div className="rounded-2xl bg-[#e4f1ed] p-4"><p className="text-xs font-semibold text-[#2f7f7b]">Parduotuvė veikia</p><p className="mt-1 text-xs leading-5 text-[#557875]">Paskutinis atnaujinimas prieš 4 min.</p><Link to="/" className="mt-3 inline-flex text-xs font-semibold text-[#2f7f7b] hover:underline">Peržiūrėti svetainę ↗</Link></div><div className="mt-6 flex items-center gap-3 border-t border-[#203b40]/8 pt-5"><span className="flex size-9 items-center justify-center rounded-full bg-[#203b40] text-xs font-semibold text-white">MI</span><div className="min-w-0"><p className="truncate text-xs font-semibold">mindaugas2027@gmail.com</p><p className="text-[11px] text-[#203b40]/45">Administratorius</p></div><button type="button" onClick={signOut} className="ml-auto text-xs font-semibold text-[#2f7f7b] hover:underline">Atsijungti</button></div></div>
       </aside>
 
       <div className="min-w-0 flex-1">

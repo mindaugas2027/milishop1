@@ -6,6 +6,7 @@
   "type": "module",
   "scripts": {
     "migrate:production": "tsx scripts/migrate-production.ts",
+    "supabase:admin:create": "tsx scripts/create-supabase-admin.ts",
     "dev": "agent-native dev",
     "build": "agent-native build",
     "start": "agent-native start",
