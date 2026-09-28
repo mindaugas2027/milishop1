@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { IconMinus, IconPlus, IconShoppingCart, IconShoppingCartPlus, IconX } from "@tabler/icons-react";
 
 import { APP_TITLE } from "@/lib/app-config";
+import { addCartItem, readCart, type CartLine, writeCart } from "@/lib/cart";
 import { StoreSocialLinks } from "@/components/StoreInfoPage";
 import {
   Sheet,
@@ -144,14 +145,6 @@ const heroSlides = [
   },
 ];
 
-type CartLine = {
-  slug: string;
-  name: string;
-  price: string;
-  image: string;
-  quantity: number;
-};
-
 function priceValue(price: string) {
   return Number(price.replace(/[^\d,.-]/g, "").replace(",", ".")) || 0;
 }
@@ -175,18 +168,34 @@ export default function HomeRoute() {
   const [activeHeroSlide, setActiveHeroSlide] = useState(0);
   const [cartOpen, setCartOpen] = useState(false);
   const [cartItems, setCartItems] = useState<CartLine[]>([]);
+  const [paymentMethod, setPaymentMethod] = useState("paysera");
   const year = new Date().getFullYear();
   const cartCount = cartItems.reduce((total, item) => total + item.quantity, 0);
   const cartTotal = cartItems.reduce((total, item) => total + priceValue(item.price) * item.quantity, 0);
 
+  useEffect(() => {
+    setCartItems(readCart());
+  }, []);
+
+  useEffect(() => {
+    writeCart(cartItems);
+  }, [cartItems]);
+
+  useEffect(() => {
+    const openCart = () => setCartOpen(true);
+    window.addEventListener("milishop-cart:open", openCart);
+    return () => window.removeEventListener("milishop-cart:open", openCart);
+  }, []);
+
   const addToCart = (product: (typeof products)[number]) => {
-    setCartItems((current) => {
-      const existing = current.find((item) => item.slug === product.slug);
-      if (existing) {
-        return current.map((item) => item.slug === product.slug ? { ...item, quantity: item.quantity + 1 } : item);
-      }
-      return [...current, { ...product, quantity: 1 }];
-    });
+    setCartItems((current) =>
+      addCartItem(current, {
+        slug: product.slug,
+        name: product.name,
+        price: product.price,
+        image: product.image,
+      }),
+    );
     setCartOpen(true);
   };
 
@@ -278,8 +287,34 @@ export default function HomeRoute() {
                         </article>
                       ))}
                     </div>
+                    <div className="rounded-2xl border border-[#203b40]/10 bg-[#f7f8f6] p-4">
+                      <p className="text-sm font-semibold text-[#203b40]">Apmokėjimo būdas</p>
+                      <div className="mt-3 space-y-2 text-sm text-[#203b40]/70">
+                        <label className="flex items-center gap-2">
+                          <input type="radio" name="paymentMethod" checked={paymentMethod === "paysera"} onChange={() => setPaymentMethod("paysera")} />
+                          Paysera
+                        </label>
+                        <label className="flex items-center gap-2">
+                          <input type="radio" name="paymentMethod" checked={paymentMethod === "bank"} onChange={() => setPaymentMethod("bank")} />
+                          Bankinis pavedimas
+                        </label>
+                      </div>
+                      <div className="mt-3 rounded-xl border border-[#203b40]/10 bg-white p-3 text-xs text-[#203b40]/60">
+                        {paymentMethod === "paysera" ? "Lietuvos bankai: Swedbank, SEB, Luminor, Revolut, Paysera." : "Gali būti mokama per SEB, Swedbank ar Luminor bankų pavedimu."}
+                      </div>
+                    </div>
                     <div className="levitara-cart-total"><span>Tarpinė suma</span><strong>{formatPrice(cartTotal)}</strong></div>
-                    <p className="levitara-cart-note">Pristatymo kaina apskaičiuojama prieš užsakymo patvirtinimą.</p>
+                    <button
+                      type="button"
+                      className="w-full rounded-full bg-[#2f7f7b] px-4 py-3 text-sm font-semibold text-white shadow-[0_10px_24px_rgba(47,127,123,0.18)] transition hover:bg-[#256d69]"
+                      onClick={() => {
+                        const methodLabel = paymentMethod === "paysera" ? "Paysera" : "Bankinis pavedimas";
+                        window.alert(`Užsakymas paruoštas apmokėjimui per ${methodLabel}. Paysera integracija bus prijungta vėliau, šiuo metu krepšelis veikia vietoje.`);
+                      }}
+                    >
+                      Tęsti prie apmokėjimo
+                    </button>
+                    <p className="levitara-cart-note">Pristatymo kaina apskaičiuojama prieš užsakymo patvirtinimą. Lietuvos bankai ir Paysera bus rodomi lietuviškai.</p>
                   </>
                 )}
               </SheetContent>
