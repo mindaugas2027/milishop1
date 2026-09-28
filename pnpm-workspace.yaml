@@ -1,7 +1,7 @@
-allowBuilds:
-  tesseract.js: true
-  node-pty: true
-  esbuild: true
+onlyBuiltDependencies:
+  - esbuild
+  - node-pty
+  - tesseract.js
 
 overrides:
   "@tiptap/starter-kit": "3.28.0"
