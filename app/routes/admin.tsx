@@ -1,4 +1,5 @@
-import { useMemo, useState } from "react";
+import { useActionMutation, useActionQuery } from "@agent-native/core/client/hooks";
+import { useEffect, useMemo, useState } from "react";
 import { Link, Outlet, useLocation } from "react-router";
 
 const products = [
@@ -170,6 +171,28 @@ function DashboardProducts({ query, onQueryChange }: { query: string; onQueryCha
     <section className="admin-panel mt-6">
       <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center"><div><h2 className="admin-panel-title">Produktai</h2><p className="admin-panel-meta">Valdykite katalogą ir produktų puslapius</p></div><div className="flex gap-3"><label className="admin-search"><span>⌕</span><input value={query} onChange={(event) => onQueryChange(event.target.value)} placeholder="Ieškoti produkto" aria-label="Ieškoti produkto" /></label><button className="admin-filter">Filtruoti <span>⌄</span></button></div></div>
       <div className="admin-table-wrap mt-6"><table className="admin-table"><thead><tr><th>Produktas</th><th>Statusas</th><th>Kaina</th><th>Likutis</th><th className="text-right">Veiksmai</th></tr></thead><tbody>{filteredProducts.map((product) => <tr key={product.slug}><td><div className="flex min-w-[250px] items-center gap-3"><img src={product.image} alt="" className="size-11 rounded-xl object-cover mix-blend-multiply" /><div><p className="font-semibold text-[#203b40]">{product.name}</p><p className="mt-0.5 text-xs text-[#203b40]/40">/{product.slug}</p></div></div></td><td><StatusPill tone={product.statusTone}>{product.status}</StatusPill></td><td className="font-semibold">{product.price}</td><td className={product.stock === "0 vnt." ? "font-semibold text-[#bd6659]" : "text-[#203b40]/60"}>{product.stock}</td><td><div className="flex justify-end gap-2"><Link to={`/${product.slug}`} className="admin-row-action">Peržiūrėti</Link><Link to="/admin/landing" className="admin-row-action">Redaguoti</Link></div></td></tr>)}</tbody></table>{filteredProducts.length === 0 && <p className="py-10 text-center text-sm text-[#203b40]/45">Produktų pagal šią užklausą neradome.</p>}</div>
+      <div className="admin-mobile-products mt-5">
+        {filteredProducts.map((product) => (
+          <article className="admin-mobile-product" key={product.slug}>
+            <div className="admin-mobile-product-heading">
+              <img src={product.image} alt="" />
+              <div>
+                <p>{product.name}</p>
+                <StatusPill tone={product.statusTone}>{product.status}</StatusPill>
+              </div>
+            </div>
+            <div className="admin-mobile-product-details">
+              <span>Kaina <strong>{product.price}</strong></span>
+              <span>Likutis <strong>{product.stock}</strong></span>
+            </div>
+            <div className="admin-mobile-product-actions">
+              <Link to={product.slug === "obd2" ? "/obd" : `/${product.slug}`} className="admin-row-action">Peržiūrėti</Link>
+              <Link to="/admin/landing" className="admin-row-action">Redaguoti</Link>
+            </div>
+          </article>
+        ))}
+        {filteredProducts.length === 0 && <p className="py-8 text-center text-sm text-[#203b40]/45">Produktų neradome.</p>}
+      </div>
     </section>
   );
 }
@@ -191,13 +214,49 @@ function DashboardOrders() {
 }
 
 function DashboardSettings() {
+  const { data: socialLinks } = useActionQuery("get-store-social-links", {});
+  const { mutate, isPending, isSuccess, error } = useActionMutation("update-store-social-links");
+  const [instagramUrl, setInstagramUrl] = useState("");
+  const [facebookUrl, setFacebookUrl] = useState("");
+
+  useEffect(() => {
+    if (!socialLinks) return;
+    setInstagramUrl(socialLinks.instagramUrl);
+    setFacebookUrl(socialLinks.facebookUrl);
+  }, [socialLinks]);
+
   return (
     <section className="admin-panel mt-6">
       <h2 className="admin-panel-title">Nustatymai</h2>
       <div className="mt-5 grid gap-4 sm:grid-cols-2">
-        <div className="rounded-2xl border border-[#203b40]/8 bg-[#f8faf8] p-4"><p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#398b86]">Parduotuvė</p><p className="mt-2 text-sm text-[#203b40]">Pavadinimas: atrinkta.</p><p className="mt-1 text-sm text-[#203b40]">Valiutos kursas: EUR</p></div>
+        <div className="rounded-2xl border border-[#203b40]/8 bg-[#f8faf8] p-4"><p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#398b86]">Parduotuvė</p><p className="mt-2 text-sm text-[#203b40]">Pavadinimas: milishop</p><p className="mt-1 text-sm text-[#203b40]">Valiutos kursas: EUR</p></div>
         <div className="rounded-2xl border border-[#203b40]/8 bg-[#f8faf8] p-4"><p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#398b86]">Pristatymas</p><p className="mt-2 text-sm text-[#203b40]">Nuo 50 € nemokamas pristatymas</p><p className="mt-1 text-sm text-[#203b40]">14 dienų grąžinimas</p></div>
       </div>
+      <form
+        className="mt-6 grid max-w-2xl gap-4 border-t border-[#203b40]/8 pt-6"
+        onSubmit={(event) => {
+          event.preventDefault();
+          mutate({ instagramUrl, facebookUrl });
+        }}
+      >
+        <div>
+          <h3 className="text-sm font-semibold text-[#203b40]">Socialiniai tinklai</h3>
+          <p className="mt-1 text-xs text-[#203b40]/55">Įveskite HTTPS profilių nuorodas. Tušti laukai svetainėje nerodomi.</p>
+        </div>
+        <label className="grid gap-1.5 text-xs font-medium text-[#203b40]/70">
+          Instagram
+          <input className="rounded-lg border border-[#203b40]/15 bg-white px-3 py-2.5 text-sm text-[#203b40]" type="url" value={instagramUrl} onChange={(event) => setInstagramUrl(event.target.value)} placeholder="https://www.instagram.com/..." />
+        </label>
+        <label className="grid gap-1.5 text-xs font-medium text-[#203b40]/70">
+          Facebook
+          <input className="rounded-lg border border-[#203b40]/15 bg-white px-3 py-2.5 text-sm text-[#203b40]" type="url" value={facebookUrl} onChange={(event) => setFacebookUrl(event.target.value)} placeholder="https://www.facebook.com/..." />
+        </label>
+        <div className="flex flex-wrap items-center gap-3">
+          <button type="submit" disabled={isPending} className="rounded-lg bg-[#2f7f7b] px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-60">{isPending ? "Saugoma…" : "Išsaugoti nuorodas"}</button>
+          {isSuccess && <span className="text-sm text-[#2f7f7b]">Nuorodos išsaugotos.</span>}
+          {error && <span role="alert" className="text-sm text-[#bd6659]">Patikrinkite nuorodą: turi būti Instagram arba Facebook HTTPS adresas.</span>}
+        </div>
+      </form>
     </section>
   );
 }
@@ -228,13 +287,27 @@ export default function AdminRoute() {
   return (
     <div className="admin-shell min-h-screen bg-[#f7f8f6] text-[#203b40]">
       <aside className="admin-sidebar hidden border-r border-[#203b40]/8 bg-white lg:flex lg:flex-col">
-        <div className="flex items-center gap-2.5 px-7 py-7"><span className="brand-mark" aria-hidden="true"><span /></span><span className="text-[17px] font-semibold tracking-[-0.04em]">atrinkta<span className="text-[#61aaa3]">.</span></span></div>
+        <div className="flex items-center gap-2.5 px-7 py-7"><span className="brand-mark" aria-hidden="true"><span /></span><span className="text-[17px] font-semibold tracking-[-0.04em]">milishop</span></div>
         <div className="px-5"><p className="admin-label px-3">Parduotuvė</p><nav className="mt-3 grid gap-1">{navItems.map((item, index) => <button key={item} onClick={() => setActiveNav(item)} className={`admin-nav-item ${activeNav === item ? "admin-nav-item-active" : ""}`}><span className="admin-nav-symbol">{["⌂", "□", "↗", "◌"][index]}</span>{item}{item === "Užsakymai" && <span className="ml-auto rounded-full bg-[#f5e6ce] px-2 py-0.5 text-[10px] font-bold text-[#976636]">3</span>}</button>)}</nav></div>
         <div className="mt-auto px-5 pb-6"><div className="rounded-2xl bg-[#e4f1ed] p-4"><p className="text-xs font-semibold text-[#2f7f7b]">Parduotuvė veikia</p><p className="mt-1 text-xs leading-5 text-[#557875]">Paskutinis atnaujinimas prieš 4 min.</p><Link to="/" className="mt-3 inline-flex text-xs font-semibold text-[#2f7f7b] hover:underline">Peržiūrėti svetainę ↗</Link></div><div className="mt-6 flex items-center gap-3 border-t border-[#203b40]/8 pt-5"><span className="flex size-9 items-center justify-center rounded-full bg-[#203b40] text-xs font-semibold text-white">SI</span><div className="min-w-0"><p className="truncate text-xs font-semibold">Statybos Industrija</p><p className="text-[11px] text-[#203b40]/45">Administratorius</p></div><span className="ml-auto text-[#203b40]/35">···</span></div></div>
       </aside>
 
       <div className="min-w-0 flex-1">
-        <header className="flex items-center justify-between border-b border-[#203b40]/8 bg-white px-5 py-4 sm:px-8 lg:hidden"><Link to="/" className="flex items-center gap-2.5"><span className="brand-mark" aria-hidden="true"><span /></span><span className="text-[17px] font-semibold tracking-[-0.04em]">atrinkta<span className="text-[#61aaa3]">.</span></span></Link><Link to="/" className="text-xs font-semibold text-[#2f7f7b]">Į parduotuvę ↗</Link></header>
+        <header className="flex items-center justify-between border-b border-[#203b40]/8 bg-white px-5 py-4 sm:px-8 lg:hidden"><Link to="/" className="flex items-center gap-2.5"><span className="brand-mark" aria-hidden="true"><span /></span><span className="text-[17px] font-semibold tracking-[-0.04em]">milishop</span></Link><Link to="/" className="text-xs font-semibold text-[#2f7f7b]">Į parduotuvę ↗</Link></header>
+        <nav className="admin-mobile-tabs lg:hidden" aria-label="Administravimo skyriai">
+          {navItems.map((item, index) => (
+            <button
+              type="button"
+              key={item}
+              onClick={() => setActiveNav(item)}
+              className={activeNav === item ? "admin-mobile-tab-active" : ""}
+              aria-pressed={activeNav === item}
+            >
+              <span aria-hidden="true">{["⌂", "□", "↗", "◌"][index]}</span>
+              <span>{item}</span>
+            </button>
+          ))}
+        </nav>
         <main className="mx-auto max-w-[1380px] px-5 py-7 sm:px-8 sm:py-10 lg:px-12 lg:py-12">
           <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-end"><div><p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#398b86]">{activeNav}</p><h1 className="mt-2 text-3xl font-semibold tracking-[-0.06em] sm:text-4xl">Sveiki sugrįžę.</h1></div><div className="flex items-center gap-3"><Link to="/" className="hidden rounded-full border border-[#203b40]/10 bg-white px-4 py-2.5 text-sm font-medium text-[#203b40]/65 transition-colors hover:text-[#203b40] sm:inline-flex">Peržiūrėti svetainę</Link><button onClick={() => setShowToast(true)} className="rounded-full bg-[#2f7f7b] px-5 py-2.5 text-sm font-semibold text-white shadow-[0_8px_20px_rgba(47,127,123,0.16)] transition-[background-color,transform] hover:-translate-y-0.5 hover:bg-[#256d69]">+ Naujas produktas</button></div></div>
           {renderTabContent()}

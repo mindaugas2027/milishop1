@@ -1,9 +1,29 @@
 import { Link } from "react-router";
 import { useEffect, useState } from "react";
+import { IconMinus, IconPlus, IconShoppingCart, IconShoppingCartPlus, IconX } from "@tabler/icons-react";
 
 import { APP_TITLE } from "@/lib/app-config";
+import { StoreSocialLinks } from "@/components/StoreInfoPage";
+import {
+  Sheet,
+  SheetClose,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 
 const products = [
+  {
+    slug: "didelis-plepus-zaislas",
+    name: "Didelis pūkus žaislas 180 cm – baltas",
+    description: "Minkštas ir jaukus žaislas namams.",
+    price: "131,82 €",
+    oldPrice: "€131,82",
+    tag: "-5%",
+    image:
+      "https://images.unsplash.com/photo-1517849845537-4d257902454a?auto=format&fit=crop&w=900&q=80",
+  },
   {
     slug: "obd2",
     name: "OBD2 automobilio diagnostikos įrenginys",
@@ -34,6 +54,42 @@ const products = [
     image:
       "https://cdn.builder.io/api/v1/image/assets%2Fd04450a0da6f48df807f14687fdbf7fe%2F003c69477ff24c93a0de402ab9247d9f?format=webp&width=800&height=1200",
   },
+  {
+    slug: "medinis-svyravimas",
+    name: "Medinis vaikų sūpynės – su virve",
+    description: "Namuose laimingas ir aktyvus laikas.",
+    price: "€142,00",
+    oldPrice: "€162,00",
+    tag: "-22%",
+    image: "https://images.unsplash.com/photo-1517705008128-361805f42e86?auto=format&fit=crop&w=900&q=80",
+  },
+  {
+    slug: "garso-modulis",
+    name: "Garso elektronikos sistema „Tesla“",
+    description: "Garsas, stiprumas ir paprastas dizainas.",
+    price: "€68,00",
+    oldPrice: "€72,00",
+    tag: "-8%",
+    image: "https://images.unsplash.com/photo-1518444065439-e933c06ce9a9?auto=format&fit=crop&w=900&q=80",
+  },
+  {
+    slug: "daugiafunkcinis-kratytuvas",
+    name: "VAYOX insect killer – elektrinis",
+    description: "Efektyvus apsauga nuo vabzdžių.",
+    price: "€84,00",
+    oldPrice: "€104,00",
+    tag: "-21%",
+    image: "https://images.unsplash.com/photo-1555099962-4199c345e5dd?auto=format&fit=crop&w=900&q=80",
+  },
+  {
+    slug: "parfumas",
+    name: "Perceive Gift Set – perfumed",
+    description: "Gaivus ir subtilus kvapas kasdienai.",
+    price: "€80,00",
+    oldPrice: "€100,00",
+    tag: "-20%",
+    image: "https://images.unsplash.com/photo-1528740561666-dc2479d461a6?auto=format&fit=crop&w=900&q=80",
+  },
 ];
 
 const categories = [
@@ -42,28 +98,67 @@ const categories = [
   { label: "Namams", caption: "Ramūs akcentai tavo erdvei", image: products[2].image, href: "/namu-akcentas" },
 ];
 
+const getProductImage = (slug: string) =>
+  products.find((product) => product.slug === slug)?.image ?? "";
+
 const heroSlides = [
   {
     src: "https://images.pexels.com/photos/12271949/pexels-photo-12271949.jpeg?auto=compress&cs=tinysrgb&w=1600",
     alt: "OBD2 diagnostikos įrenginys automobilyje",
     label: "Automobiliui · Diagnostika",
+    eyebrow: "Automobiliui · OBD2 diagnostika",
+    title: "Pažink, ką rodo tavo automobilis.",
+    copy: "Greitai patikrink automobilio būklę ir į kelionę leiskis ramiau.",
+    cta: "Peržiūrėti OBD2",
+    href: "/obd",
   },
   {
     src: "https://images.pexels.com/photos/28536450/pexels-photo-28536450.jpeg?auto=compress&cs=tinysrgb&w=1600",
     alt: "Modernūs kasdienybės daiktai namams ir darbui",
     label: "Kasdienybei · Atrinkta",
+    eyebrow: "Milishop kasdienybei",
+    title: "Mažos detalės. Daugiau patogumo.",
+    copy: "Apgalvoti radiniai namams, kelionei ir kasdieniams darbams.",
+    cta: "Atrasti produktus",
+    href: "#produktai",
   },
   {
-    src: products[1].image,
+    src: getProductImage("automobilio-laikiklis"),
     alt: "Magnetinis automobilio telefono laikiklis",
     label: "Kelionei · Patogu",
+    eyebrow: "Patogiau kiekvienoje kelionėje",
+    title: "Telefonas po ranka. Akys kelyje.",
+    copy: "Stabilus magnetinis laikiklis navigacijai ir kasdieniams maršrutams.",
+    cta: "Peržiūrėti laikiklį",
+    href: "/automobilio-laikiklis",
   },
   {
-    src: products[2].image,
+    src: getProductImage("namu-akcentas"),
     alt: "Keraminė namų interjero detalė",
     label: "Namams · Forma",
+    eyebrow: "Namams · Forma ir jaukumas",
+    title: "Jaukumas slypi detalėse.",
+    copy: "Rami keraminė detalė, kuri suteikia erdvei savitą akcentą.",
+    cta: "Peržiūrėti namams",
+    href: "/namu-akcentas",
   },
 ];
+
+type CartLine = {
+  slug: string;
+  name: string;
+  price: string;
+  image: string;
+  quantity: number;
+};
+
+function priceValue(price: string) {
+  return Number(price.replace(/[^\d,.-]/g, "").replace(",", ".")) || 0;
+}
+
+function formatPrice(price: number) {
+  return `${price.toFixed(2).replace(".", ",")} €`;
+}
 
 export function meta() {
   return [
@@ -78,7 +173,30 @@ export function meta() {
 export default function HomeRoute() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [activeHeroSlide, setActiveHeroSlide] = useState(0);
+  const [cartOpen, setCartOpen] = useState(false);
+  const [cartItems, setCartItems] = useState<CartLine[]>([]);
   const year = new Date().getFullYear();
+  const cartCount = cartItems.reduce((total, item) => total + item.quantity, 0);
+  const cartTotal = cartItems.reduce((total, item) => total + priceValue(item.price) * item.quantity, 0);
+
+  const addToCart = (product: (typeof products)[number]) => {
+    setCartItems((current) => {
+      const existing = current.find((item) => item.slug === product.slug);
+      if (existing) {
+        return current.map((item) => item.slug === product.slug ? { ...item, quantity: item.quantity + 1 } : item);
+      }
+      return [...current, { ...product, quantity: 1 }];
+    });
+    setCartOpen(true);
+  };
+
+  const changeCartQuantity = (slug: string, amount: number) => {
+    setCartItems((current) => current.flatMap((item) => {
+      if (item.slug !== slug) return [item];
+      const quantity = item.quantity + amount;
+      return quantity > 0 ? [{ ...item, quantity }] : [];
+    }));
+  };
 
   useEffect(() => {
     const timer = window.setInterval(() => {
@@ -108,26 +226,65 @@ export default function HomeRoute() {
 
       <header className="levitara-header">
         <div className="levitara-header-inner">
-          <Link to="/" className="levitara-logo" aria-label="Atrinkta pradžia">
-            <span className="levitara-logo-mark" aria-hidden="true">a.</span>
-            <span>atrinkta.</span>
+          <Link to="/" className="levitara-logo" aria-label="Milishop pradžia">
+            <span className="levitara-logo-mark" aria-hidden="true">M</span>
+            <span>milishop</span>
           </Link>
 
           <nav className="levitara-nav" aria-label="Pagrindinė navigacija">
             <a href="#produktai">Produktai</a>
             <a href="#kategorijos">Kategorijos</a>
-            <a href="#apie-mus">Apie mus</a>
+            <Link to="/apie-mus">Apie mus</Link>
             <a href="#kontaktai">Kontaktai</a>
           </nav>
 
           <div className="levitara-header-tools">
-            <a className="levitara-contact-link" href="mailto:labas@atrinkta.lt">labas@atrinkta.lt</a>
+            <Sheet open={cartOpen} onOpenChange={setCartOpen}>
+              <SheetTrigger asChild>
+                <button className="levitara-cart" type="button" aria-label={`Krepšelis, ${cartCount} prekių`}>
+                  <span aria-hidden="true"><IconShoppingCart size={18} stroke={1.8} /></span>
+                  <span>Krepšelis</span>
+                  <strong>{cartCount}</strong>
+                </button>
+              </SheetTrigger>
+              <SheetContent side="right" showClose={false} className="levitara-cart-sheet">
+                <SheetHeader className="levitara-cart-sheet-header">
+                  <SheetTitle>Krepšelis <span>{cartCount}</span></SheetTitle>
+                  <SheetClose asChild>
+                    <button type="button" className="levitara-cart-close" aria-label="Uždaryti krepšelį"><IconX size={19} /></button>
+                  </SheetClose>
+                </SheetHeader>
+                {cartItems.length === 0 ? (
+                  <div className="levitara-cart-empty">
+                    <IconShoppingCart size={32} stroke={1.5} aria-hidden="true" />
+                    <p>Krepšelis tuščias</p>
+                    <span>Pasirink produktą ir pridėk jį čia.</span>
+                  </div>
+                ) : (
+                  <>
+                    <div className="levitara-cart-items">
+                      {cartItems.map((item) => (
+                        <article className="levitara-cart-item" key={item.slug}>
+                          <img src={item.image} alt="" />
+                          <div className="levitara-cart-item-info">
+                            <h3>{item.name}</h3>
+                            <strong>{item.price}</strong>
+                            <div className="levitara-cart-quantity">
+                              <button type="button" onClick={() => changeCartQuantity(item.slug, -1)} aria-label={`Sumažinti ${item.name} kiekį`}><IconMinus size={14} /></button>
+                              <span>{item.quantity}</span>
+                              <button type="button" onClick={() => changeCartQuantity(item.slug, 1)} aria-label={`Padidinti ${item.name} kiekį`}><IconPlus size={14} /></button>
+                            </div>
+                          </div>
+                        </article>
+                      ))}
+                    </div>
+                    <div className="levitara-cart-total"><span>Tarpinė suma</span><strong>{formatPrice(cartTotal)}</strong></div>
+                    <p className="levitara-cart-note">Pristatymo kaina apskaičiuojama prieš užsakymo patvirtinimą.</p>
+                  </>
+                )}
+              </SheetContent>
+            </Sheet>
             <Link className="levitara-admin-link" to="/admin">Prisijungti</Link>
-            <button className="levitara-cart" type="button" aria-label="Krepšelis, 0 prekių">
-              <span aria-hidden="true">◌</span>
-              <span>Krepšelis</span>
-              <strong>0</strong>
-            </button>
             <button
               className="levitara-menu-button"
               type="button"
@@ -144,7 +301,7 @@ export default function HomeRoute() {
           <nav className="levitara-mobile-nav" aria-label="Mobilioji navigacija">
             <a href="#produktai" onClick={() => setMenuOpen(false)}>Produktai</a>
             <a href="#kategorijos" onClick={() => setMenuOpen(false)}>Kategorijos</a>
-            <a href="#apie-mus" onClick={() => setMenuOpen(false)}>Apie mus</a>
+            <Link to="/apie-mus" onClick={() => setMenuOpen(false)}>Apie mus</Link>
             <a href="#kontaktai" onClick={() => setMenuOpen(false)}>Kontaktai</a>
             <Link to="/admin">Prisijungti</Link>
           </nav>
@@ -162,11 +319,11 @@ export default function HomeRoute() {
           />
           <div className="levitara-hero-overlay" />
           <div className="levitara-hero-content">
-            <p className="levitara-kicker">Atrinkta kasdienybei</p>
-            <h1 id="hero-title">Daiktai, kurie palengvina kasdienybę.</h1>
-            <p className="levitara-hero-copy">Praktiški, gražūs ir apgalvoti produktai automobiliui, namams bei gyvenimui</p>
+            <p className="levitara-kicker">{activeSlide.eyebrow}</p>
+            <h1 id="hero-title">{activeSlide.title}</h1>
+            <p className="levitara-hero-copy">{activeSlide.copy}</p>
             <div className="levitara-hero-actions">
-              <a href="#produktai" className="levitara-light-button">Atrasti kolekciją <span aria-hidden="true">↗</span></a>
+              <Link to={activeSlide.href} className="levitara-light-button">{activeSlide.cta} <span aria-hidden="true">↗</span></Link>
             </div>
           </div>
           <div className="levitara-hero-controls">
@@ -195,7 +352,7 @@ export default function HomeRoute() {
         <section id="kategorijos" className="levitara-section levitara-category-section">
           <div className="levitara-section-heading">
             <div>
-              <p className="levitara-kicker dark">Atrinkta kolekcija</p>
+              <p className="levitara-kicker dark">Milishop kolekcija</p>
               <h2>Rask tai, kas tinka tau.</h2>
             </div>
             <span className="levitara-heading-side">Paprasti sprendimai kasdienai</span>
@@ -229,26 +386,31 @@ export default function HomeRoute() {
           </div>
           <div className="levitara-product-grid">
             {products.map((product) => (
-              <Link key={product.slug} to={`/${product.slug}`} className="levitara-product-card">
+              <article key={product.slug} className="levitara-product-card">
                 <div className="levitara-product-media">
-                  <img
-                    className={product.slug === "namu-akcentas" ? "levitara-product-image-home" : ""}
-                    src={product.image}
-                    alt={product.name}
-                    loading="lazy"
-                  />
-                  <span className="levitara-sale-badge">{product.tag}</span>
-                  <span className="levitara-quick-add"><span>Add to cart</span><span aria-hidden="true">↗</span></span>
+                  <Link to={product.slug === "obd2" ? "/obd" : `/${product.slug}`} className="levitara-product-image-link" aria-label={`Peržiūrėti: ${product.name}`}>
+                    <img
+                      className={product.slug === "namu-akcentas" ? "levitara-product-image-home" : ""}
+                      src={product.image}
+                      alt={product.name}
+                      loading="lazy"
+                    />
+                    <span className="levitara-sale-badge">{product.tag}</span>
+                    <span className="levitara-quick-add"><span>Peržiūrėti</span><span aria-hidden="true">↗</span></span>
+                  </Link>
+                  <button className="levitara-add-to-cart" type="button" onClick={() => addToCart(product)} aria-label={`Įdėti į krepšelį: ${product.name}`} title="Įdėti į krepšelį">
+                    <IconShoppingCartPlus size={20} stroke={1.8} aria-hidden="true" />
+                  </button>
                 </div>
-                <div className="levitara-product-info">
+                <Link to={product.slug === "obd2" ? "/obd" : `/${product.slug}`} className="levitara-product-info">
                   <h3>{product.name}</h3>
                   <p>{product.description}</p>
                   <div className="levitara-price-row">
                     <strong>{product.price}</strong>
                     {product.oldPrice && <span>{product.oldPrice}</span>}
                   </div>
-                </div>
-              </Link>
+                </Link>
+              </article>
             ))}
           </div>
           <a href="#kategorijos" className="levitara-dark-button">Peržiūrėti visą kolekciją</a>
@@ -296,16 +458,36 @@ export default function HomeRoute() {
             <div className="levitara-trust-item"><span>03</span><div><strong>14 dienų grąžinimas</strong><small>Norime, kad pirkinys tikrai patiktų.</small></div></div>
           </div>
         </section>
+        <section className="levitara-payment-strip" aria-label="Bankai ir mokėjimo būdai">
+          <div className="levitara-payment-track">
+            {[0, 1].map((copy) => (
+              <div className="levitara-payment-group" aria-hidden={copy === 1} key={copy}>
+                {[
+                  ["SEB", "seb"],
+                  ["Luminor", "luminor"],
+                  ["Citadele", "citadele"],
+                  ["VISA", "visa"],
+                  ["Revolut", "revolut"],
+                  ["Swedbank", "swedbank"],
+                ].map(([name, brand]) => (
+                  <span className={`levitara-payment-name levitara-payment-${brand}`} key={name}>
+                    {brand === "visa" ? <img src="/visa-mark.svg" alt="VISA" /> : name}
+                  </span>
+                ))}
+              </div>
+            ))}
+          </div>
+        </section>
       </main>
 
       <footer id="kontaktai" className="levitara-footer">
         <div className="levitara-footer-grid">
-          <div className="levitara-footer-brand"><Link to="/" className="levitara-logo"><span className="levitara-logo-mark" aria-hidden="true">a.</span><span>atrinkta.</span></Link><p>Apgalvoti daiktai automobiliui, namams ir kasdienai.</p><a href="mailto:labas@atrinkta.lt">labas@atrinkta.lt</a></div>
+          <div className="levitara-footer-brand"><Link to="/" className="levitara-logo"><span className="levitara-logo-mark" aria-hidden="true">M</span><span>milishop</span></Link><p>Apgalvoti daiktai automobiliui, namams ir kasdienai.</p></div>
           <div><h3>Kategorijos</h3><a href="#produktai">Automobiliui</a><a href="#produktai">Kasdienai</a><a href="#produktai">Namams</a></div>
-          <div><h3>Informacija</h3><a href="#apie-mus">Apie mus</a><a href="#kontaktai">Pristatymas</a><a href="#kontaktai">Grąžinimas</a></div>
-          <div><h3>Pagalba</h3><a href="mailto:labas@atrinkta.lt">Susisiekite su mumis</a><Link to="/admin">Prisijungti</Link><span className="levitara-footer-social">Instagram · Facebook</span></div>
+          <div><h3>Informacija</h3><Link to="/apie-mus">Apie mus</Link><Link to="/pristatymas">Pristatymas</Link><Link to="/grazinimas">Grąžinimas</Link></div>
+          <div><h3>Pagalba</h3><Link to="/admin">Prisijungti</Link><StoreSocialLinks /></div>
         </div>
-        <div className="levitara-footer-bottom"><span>© {year} Atrinkta. Visos teisės saugomos.</span></div>
+        <div className="levitara-footer-bottom"><span>© {year} Milishop. Visos teisės saugomos.</span></div>
       </footer>
     </div>
   );

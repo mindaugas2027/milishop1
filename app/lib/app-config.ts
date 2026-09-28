@@ -1,5 +1,5 @@
-const rawAppName = "Atrinkta";
-const rawAppTitle = "Atrinkta — apgalvoti daiktai kasdienai";
+const rawAppName = "Milishop";
+const rawAppTitle = "Milishop — apgalvoti daiktai kasdienai";
 
 const APP_NAME_PLACEHOLDER = "{" + "{APP_NAME}}";
 const APP_TITLE_PLACEHOLDER = "{" + "{APP_TITLE}}";

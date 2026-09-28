@@ -34,7 +34,7 @@ vi.mock("../server/db.js", () => ({
       createdAt: "createdAt",
       updatedAt: "updatedAt",
     },
-  }),
+  },
 }));
 
 import action from "./list-product-landings";

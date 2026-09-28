@@ -6,7 +6,7 @@ const loginHtml = `
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Prisijungti • Atrinkta</title>
+    <title>Prisijungti • Milishop</title>
     <style>
       :root {
         --bg: #f7f8f6;
@@ -55,7 +55,7 @@ const loginHtml = `
   </head>
   <body>
     <div class="shell">
-      <div class="brand"><span class="mark">a</span><span>atrinkta.</span></div>
+      <div class="brand"><span class="mark">M</span><span>milishop</span></div>
       <div class="eyebrow">Admin access</div>
       <h1 id="title">Prisijungti</h1>
       <p id="copy">Prašome prisijungti prie parduotuvės administravimo srities.</p>

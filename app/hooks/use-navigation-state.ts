@@ -39,6 +39,9 @@ function threadIdFromPath(pathname: string): string | null {
 
 function viewForPath(pathname: string): string {
   if (pathname === "/") return "home";
+  if (pathname === "/apie-mus") return "about";
+  if (pathname === "/pristatymas") return "delivery";
+  if (pathname === "/grazinimas") return "returns";
   return "home";
 }
 
@@ -46,6 +49,12 @@ function pathForView(view?: string): string {
   switch (view) {
     case "home":
       return "/";
+    case "about":
+      return "/apie-mus";
+    case "delivery":
+      return "/pristatymas";
+    case "returns":
+      return "/grazinimas";
     default:
       return "/";
   }
