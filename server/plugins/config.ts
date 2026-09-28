@@ -10,6 +10,6 @@ export default defineAppConfig({
     disabled: ["integrations", "observational-memory", "sentry", "terminal"],
   },
   app: {
-    homePath: "/",
+    homePath: "/admin",
   },
 });

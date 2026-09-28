@@ -238,7 +238,7 @@ export default function HomeRoute() {
                     loading="lazy"
                   />
                   <span className="levitara-sale-badge">{product.tag}</span>
-                  <span className="levitara-quick-add">Peržiūrėti produktą <span aria-hidden="true">↗</span></span>
+                  <span className="levitara-quick-add"><span>Add to cart</span><span aria-hidden="true">↗</span></span>
                 </div>
                 <div className="levitara-product-info">
                   <h3>{product.name}</h3>
@@ -252,6 +252,40 @@ export default function HomeRoute() {
             ))}
           </div>
           <a href="#kategorijos" className="levitara-dark-button">Peržiūrėti visą kolekciją</a>
+        </section>
+
+        <section className="levitara-section levitara-showcase-section">
+          <div className="levitara-section-heading">
+            <div>
+              <p className="levitara-kicker dark">Išskirtinis pasirinkimas</p>
+              <h2>Premium dalykai, kuriuos norisi nešiotis kasdien</h2>
+            </div>
+            <span className="levitara-heading-side">Nauja kolekcija</span>
+          </div>
+          <div className="levitara-feature-grid">
+            <div className="levitara-feature-card levitara-feature-card-hero">
+              <div>
+                <span>Rinkitės protingai</span>
+                <h3>Produkto kategorija</h3>
+                <p>Minimalūs, funkcionalūs ir gražūs daiktai, kurie vienodai tinka namams, automobiliui ir kasdienai.</p>
+              </div>
+            </div>
+            <div className="levitara-feature-card">
+              <span>01</span>
+              <h3>Švarus dizainas</h3>
+              <p>Minimalūs paviršiai, šviesi paletė ir suformuotas premium look.</p>
+            </div>
+            <div className="levitara-feature-card">
+              <span>02</span>
+              <h3>Patogi prekyba</h3>
+              <p>Greitas perėjimas į produktą, aiškios kainos, lengvas add-to-cart patyrimas.</p>
+            </div>
+            <div className="levitara-feature-card">
+              <span>03</span>
+              <h3>Sklandi kokybė</h3>
+              <p>Intuityvūs skyriai, kokybiška prezentacija ir tvarus e-commerce jausmas.</p>
+            </div>
+          </div>
         </section>
 
         <section id="apie-mus" className="levitara-trust-strip">
