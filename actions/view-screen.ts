@@ -19,9 +19,16 @@ export default defineAction({
   readOnly: true,
   run: async () => {
     const navigation = await readAppState("navigation");
+    const url = (await readAppState("__url__")) as {
+      searchParams?: Record<string, string>;
+    } | null;
 
     const screen: Record<string, unknown> = {};
     if (navigation) screen.navigation = navigation;
+    const category = url?.searchParams?.category;
+    if (category && ["automobiliui", "kasdienai", "namams"].includes(category)) {
+      screen.activeFilters = { category };
+    }
 
     if (Object.keys(screen).length === 0) {
       return "No application state found. Is the app running?";

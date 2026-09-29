@@ -7,18 +7,21 @@ export interface NavigationState {
   view: string;
   path?: string;
   threadId?: string;
+  activeCategory?: string;
 }
 
 export function useNavigationState() {
   useAgentRouteState<NavigationState>({
     browserTabId: TAB_ID,
     requestSource: TAB_ID,
-    getNavigationState: ({ pathname }) => {
+    getNavigationState: ({ pathname, searchParams }) => {
       const threadId = threadIdFromPath(pathname);
+      const activeCategory = searchParams.get("category");
       return {
         view: viewForPath(pathname),
         path: appPath(pathname),
         ...(threadId ? { threadId } : {}),
+        ...(activeCategory ? { activeCategory } : {}),
       };
     },
     getCommandPath: (command) =>

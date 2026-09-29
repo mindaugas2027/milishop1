@@ -14,6 +14,7 @@ vi.mock("../server/db.js", () => ({
       brandName: "brandName",
       footerText: "footerText",
       name: "name",
+      category: "category",
       eyebrow: "eyebrow",
       description: "description",
       longDescription: "longDescription",
@@ -52,6 +53,7 @@ describe("list-product-landings", () => {
           {
             slug: "obd2",
             name: "OBD2",
+            category: "automobiliui",
             description: "OBD2 produktas",
             price: "39,90 €",
             oldPrice: "49,90 €",
@@ -79,6 +81,7 @@ describe("list-product-landings", () => {
     expect(result[0]).toMatchObject({
       slug: "obd2",
       name: "OBD2",
+      category: "automobiliui",
       description: "OBD2 produktas",
       price: "39,90 €",
       oldPrice: "49,90 €",

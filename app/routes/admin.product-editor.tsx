@@ -2,13 +2,15 @@ import { useActionMutation, useActionQuery } from "@agent-native/core/client/hoo
 import { uploadEditorImage } from "@agent-native/core/client/uploads";
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router";
-import { builtInProducts } from "@/lib/store-products";
+import { calculateDiscount } from "@/lib/cart";
+import { builtInProducts, isStoreCategory, storeCategories, type StoreCategory } from "@/lib/store-products";
 
 type ProductDraft = {
   slug: string;
   brandName: string;
   footerText: string;
   name: string;
+  category: StoreCategory;
   eyebrow: string;
   description: string;
   longDescription: string;
@@ -39,6 +41,7 @@ function createDraft(slug: string): ProductDraft {
     brandName: "Milishop",
     footerText: "Apgalvoti daiktai kasdienai.",
     name,
+    category: product?.category ?? "kasdienai",
     eyebrow: product ? "Milishop kolekcija" : "",
     description,
     longDescription: description,
@@ -86,9 +89,13 @@ export default function AdminProductEditorRoute() {
   const [formError, setFormError] = useState("");
   const [uploadError, setUploadError] = useState("");
   const [isUploading, setIsUploading] = useState(false);
+  const discount = calculateDiscount(draft.price, draft.oldPrice);
 
   useEffect(() => {
-    if (data) setDraft({ ...createDraft(slug), ...data });
+    if (data) {
+      const baseDraft = createDraft(slug);
+      setDraft({ ...baseDraft, ...data, category: isStoreCategory(data.category) ? data.category : baseDraft.category });
+    }
   }, [data, slug]);
 
   useEffect(() => {
@@ -145,7 +152,7 @@ export default function AdminProductEditorRoute() {
       setFormError("Įkelkite nuotrauką ir pažymėkite pagrindinę.");
       return;
     }
-    mutate({ ...draft, slug: nextSlug, name: draft.name.trim(), supplierUrl: draft.supplierUrl.trim() });
+    mutate({ ...draft, saving: discount ? `Sutaupai ${discount.amountLabel}` : "", slug: nextSlug, name: draft.name.trim(), supplierUrl: draft.supplierUrl.trim() });
   };
 
   return (
@@ -161,9 +168,16 @@ export default function AdminProductEditorRoute() {
             <div className="landing-field-grid">
               <Field label="Produkto pavadinimas" value={draft.name} onChange={(value) => update("name", value)} required />
               <Field label="Produkto adresas" value={draft.slug} onChange={(value) => update("slug", value)} required={!isNew} />
+              <label className="grid gap-1.5 text-xs font-medium text-[#203b40]/70">Kategorija
+                <select className="w-full rounded-lg border border-[#203b40]/15 bg-white px-3 py-2.5 text-sm text-[#203b40] outline-none focus:border-[#2f7f7b]" value={draft.category} onChange={(event) => update("category", event.target.value as StoreCategory)}>
+                  {storeCategories.map((category) => <option key={category.value} value={category.value}>{category.label}</option>)}
+                </select>
+              </label>
               <Field label="Kaina" value={draft.price} onChange={(value) => update("price", value)} required />
               <Field label="Sena kaina" value={draft.oldPrice} onChange={(value) => update("oldPrice", value)} />
-              <Field label="Akcijos tekstas" value={draft.saving} onChange={(value) => update("saving", value)} />
+              <p className="self-end pb-2 text-xs font-medium text-[#2f7f7b]" aria-live="polite">
+                {discount ? `Sutaupote ${discount.amountLabel} (${discount.percentLabel})` : "Nuolaida bus rodoma įvedus didesnę seną kainą."}
+              </p>
               <Field label="Hero etiketė" value={draft.eyebrow} onChange={(value) => update("eyebrow", value)} />
               <Field label="Tiekėjo užsakymo nuoroda (matoma tik admin)" value={draft.supplierUrl} onChange={(value) => update("supplierUrl", value)} />
               <Field label="Trumpas aprašymas" value={draft.description} onChange={(value) => update("description", value)} multiline required />

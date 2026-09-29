@@ -606,6 +606,11 @@
 .levitara-price-row { display: flex; align-items: baseline; gap: 9px; margin-top: 9px; }
 .levitara-price-row strong { font-size: 14px; font-weight: 700; }
 .levitara-price-row span { color: #999; font-size: 11px; text-decoration: line-through; }
+.levitara-category-filters { display: flex; flex-wrap: wrap; gap: 8px; margin: -8px 0 24px; }
+.levitara-category-filters a { border: 1px solid #dedfdd; border-radius: 3px; padding: 9px 13px; color: #4d514f; font-size: 11px; font-weight: 600; text-decoration: none; transition: border-color 160ms ease, background-color 160ms ease, color 160ms ease; }
+.levitara-category-filters a:hover { border-color: #171a19; color: #171a19; }
+.levitara-category-filters a[aria-current="page"] { border-color: #171a19; background: #171a19; color: #fff; }
+.levitara-empty-category { padding: 30px 0; color: #777e7a; font-size: 13px; }
 .levitara-cart-sheet { display: flex; width: min(100vw, 420px); flex-direction: column; gap: 20px; overflow: hidden; border-color: #e7e7e5; background: #fff; padding: 24px; color: #171a19; }
 .levitara-cart-sheet-header { display: flex; flex-direction: row; align-items: center; justify-content: space-between; border-bottom: 1px solid #e8e8e6; padding: 2px 32px 18px 0; }
 .levitara-cart-sheet-header h2 { display: flex; align-items: center; gap: 9px; margin: 0; color: #171a19; font-size: 20px; font-weight: 600; }
@@ -664,6 +669,7 @@
 .levitara-payment-visa img { display: block; width: 112px; height: 22px; object-fit: contain; }
 .levitara-payment-revolut { font-size: 20px; letter-spacing: 0; }
 .levitara-payment-swedbank { color: #d55d21; font-size: 15px; }
+.levitara-payment-seb { color: #3f5752; }
 @keyframes levitara-payment-scroll { to { transform: translateX(-50%); } }
 @media (prefers-reduced-motion: reduce) {
   .levitara-payment-track { animation: none; }
@@ -720,6 +726,36 @@
   letter-spacing: 0;
 }
 
+.milishop-product-page .levitara-cart {
+  min-height: 42px;
+  gap: 9px;
+  border: 1px solid #d7dcdd;
+  border-radius: 4px;
+  background: #fff;
+  padding: 0 13px;
+  color: #171a19;
+}
+
+.milishop-product-page .levitara-cart:hover,
+.milishop-product-page .levitara-cart:focus-visible {
+  border-color: #171a19;
+  background: #171a19;
+  color: #fff;
+}
+
+.milishop-product-page .levitara-cart strong {
+  width: 21px;
+  height: 21px;
+  background: #171a19;
+  color: #fff;
+}
+
+.milishop-product-page .levitara-cart:hover strong,
+.milishop-product-page .levitara-cart:focus-visible strong {
+  background: #fff;
+  color: #171a19;
+}
+
 .milishop-product-page > main {
   padding-top: 0;
 }
@@ -729,16 +765,138 @@
 }
 
 .milishop-product-page > main > section:first-of-type {
-  min-height: min(760px, calc(100vh - 76px));
-  align-items: center;
+  min-height: auto;
+  align-items: start;
   gap: clamp(32px, 6vw, 84px);
   padding-block: 34px 58px;
 }
 
+@media (min-width: 1024px) {
+  .milishop-product-page .product-gallery-sticky {
+    position: sticky;
+    top: 24px;
+    align-self: start;
+  }
+}
+
+.milishop-product-page .product-detail-content {
+  min-width: 0;
+}
+
+.milishop-product-page .product-detail-content h2 {
+  max-width: 20ch;
+}
+
+.product-provider {
+  display: inline-flex;
+  min-height: 28px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #e5e7e6;
+  border-radius: 3px;
+  background: #fff;
+  padding: 0 9px;
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.product-provider-dpd { border-color: #f2d6dc; color: #ce0033; }
+.product-provider-omniva { border-color: #f7dfca; color: #e87319; }
+.product-provider-venipak { border-color: #eadcf0; color: #74347f; }
+.product-provider-lp-express { border-color: #ead47a; background: #fff9dc; color: #252525; }
+.product-provider-swedbank { color: #e66a25; }
+.product-provider-seb { color: #425650; }
+.product-provider-luminor { color: #642d51; }
+.product-provider-revolut { color: #171a19; }
+.product-provider-visa { color: #1a1f71; }
+
 .milishop-product-page .product-detail-image {
   min-height: clamp(430px, 57vw, 620px);
   border-radius: 3px;
-  background: #f3f5f5;
+  background: #fff;
+}
+
+.milishop-product-page .product-detail-image-open {
+  display: block;
+  width: 100%;
+  border: 0;
+  padding: 0;
+  cursor: zoom-in;
+}
+
+.product-image-zoom {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  display: grid;
+  width: 40px;
+  height: 40px;
+  place-items: center;
+  border: 1px solid #dedfdd;
+  border-radius: 50%;
+  background: #fff;
+  color: #171a19;
+  opacity: 0;
+  transition: opacity 160ms ease;
+}
+
+.product-detail-image-open:hover .product-image-zoom,
+.product-detail-image-open:focus-visible .product-image-zoom { opacity: 1; }
+
+.product-lightbox-overlay {
+  position: fixed;
+  z-index: 1000;
+  inset: 0;
+  background: rgb(15 17 16 / 0.94);
+}
+
+.product-lightbox-content {
+  position: fixed;
+  z-index: 1001;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  outline: none;
+}
+
+.product-lightbox-content > img {
+  display: block;
+  max-width: min(88vw, 1440px);
+  max-height: 88vh;
+  object-fit: contain;
+}
+
+.product-lightbox-close,
+.product-lightbox-arrow {
+  position: absolute;
+  z-index: 1;
+  display: grid;
+  width: 48px;
+  height: 48px;
+  place-items: center;
+  border: 1px solid rgb(255 255 255 / 0.35);
+  border-radius: 50%;
+  background: rgb(255 255 255 / 0.96);
+  color: #171a19;
+  cursor: pointer;
+  transition: background-color 160ms ease, transform 160ms ease;
+}
+
+.product-lightbox-close:hover,
+.product-lightbox-arrow:hover { background: #fff; transform: scale(1.04); }
+.product-lightbox-close { top: 24px; right: 24px; }
+.product-lightbox-previous { left: 24px; }
+.product-lightbox-next { right: 24px; }
+.product-lightbox-count { position: absolute; bottom: 20px; margin: 0; color: #fff; font-size: 12px; font-variant-numeric: tabular-nums; }
+
+@media (max-width: 720px) {
+  .product-image-zoom { top: 10px; right: 10px; width: 36px; height: 36px; opacity: 1; }
+  .product-lightbox-content > img { max-width: 94vw; max-height: 82vh; }
+  .product-lightbox-close { top: 14px; right: 14px; }
+  .product-lightbox-previous { left: 10px; }
+  .product-lightbox-next { right: 10px; }
+  .product-lightbox-arrow { width: 40px; height: 40px; }
 }
 
 .milishop-product-page .product-detail-image > img {
@@ -786,12 +944,12 @@
 
 .milishop-product-page > main > section:first-of-type > div:last-child > div:last-child > button:last-child {
   border-radius: 3px;
-  background: #17232a;
+  background: #171a19;
   box-shadow: none;
 }
 
 .milishop-product-page > main > section:first-of-type > div:last-child > div:last-child > button:last-child:hover {
-  background: var(--product-accent);
+  background: #3d4341;
 }
 
 .milishop-product-page > main > section:not(:first-of-type) {
@@ -811,15 +969,20 @@
 }
 
 .milishop-product-page > main > section:last-of-type {
+  border-radius: 0;
+  background: #fff;
+}
+
+.milishop-product-page .product-buy-button {
   border-radius: 3px;
-  background: #17232a;
+  box-shadow: none;
 }
 
 @media (min-width: 721px) and (max-width: 1023px) {
   .milishop-product-page > main > section:first-of-type {
     min-height: auto;
     grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
-    align-items: center;
+    align-items: start;
     gap: 28px;
     padding-block: 28px 48px;
   }

@@ -9,7 +9,7 @@ vi.mock("../server/db.js", () => ({
   schema: {
     productLandings: Object.fromEntries([
       "id", "slug", "status", "supplierUrl", "brandName", "footerText", "name",
-      "eyebrow", "description", "longDescription", "price", "oldPrice", "saving",
+      "category", "eyebrow", "description", "longDescription", "price", "oldPrice", "saving",
       "heroImage", "gallery", "features", "steps", "specs", "faq", "deliveryInfo",
       "returnsInfo", "ctaText", "finalCtaEyebrow", "finalCtaTitle", "finalCtaText",
       "createdAt", "updatedAt",
@@ -31,6 +31,7 @@ describe("get-product-landing public response", () => {
       brandName: "Milishop",
       footerText: "",
       name: "Car mount",
+      category: "automobiliui",
       eyebrow: "",
       description: "",
       longDescription: "",
@@ -60,5 +61,6 @@ describe("get-product-landing public response", () => {
 
     expect(mockDb.select.mock.calls[0][0]).not.toHaveProperty("supplierUrl");
     expect(result).not.toHaveProperty("supplierUrl");
+    expect(result).toMatchObject({ category: "automobiliui" });
   });
 });

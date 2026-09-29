@@ -34,6 +34,19 @@ describe("view-screen", () => {
     expect(result).toBe("No application state found. Is the app running?");
   });
 
+  it("returns the active product category filter from the current URL", async () => {
+    mocks.readAppState.mockImplementation(async (key: string) => key === "navigation"
+      ? { view: "home" }
+      : { searchParams: { category: "automobiliui" } });
+
+    const result = await action.run({});
+
+    expect(result).toEqual({
+      navigation: { view: "home" },
+      activeFilters: { category: "automobiliui" },
+    });
+  });
+
   it("is marked read-only", () => {
     expect(action.readOnly).toBe(true);
   });

@@ -1,8 +1,12 @@
+import * as Dialog from "@radix-ui/react-dialog";
+import { IconChevronLeft, IconChevronRight, IconX, IconZoomIn } from "@tabler/icons-react";
 import { useActionQuery } from "@agent-native/core/client/hooks";
-import { useLayoutEffect, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router";
+import { useEffect, useLayoutEffect, useState } from "react";
+import { Link, useParams } from "react-router";
 
-import { addCartItem, readCart, writeCart } from "@/lib/cart";
+import { StoreCartDrawer } from "@/components/StoreCartDrawer";
+import { StoreFooter, StorePaymentStrip } from "@/components/StorefrontChrome";
+import { addCartItem, calculateDiscount, readCart, type CartLine, writeCart } from "@/lib/cart";
 
 const catalog = {
   obd2: {
@@ -150,6 +154,21 @@ const catalog = {
   },
 } as const;
 
+const deliveryPartners = [
+  { name: "DPD", brand: "dpd" },
+  { name: "Omniva", brand: "omniva" },
+  { name: "Venipak", brand: "venipak" },
+  { name: "LP Express", brand: "lp-express" },
+] as const;
+
+const paymentBrands = [
+  { name: "Swedbank", brand: "swedbank" },
+  { name: "SEB", brand: "seb" },
+  { name: "Luminor", brand: "luminor" },
+  { name: "Revolut", brand: "revolut" },
+  { name: "VISA", brand: "visa" },
+] as const;
+
 type Product = (typeof catalog)[keyof typeof catalog];
 
 export function meta({ params }: { params: { slug?: string } }) {
@@ -170,10 +189,20 @@ function ProductPage({
   const { data: savedLanding, isPending: isLandingPending } = useActionQuery("get-product-landing", {
     slug,
   });
-  const navigate = useNavigate();
   const [activeImage, setActiveImage] = useState(0);
+  const [imageViewerOpen, setImageViewerOpen] = useState(false);
   const [quantity, setQuantity] = useState(1);
   const [added, setAdded] = useState(false);
+  const [cartOpen, setCartOpen] = useState(false);
+  const [cartItems, setCartItems] = useState<CartLine[]>([]);
+
+  useEffect(() => {
+    setCartItems(readCart());
+  }, []);
+
+  useEffect(() => {
+    writeCart(cartItems);
+  }, [cartItems]);
   if (!baseProduct && !savedLanding && isLandingPending) {
     return <div className="min-h-[60vh] animate-pulse bg-[#f7f8f6]" aria-label="Įkeliamas produktas" />;
   }
@@ -255,16 +284,51 @@ function ProductPage({
         }
       : {}),
   };
+  const discount = calculateDiscount(product.price, product.oldPrice);
+  const activeImageSrc = product.images[activeImage] ?? product.image;
+  const imageCount = product.images.length;
+  const changeActiveImage = (direction: number) => {
+    if (product.images.length < 2) return;
+    setActiveImage((current) => (current + direction + product.images.length) % product.images.length);
+  };
+
+  useEffect(() => {
+    if (!imageViewerOpen) return;
+    const handleImageViewerKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setImageViewerOpen(false);
+        return;
+      }
+      if (imageCount < 2) return;
+      const direction = event.key === "ArrowLeft" ? -1 : event.key === "ArrowRight" ? 1 : 0;
+      if (direction) {
+        event.preventDefault();
+        setActiveImage((current) => (current + direction + imageCount) % imageCount);
+      }
+    };
+    window.addEventListener("keydown", handleImageViewerKeyDown);
+    return () => window.removeEventListener("keydown", handleImageViewerKeyDown);
+  }, [imageCount, imageViewerOpen]);
 
   const addCurrentProductToCart = () => {
-    writeCart(addCartItem(readCart(), {
+    const nextCart = addCartItem(cartItems, {
       slug,
       name: product.name,
       price: product.price,
       image: product.images[0] || product.image,
-    }, quantity));
+    }, quantity);
+    setCartItems(nextCart);
+    writeCart(nextCart);
     setAdded(true);
-    navigate("/?cart=open");
+    setCartOpen(true);
+  };
+
+  const changeCartQuantity = (productSlug: string, amount: number) => {
+    setCartItems((current) => current.flatMap((item) => {
+      if (item.slug !== productSlug) return [item];
+      const nextQuantity = item.quantity + amount;
+      return nextQuantity > 0 ? [{ ...item, quantity: nextQuantity }] : [];
+    }));
   };
 
   return (
@@ -282,12 +346,10 @@ function ProductPage({
             milishop
           </span>
         </Link>
-        <Link
-          to="/"
-          className="rounded-full border border-foreground/10 bg-white px-4 py-2 text-sm font-medium text-foreground/70 transition-colors hover:border-[#61aaa3] hover:text-foreground"
-        >
-          ← Visi produktai
-        </Link>
+        <div className="flex items-center gap-2">
+          <StoreCartDrawer items={cartItems} open={cartOpen} onOpenChange={setCartOpen} onQuantityChange={changeCartQuantity} />
+          <Link to="/" className="rounded-full border border-foreground/10 bg-white px-4 py-2 text-sm font-medium text-foreground/70 transition-colors hover:border-[#61aaa3] hover:text-foreground">← Visi produktai</Link>
+        </div>
       </header>
       <main className="mx-auto max-w-[1240px] px-5 pb-20 pt-5 sm:px-8 sm:pt-10 lg:px-10 lg:pb-28">
         <div className="mb-7 flex items-center gap-2 text-xs text-foreground/45">
@@ -297,36 +359,56 @@ function ProductPage({
           <span>/</span>
           <span>{product.name}</span>
         </div>
-        <section className="grid gap-8 lg:grid-cols-[1.04fr_0.96fr] lg:gap-16">
-          <div>
-            <div className="product-detail-image relative overflow-hidden rounded-[28px] bg-[#e4f1ed]">
-              <img
-                src={product.images[activeImage]}
-                alt={product.name}
-                className="size-full min-h-[370px] object-contain mix-blend-multiply sm:min-h-[560px]"
-              />
-              <span className="absolute left-5 top-5 rounded-full bg-white/85 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.12em] text-[#3b6969] backdrop-blur-sm">
-                Milishop kolekcija
-              </span>
-            </div>
-            <div className="mt-3 grid grid-cols-2 gap-3">
-              {product.images.map((image, index) => (
-                <button
-                  key={image}
-                  onClick={() => setActiveImage(index)}
-                  className={`overflow-hidden rounded-2xl border-2 bg-[#e4f1ed] transition-[border-color,opacity] ${activeImage === index ? "border-[#3b8b87]" : "border-transparent opacity-55 hover:opacity-100"}`}
-                  aria-label={`Rodyti nuotrauką ${index + 1}`}
-                >
+        <section className="product-detail-layout grid gap-8 lg:grid-cols-[1.04fr_0.96fr] lg:gap-16">
+          <div className="product-gallery-sticky">
+            <Dialog.Root open={imageViewerOpen} onOpenChange={setImageViewerOpen}>
+              <Dialog.Trigger asChild>
+                <button type="button" className="product-detail-image product-detail-image-open relative overflow-hidden rounded-[28px] bg-white" aria-label="Padidinti produkto nuotrauką">
                   <img
-                    src={image}
-                    alt=""
-                    className="aspect-[1.5] w-full object-cover mix-blend-multiply"
+                    src={activeImageSrc}
+                    alt={product.name}
+                    className="size-full min-h-[370px] object-contain mix-blend-multiply sm:min-h-[560px]"
                   />
+                  <span className="product-image-zoom" aria-hidden="true"><IconZoomIn size={20} stroke={1.8} /></span>
                 </button>
-              ))}
-            </div>
+              </Dialog.Trigger>
+              <div className="mt-3 grid grid-cols-2 gap-3">
+                {product.images.map((image, index) => (
+                  <button
+                    key={image}
+                    type="button"
+                    onClick={() => setActiveImage(index)}
+                    className={`overflow-hidden rounded-2xl border-2 bg-white transition-[border-color,opacity] ${activeImage === index ? "border-[#171a19]" : "border-transparent opacity-55 hover:opacity-100"}`}
+                    aria-label={`Rodyti nuotrauką ${index + 1}`}
+                  >
+                    <img
+                      src={image}
+                      alt=""
+                      className="aspect-[1.5] w-full object-cover mix-blend-multiply"
+                    />
+                  </button>
+                ))}
+              </div>
+              <Dialog.Portal>
+                <Dialog.Overlay className="product-lightbox-overlay" />
+                <Dialog.Content className="product-lightbox-content">
+                  <Dialog.Title className="sr-only">{product.name} nuotraukų peržiūra</Dialog.Title>
+                  <Dialog.Close asChild>
+                    <button type="button" className="product-lightbox-close" aria-label="Uždaryti nuotrauką"><IconX size={22} /></button>
+                  </Dialog.Close>
+                  {product.images.length > 1 && (
+                    <>
+                      <button type="button" className="product-lightbox-arrow product-lightbox-previous" onClick={() => changeActiveImage(-1)} aria-label="Ankstesnė nuotrauka"><IconChevronLeft size={28} /></button>
+                      <button type="button" className="product-lightbox-arrow product-lightbox-next" onClick={() => changeActiveImage(1)} aria-label="Kita nuotrauka"><IconChevronRight size={28} /></button>
+                    </>
+                  )}
+                  <img src={activeImageSrc} alt={`${product.name}, nuotrauka ${activeImage + 1}`} />
+                  {product.images.length > 1 && <p className="product-lightbox-count" aria-live="polite">{activeImage + 1} / {product.images.length}</p>}
+                </Dialog.Content>
+              </Dialog.Portal>
+            </Dialog.Root>
           </div>
-          <div className="flex flex-col justify-center py-2 lg:py-8">
+          <div className="product-detail-content flex flex-col py-2 lg:py-8">
             <p className="mb-5 text-xs font-semibold uppercase tracking-[0.16em] text-[#398b86]">
               {product.eyebrow}
             </p>
@@ -345,28 +427,29 @@ function ProductPage({
                   {product.oldPrice}
                 </span>
               )}
+              {discount && <span className="rounded-full bg-[#fbe9e7] px-2.5 py-1 text-xs font-bold text-[#bd514a]">{discount.percentLabel}</span>}
             </div>
-            {product.saving && (
+            {discount && (
               <p className="mt-2 text-sm font-medium text-[#3b8b87]">
-                {product.saving}
+                Sutaupai {discount.amountLabel} ({discount.percentLabel})
               </p>
             )}
-            <div className="my-8 h-px bg-foreground/10" />
-            <div className="grid gap-4 text-sm text-foreground/60 sm:grid-cols-2">
-              <div className="flex items-center gap-3">
-                <span className="flex size-9 items-center justify-center rounded-full bg-[#e4f1ed] text-[#398b86]">
-                  ✓
-                </span>
-                <span>{product.deliveryInfo}</span>
+            <div className="mt-6 grid gap-4 border-y border-foreground/10 py-4">
+              <div>
+                <p className="text-sm font-semibold text-[#203b40]">Pristatymas</p>
+                <p className="mt-1 text-sm text-foreground/65">{product.deliveryInfo} · {product.returnsInfo}</p>
+                <div className="mt-3 flex flex-wrap gap-2" aria-label="Pristatymo partneriai">
+                  {deliveryPartners.map((courier) => <span key={courier.brand} className={`product-provider product-provider-${courier.brand}`}>{courier.name}</span>)}
+                </div>
               </div>
-              <div className="flex items-center gap-3">
-                <span className="flex size-9 items-center justify-center rounded-full bg-[#f5f2ec] text-[#a06d3d]">
-                  ↺
-                </span>
-                <span>{product.returnsInfo}</span>
+              <div>
+                <p className="text-xs font-medium text-foreground/55">Atsiskaityk per</p>
+                <div className="mt-2 flex flex-wrap gap-x-4 gap-y-2" aria-label="Galimi bankai ir mokėjimo būdai">
+                  {paymentBrands.map((bank) => <span key={bank.brand} className={`product-provider product-provider-${bank.brand}`}>{bank.name}</span>)}
+                </div>
               </div>
             </div>
-            <div className="mt-9 flex gap-3">
+            <div className="mt-6 flex gap-3">
               <div className="flex items-center rounded-full border border-foreground/12 bg-white">
                 <button
                   className="flex size-11 items-center justify-center text-lg text-foreground/55 hover:text-foreground"
@@ -388,143 +471,84 @@ function ProductPage({
               </div>
               <button
                 onClick={addCurrentProductToCart}
-                className={`flex min-h-11 flex-1 items-center justify-center rounded-full px-6 text-sm font-semibold text-white shadow-[0_10px_24px_rgba(47,127,123,0.18)] transition-[background-color,transform] hover:-translate-y-0.5 ${added ? "bg-[#527072]" : "bg-[#2f7f7b] hover:bg-[#256d69]"}`}
+                className={`product-buy-button flex min-h-11 flex-1 items-center justify-center rounded-full px-6 text-sm font-semibold text-white transition-[background-color,transform] hover:-translate-y-0.5 ${added ? "bg-[#3d4341]" : "bg-[#171a19] hover:bg-[#3d4341]"}`}
               >
                 {added ? "Pridėta į krepšelį" : `${product.ctaText}  ↗`}
               </button>
             </div>
-          </div>
-        </section>
+            <p className="mt-3 text-xs text-foreground/45">Saugus atsiskaitymas · 14 dienų grąžinimas</p>
 
-        <section className="mt-20 grid gap-10 border-t border-foreground/10 pt-12 lg:grid-cols-[0.8fr_1.2fr] lg:gap-24">
-          <div>
-            <p className="mb-3 text-xs font-semibold uppercase tracking-[0.16em] text-[#398b86]">
-              Apie produktą
-            </p>
-            <h2 className="text-3xl font-semibold tracking-[-0.06em] text-[#203b40]">
-              Paprasta naudoti.
-              <br />
-              Malonu turėti.
-            </h2>
-          </div>
-          <div>
-            <p className="max-w-[650px] text-[17px] leading-8 text-foreground/60">
-              {product.longDescription}
-            </p>
-            <div className="mt-9 grid gap-5 sm:grid-cols-3">
-              {product.features.map((feature, index) => (
-                <div key={feature}>
-                  <p className="text-2xl">0{index + 1}</p>
-                  <p className="mt-2 text-sm font-medium">{feature}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <section className="mt-20 grid gap-8 rounded-[28px] bg-[#e4f1ed] p-7 sm:p-10 lg:grid-cols-[0.72fr_1.28fr] lg:p-14">
-          <div>
-            <p className="mb-3 text-xs font-semibold uppercase tracking-[0.16em] text-[#398b86]">
-              Kaip naudoti
-            </p>
-            <h2 className="text-3xl font-semibold tracking-[-0.06em] text-[#203b40]">
-              Trys žingsniai
-              <br />į paprasčiau.
-            </h2>
-          </div>
-          <div className="grid gap-3">
-            {product.steps.map((step, index) => (
-              <div
-                key={step}
-                className="flex items-center gap-4 rounded-2xl bg-white/70 px-5 py-4"
-              >
-                <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-[#2f7f7b] text-xs font-semibold text-white">
-                  0{index + 1}
-                </span>
-                <p className="text-sm font-medium text-[#203b40]">{step}</p>
+            <section className="product-detail-section mt-16 border-t border-foreground/10 pt-10">
+              <p className="mb-3 text-xs font-semibold uppercase tracking-[0.16em] text-[#398b86]">Apie produktą</p>
+              <h2 className="text-3xl font-semibold tracking-[-0.06em] text-[#203b40]">Paprasta naudoti.<br />Malonu turėti.</h2>
+              <p className="mt-6 max-w-[650px] text-[16px] leading-8 text-foreground/60">{product.longDescription}</p>
+              <div className="mt-8 grid gap-4">
+                {product.features.map((feature, index) => (
+                  <div key={feature} className="flex items-center gap-4 border-b border-foreground/10 pb-4">
+                    <span className="text-xs font-semibold text-[#398b86]">0{index + 1}</span>
+                    <p className="text-sm font-medium text-[#203b40]">{feature}</p>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
-        </section>
+            </section>
 
-        <section className="mt-20 grid gap-10 lg:grid-cols-[0.72fr_1.28fr]">
-          <div>
-            <p className="mb-3 text-xs font-semibold uppercase tracking-[0.16em] text-[#398b86]">
-              Specifikacija
-            </p>
-            <h2 className="text-3xl font-semibold tracking-[-0.06em] text-[#203b40]">
-              Svarbiausia
-              <br />
-              vienoje vietoje.
-            </h2>
-          </div>
-          <div className="divide-y divide-foreground/10 border-y border-foreground/10">
-            {product.specs.map(([label, value]) => (
-              <div
-                key={label}
-                className="flex items-center justify-between gap-5 py-4 text-sm"
-              >
-                <span className="text-foreground/45">{label}</span>
-                <span className="text-right font-medium text-[#203b40]">
-                  {value}
-                </span>
+            <section className="product-detail-section mt-12 border-t border-foreground/10 pt-10">
+              <p className="mb-3 text-xs font-semibold uppercase tracking-[0.16em] text-[#398b86]">Kaip naudoti</p>
+              <h2 className="text-3xl font-semibold tracking-[-0.06em] text-[#203b40]">Trys žingsniai į paprasčiau.</h2>
+              <div className="mt-6 grid gap-3">
+                {product.steps.map((step, index) => (
+                  <div key={step} className="flex items-center gap-4 border-b border-foreground/10 px-1 py-4">
+                    <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-[#171a19] text-xs font-semibold text-white">0{index + 1}</span>
+                    <p className="text-sm font-medium text-[#203b40]">{step}</p>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
-        </section>
+            </section>
 
-        <section className="mt-20 grid gap-10 lg:grid-cols-[0.72fr_1.28fr]">
-          <div>
-            <p className="mb-3 text-xs font-semibold uppercase tracking-[0.16em] text-[#398b86]">
-              Dažniausiai klausiama
-            </p>
-            <h2 className="text-3xl font-semibold tracking-[-0.06em] text-[#203b40]">
-              Turite klausimų?
-            </h2>
-          </div>
-          <div className="divide-y divide-foreground/10 border-y border-foreground/10">
-            {product.faq.map(([question, answer]) => (
-              <details key={question} className="group py-4">
-                <summary className="flex cursor-pointer list-none items-center justify-between gap-5 text-sm font-semibold text-[#203b40]">
-                  <span>{question}</span>
-                  <span className="text-xl font-normal text-[#398b86] transition-transform group-open:rotate-45">
-                    +
-                  </span>
-                </summary>
-                <p className="max-w-[600px] pt-3 text-sm leading-6 text-foreground/55">
-                  {answer}
-                </p>
-              </details>
-            ))}
-          </div>
-        </section>
+            <section className="product-detail-section mt-12 border-t border-foreground/10 pt-10">
+              <p className="mb-3 text-xs font-semibold uppercase tracking-[0.16em] text-[#398b86]">Specifikacija</p>
+              <h2 className="text-3xl font-semibold tracking-[-0.06em] text-[#203b40]">Svarbiausia vienoje vietoje.</h2>
+              <div className="mt-6 divide-y divide-foreground/10 border-y border-foreground/10">
+                {product.specs.map(([label, value]) => (
+                  <div key={label} className="flex items-center justify-between gap-5 py-4 text-sm">
+                    <span className="text-foreground/45">{label}</span>
+                    <span className="text-right font-medium text-[#203b40]">{value}</span>
+                  </div>
+                ))}
+              </div>
+            </section>
 
-        <section className="mt-20 overflow-hidden rounded-[28px] bg-[#203b40] px-7 py-10 text-white sm:px-12 lg:flex lg:items-center lg:justify-between lg:px-14">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#8ed1c7]">
-              {product.finalCtaEyebrow}
-            </p>
-            <h2 className="mt-3 max-w-[560px] text-3xl font-semibold tracking-[-0.06em] sm:text-4xl">
-              {product.finalCtaTitle}
-            </h2>
-          </div>
-          <div className="mt-7 flex items-center gap-5 lg:mt-0">
-            <span className="text-2xl font-semibold tracking-[-0.05em]">
-              {product.price}
-            </span>
-            <button
-              onClick={addCurrentProductToCart}
-              className="rounded-full bg-[#8ed1c7] px-6 py-3.5 text-sm font-semibold text-[#203b40] transition-[background-color,transform] hover:-translate-y-0.5 hover:bg-white"
-            >
-              {added ? "Pridėta ✓" : `${product.finalCtaText} ↗`}
-            </button>
+            <section className="product-detail-section mt-12 border-t border-foreground/10 pt-10">
+              <p className="mb-3 text-xs font-semibold uppercase tracking-[0.16em] text-[#398b86]">Dažniausiai klausiama</p>
+              <h2 className="text-3xl font-semibold tracking-[-0.06em] text-[#203b40]">Turite klausimų?</h2>
+              <div className="mt-6 divide-y divide-foreground/10 border-y border-foreground/10">
+                {product.faq.map(([question, answer]) => (
+                  <details key={question} className="group py-4">
+                    <summary className="flex cursor-pointer list-none items-center justify-between gap-5 text-sm font-semibold text-[#203b40]">
+                      <span>{question}</span>
+                      <span className="text-xl font-normal text-[#398b86] transition-transform group-open:rotate-45">+</span>
+                    </summary>
+                    <p className="max-w-[600px] pt-3 text-sm leading-6 text-foreground/55">{answer}</p>
+                  </details>
+                ))}
+              </div>
+            </section>
+
+            <section className="mt-12 border-t border-foreground/10 px-0 py-7 text-[#171a19]">
+              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-foreground/50">{product.finalCtaEyebrow}</p>
+              <h2 className="mt-3 text-2xl font-semibold text-[#171a19]">{product.finalCtaTitle}</h2>
+              <div className="mt-6 flex flex-wrap items-center justify-between gap-4">
+                <span className="text-2xl font-semibold">{product.price}</span>
+                <button onClick={addCurrentProductToCart} className="product-buy-button bg-[#171a19] px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#3d4341]">
+                  {added ? "Pridėta ✓" : `${product.finalCtaText} ↗`}
+                </button>
+              </div>
+            </section>
           </div>
         </section>
       </main>
-      <footer className="border-t border-foreground/8 px-5 py-8 text-center text-sm text-foreground/45">
-        {product.brandName} · {product.footerText} · ©{" "}
-        {new Date().getFullYear()}
-      </footer>
+      <StorePaymentStrip />
+      <StoreFooter />
     </div>
   );
 }

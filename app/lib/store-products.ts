@@ -1,6 +1,19 @@
+export const storeCategories = [
+  { value: "automobiliui", label: "Automobiliui" },
+  { value: "kasdienai", label: "Kasdienai" },
+  { value: "namams", label: "Namams" },
+] as const;
+
+export type StoreCategory = (typeof storeCategories)[number]["value"];
+
+export function isStoreCategory(value: unknown): value is StoreCategory {
+  return storeCategories.some((category) => category.value === value);
+}
+
 export const builtInProducts = [
   {
     slug: "didelis-plepus-zaislas",
+    category: "namams",
     name: "Didelis pūkus žaislas 180 cm – baltas",
     description: "Minkštas ir jaukus žaislas namams.",
     price: "131,82 €",
@@ -10,6 +23,7 @@ export const builtInProducts = [
   },
   {
     slug: "obd2",
+    category: "automobiliui",
     name: "OBD2 automobilio diagnostikos įrenginys",
     description: "Greitai suprask, ką sako tavo automobilis.",
     price: "39,90 €",
@@ -19,6 +33,7 @@ export const builtInProducts = [
   },
   {
     slug: "automobilio-laikiklis",
+    category: "automobiliui",
     name: "Magnetinis automobilio telefono laikiklis",
     description: "Stabilus laikiklis kiekvienai kelionei.",
     price: "24,90 €",
@@ -28,6 +43,7 @@ export const builtInProducts = [
   },
   {
     slug: "namu-akcentas",
+    category: "namams",
     name: "Keraminė stalo detalė „Forma“",
     description: "Mažas akcentas jaukesniems namams.",
     price: "32,00 €",
@@ -37,6 +53,7 @@ export const builtInProducts = [
   },
   {
     slug: "medinis-svyravimas",
+    category: "namams",
     name: "Medinis vaikų sūpynės – su virve",
     description: "Namuose laimingas ir aktyvus laikas.",
     price: "€142,00",
@@ -46,6 +63,7 @@ export const builtInProducts = [
   },
   {
     slug: "garso-modulis",
+    category: "kasdienai",
     name: "Garso elektronikos sistema „Tesla“",
     description: "Garsas, stiprumas ir paprastas dizainas.",
     price: "€68,00",
@@ -55,6 +73,7 @@ export const builtInProducts = [
   },
   {
     slug: "daugiafunkcinis-kratytuvas",
+    category: "kasdienai",
     name: "VAYOX insect killer – elektrinis",
     description: "Efektyvus apsauga nuo vabzdžių.",
     price: "€84,00",
@@ -64,6 +83,7 @@ export const builtInProducts = [
   },
   {
     slug: "parfumas",
+    category: "kasdienai",
     name: "Perceive Gift Set – perfumed",
     description: "Gaivus ir subtilus kvapas kasdienai.",
     price: "€80,00",

@@ -1,22 +1,17 @@
-import { Link } from "react-router";
+import { Link, useSearchParams } from "react-router";
 import { useEffect, useState } from "react";
 import { useActionQuery } from "@agent-native/core/client/hooks";
-import { IconMinus, IconPlus, IconShoppingCart, IconShoppingCartPlus, IconX } from "@tabler/icons-react";
+import { IconShoppingCartPlus } from "@tabler/icons-react";
 
 import { APP_TITLE } from "@/lib/app-config";
-import { addCartItem, readCart, type CartLine, writeCart } from "@/lib/cart";
-import { StoreSocialLinks } from "@/components/StoreInfoPage";
-import {
-  Sheet,
-  SheetClose,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
+import { addCartItem, readCart, type CartLine, writeCart, calculateDiscount } from "@/lib/cart";
+import { StoreCartDrawer } from "@/components/StoreCartDrawer";
+import { StoreFooter, StorePaymentStrip } from "@/components/StorefrontChrome";
+import { isStoreCategory, storeCategories, type StoreCategory } from "@/lib/store-products";
 
 type StorefrontProduct = {
   slug: string;
+  category: StoreCategory;
   name: string;
   description: string;
   price: string;
@@ -28,6 +23,7 @@ type StorefrontProduct = {
 const products: StorefrontProduct[] = [
   {
     slug: "didelis-plepus-zaislas",
+    category: "namams",
     name: "Didelis pūkus žaislas 180 cm – baltas",
     description: "Minkštas ir jaukus žaislas namams.",
     price: "131,82 €",
@@ -38,6 +34,7 @@ const products: StorefrontProduct[] = [
   },
   {
     slug: "obd2",
+    category: "automobiliui",
     name: "OBD2 automobilio diagnostikos įrenginys",
     description: "Greitai suprask, ką sako tavo automobilis.",
     price: "39,90 €",
@@ -48,6 +45,7 @@ const products: StorefrontProduct[] = [
   },
   {
     slug: "automobilio-laikiklis",
+    category: "automobiliui",
     name: "Magnetinis automobilio telefono laikiklis",
     description: "Stabilus laikiklis kiekvienai kelionei.",
     price: "24,90 €",
@@ -58,6 +56,7 @@ const products: StorefrontProduct[] = [
   },
   {
     slug: "namu-akcentas",
+    category: "namams",
     name: "Keraminė stalo detalė „Forma“",
     description: "Mažas akcentas jaukesniems namams.",
     price: "32,00 €",
@@ -68,6 +67,7 @@ const products: StorefrontProduct[] = [
   },
   {
     slug: "medinis-svyravimas",
+    category: "namams",
     name: "Medinis vaikų sūpynės – su virve",
     description: "Namuose laimingas ir aktyvus laikas.",
     price: "€142,00",
@@ -77,6 +77,7 @@ const products: StorefrontProduct[] = [
   },
   {
     slug: "garso-modulis",
+    category: "kasdienai",
     name: "Garso elektronikos sistema „Tesla“",
     description: "Garsas, stiprumas ir paprastas dizainas.",
     price: "€68,00",
@@ -86,6 +87,7 @@ const products: StorefrontProduct[] = [
   },
   {
     slug: "daugiafunkcinis-kratytuvas",
+    category: "kasdienai",
     name: "VAYOX insect killer – elektrinis",
     description: "Efektyvus apsauga nuo vabzdžių.",
     price: "€84,00",
@@ -95,6 +97,7 @@ const products: StorefrontProduct[] = [
   },
   {
     slug: "parfumas",
+    category: "kasdienai",
     name: "Perceive Gift Set – perfumed",
     description: "Gaivus ir subtilus kvapas kasdienai.",
     price: "€80,00",
@@ -105,9 +108,9 @@ const products: StorefrontProduct[] = [
 ];
 
 const categories = [
-  { label: "Automobiliui", caption: "Išmaniau kiekvienai kelionei", image: products[0].image, href: "/obd2" },
-  { label: "Kasdienai", caption: "Maži daiktai, didelis patogumas", image: products[1].image, href: "/automobilio-laikiklis" },
-  { label: "Namams", caption: "Ramūs akcentai tavo erdvei", image: products[2].image, href: "/namu-akcentas" },
+  { key: "automobiliui", label: "Automobiliui", caption: "Išmaniau kiekvienai kelionei", image: products[1].image, href: "/?category=automobiliui#produktai" },
+  { key: "kasdienai", label: "Kasdienai", caption: "Maži daiktai, didelis patogumas", image: products[5].image, href: "/?category=kasdienai#produktai" },
+  { key: "namams", label: "Namams", caption: "Ramūs akcentai tavo erdvei", image: products[0].image, href: "/?category=namams#produktai" },
 ];
 
 const getProductImage = (slug: string) =>
@@ -156,14 +159,6 @@ const heroSlides = [
   },
 ];
 
-function priceValue(price: string) {
-  return Number(price.replace(/[^\d,.-]/g, "").replace(",", ".")) || 0;
-}
-
-function formatPrice(price: number) {
-  return `${price.toFixed(2).replace(".", ",")} €`;
-}
-
 export function meta() {
   return [
     { title: APP_TITLE },
@@ -175,11 +170,11 @@ export function meta() {
 }
 
 export default function HomeRoute() {
+  const [searchParams] = useSearchParams();
   const [menuOpen, setMenuOpen] = useState(false);
   const [activeHeroSlide, setActiveHeroSlide] = useState(0);
   const [cartOpen, setCartOpen] = useState(false);
   const [cartItems, setCartItems] = useState<CartLine[]>([]);
-  const [paymentMethod, setPaymentMethod] = useState("paysera");
   const { data: savedProductLandings = [] } = useActionQuery("list-product-landings", {});
   const builtInSlugs = new Set(products.map((product) => product.slug));
   const savedProducts = new Map(savedProductLandings.map((landing) => [landing.slug, landing]));
@@ -191,10 +186,11 @@ export default function HomeRoute() {
         ? {
             ...product,
             name: landing.name || product.name,
+            category: isStoreCategory(landing.category) ? landing.category : product.category,
             description: landing.description || product.description,
             price: landing.price || product.price,
             oldPrice: landing.oldPrice,
-            tag: landing.saving || product.tag,
+            tag: calculateDiscount(landing.price || product.price, landing.oldPrice)?.percentLabel || product.tag,
             image: landing.heroImage || product.image,
           }
         : product;
@@ -203,11 +199,12 @@ export default function HomeRoute() {
       .filter((landing) => landing.status !== "hidden" && !builtInSlugs.has(landing.slug))
       .map((landing) => ({
         slug: landing.slug,
+        category: isStoreCategory(landing.category) ? landing.category : "kasdienai",
         name: landing.name,
         description: landing.description,
         price: landing.price,
         oldPrice: landing.oldPrice,
-        tag: landing.saving || "Naujiena",
+        tag: calculateDiscount(landing.price, landing.oldPrice)?.percentLabel || "Naujiena",
         image: landing.heroImage,
       })),
   ];
@@ -216,9 +213,12 @@ export default function HomeRoute() {
     const slug = slide.href === "/obd" ? "obd2" : slide.href.startsWith("/") ? slide.href.slice(1) : "";
     return !slug || !hiddenSlugs.has(slug);
   });
-  const visibleCategories = categories.filter((category) => !hiddenSlugs.has(category.href.slice(1)));
+  const activeCategory = storeCategories.find(({ value }) => value === searchParams.get("category"))?.value ?? "all";
+  const visibleProducts = activeCategory === "all"
+    ? storefrontProducts
+    : storefrontProducts.filter((product) => product.category === activeCategory);
+  const visibleCategories = categories.filter((category) => storefrontProducts.some((product) => product.category === category.key));
   const cartCount = cartItems.reduce((total, item) => total + item.quantity, 0);
-  const cartTotal = cartItems.reduce((total, item) => total + priceValue(item.price) * item.quantity, 0);
 
   useEffect(() => {
     setCartItems(readCart());
@@ -299,77 +299,7 @@ export default function HomeRoute() {
           </nav>
 
           <div className="levitara-header-tools">
-            <Sheet open={cartOpen} onOpenChange={setCartOpen}>
-              <SheetTrigger asChild>
-                <button className="levitara-cart" type="button" aria-label={`Krepšelis, ${cartCount} prekių`}>
-                  <span aria-hidden="true"><IconShoppingCart size={18} stroke={1.8} /></span>
-                  <span>Krepšelis</span>
-                  <strong>{cartCount}</strong>
-                </button>
-              </SheetTrigger>
-              <SheetContent side="right" showClose={false} className="levitara-cart-sheet">
-                <SheetHeader className="levitara-cart-sheet-header">
-                  <SheetTitle>Krepšelis <span>{cartCount}</span></SheetTitle>
-                  <SheetClose asChild>
-                    <button type="button" className="levitara-cart-close" aria-label="Uždaryti krepšelį"><IconX size={19} /></button>
-                  </SheetClose>
-                </SheetHeader>
-                {cartItems.length === 0 ? (
-                  <div className="levitara-cart-empty">
-                    <IconShoppingCart size={32} stroke={1.5} aria-hidden="true" />
-                    <p>Krepšelis tuščias</p>
-                    <span>Pasirink produktą ir pridėk jį čia.</span>
-                  </div>
-                ) : (
-                  <>
-                    <div className="levitara-cart-items">
-                      {cartItems.map((item) => (
-                        <article className="levitara-cart-item" key={item.slug}>
-                          <img src={item.image} alt="" />
-                          <div className="levitara-cart-item-info">
-                            <h3>{item.name}</h3>
-                            <strong>{item.price}</strong>
-                            <div className="levitara-cart-quantity">
-                              <button type="button" onClick={() => changeCartQuantity(item.slug, -1)} aria-label={`Sumažinti ${item.name} kiekį`}><IconMinus size={14} /></button>
-                              <span>{item.quantity}</span>
-                              <button type="button" onClick={() => changeCartQuantity(item.slug, 1)} aria-label={`Padidinti ${item.name} kiekį`}><IconPlus size={14} /></button>
-                            </div>
-                          </div>
-                        </article>
-                      ))}
-                    </div>
-                    <div className="rounded-2xl border border-[#203b40]/10 bg-[#f7f8f6] p-4">
-                      <p className="text-sm font-semibold text-[#203b40]">Apmokėjimo būdas</p>
-                      <div className="mt-3 space-y-2 text-sm text-[#203b40]/70">
-                        <label className="flex items-center gap-2">
-                          <input type="radio" name="paymentMethod" checked={paymentMethod === "paysera"} onChange={() => setPaymentMethod("paysera")} />
-                          Paysera
-                        </label>
-                        <label className="flex items-center gap-2">
-                          <input type="radio" name="paymentMethod" checked={paymentMethod === "bank"} onChange={() => setPaymentMethod("bank")} />
-                          Bankinis pavedimas
-                        </label>
-                      </div>
-                      <div className="mt-3 rounded-xl border border-[#203b40]/10 bg-white p-3 text-xs text-[#203b40]/60">
-                        {paymentMethod === "paysera" ? "Lietuvos bankai: Swedbank, SEB, Luminor, Revolut, Paysera." : "Gali būti mokama per SEB, Swedbank ar Luminor bankų pavedimu."}
-                      </div>
-                    </div>
-                    <div className="levitara-cart-total"><span>Tarpinė suma</span><strong>{formatPrice(cartTotal)}</strong></div>
-                    <button
-                      type="button"
-                      className="w-full rounded-full bg-[#2f7f7b] px-4 py-3 text-sm font-semibold text-white shadow-[0_10px_24px_rgba(47,127,123,0.18)] transition hover:bg-[#256d69]"
-                      onClick={() => {
-                        const methodLabel = paymentMethod === "paysera" ? "Paysera" : "Bankinis pavedimas";
-                        window.alert(`Užsakymas paruoštas apmokėjimui per ${methodLabel}. Paysera integracija bus prijungta vėliau, šiuo metu krepšelis veikia vietoje.`);
-                      }}
-                    >
-                      Tęsti prie apmokėjimo
-                    </button>
-                    <p className="levitara-cart-note">Pristatymo kaina apskaičiuojama prieš užsakymo patvirtinimą. Lietuvos bankai ir Paysera bus rodomi lietuviškai.</p>
-                  </>
-                )}
-              </SheetContent>
-            </Sheet>
+            <StoreCartDrawer items={cartItems} open={cartOpen} onOpenChange={setCartOpen} onQuantityChange={changeCartQuantity} />
             <Link className="levitara-admin-link" to="/admin">Prisijungti</Link>
             <button
               className="levitara-menu-button"
@@ -446,7 +376,7 @@ export default function HomeRoute() {
           <div className="levitara-category-grid">
             {visibleCategories.map((category) => (
               <Link
-                key={category.label}
+                key={category.key}
                 to={category.href}
                 className={`levitara-category-card ${category.label !== "Automobiliui" ? "levitara-category-card-light" : ""}`}
               >
@@ -468,10 +398,18 @@ export default function HomeRoute() {
               <p className="levitara-kicker dark">Mūsų pasirinkimas</p>
               <h2>Mūsų produktai</h2>
             </div>
-            <span className="levitara-heading-side">{storefrontProducts.length.toString().padStart(2, "0")} produktai</span>
+            <span className="levitara-heading-side">{visibleProducts.length.toString().padStart(2, "0")} produktai</span>
           </div>
+          <nav className="levitara-category-filters" aria-label="Filtruoti produktus pagal kategoriją">
+            <Link to="/#produktai" aria-current={activeCategory === "all" ? "page" : undefined}>Visi</Link>
+            {storeCategories.map((category) => (
+              <Link key={category.value} to={`/?category=${category.value}#produktai`} aria-current={activeCategory === category.value ? "page" : undefined}>
+                {category.label}
+              </Link>
+            ))}
+          </nav>
           <div className="levitara-product-grid">
-            {storefrontProducts.map((product) => (
+            {visibleProducts.map((product) => (
               <article key={product.slug} className="levitara-product-card">
                 <div className="levitara-product-media">
                   <Link to={product.slug === "obd2" ? "/obd" : `/${product.slug}`} className="levitara-product-image-link" aria-label={`Peržiūrėti: ${product.name}`}>
@@ -499,7 +437,7 @@ export default function HomeRoute() {
               </article>
             ))}
           </div>
-          <a href="#kategorijos" className="levitara-dark-button">Peržiūrėti visą kolekciją</a>
+          {visibleProducts.length === 0 && <p className="levitara-empty-category">Šioje kategorijoje produktų nėra.</p>}
         </section>
 
         <section className="levitara-section levitara-showcase-section">
@@ -544,37 +482,10 @@ export default function HomeRoute() {
             <div className="levitara-trust-item"><span>03</span><div><strong>14 dienų grąžinimas</strong><small>Norime, kad pirkinys tikrai patiktų.</small></div></div>
           </div>
         </section>
-        <section className="levitara-payment-strip" aria-label="Bankai ir mokėjimo būdai">
-          <div className="levitara-payment-track">
-            {[0, 1].map((copy) => (
-              <div className="levitara-payment-group" aria-hidden={copy === 1} key={copy}>
-                {[
-                  ["SEB", "seb"],
-                  ["Luminor", "luminor"],
-                  ["Citadele", "citadele"],
-                  ["VISA", "visa"],
-                  ["Revolut", "revolut"],
-                  ["Swedbank", "swedbank"],
-                ].map(([name, brand]) => (
-                  <span className={`levitara-payment-name levitara-payment-${brand}`} key={name}>
-                    {brand === "visa" ? <img src="/visa-mark.svg" alt="VISA" /> : name}
-                  </span>
-                ))}
-              </div>
-            ))}
-          </div>
-        </section>
+        <StorePaymentStrip />
       </main>
 
-      <footer id="kontaktai" className="levitara-footer">
-        <div className="levitara-footer-grid">
-          <div className="levitara-footer-brand"><Link to="/" className="levitara-logo"><span className="levitara-logo-mark" aria-hidden="true">M</span><span>milishop</span></Link><p>Apgalvoti daiktai automobiliui, namams ir kasdienai.</p></div>
-          <div><h3>Kategorijos</h3><a href="#produktai">Automobiliui</a><a href="#produktai">Kasdienai</a><a href="#produktai">Namams</a></div>
-          <div><h3>Informacija</h3><Link to="/apie-mus">Apie mus</Link><Link to="/pristatymas">Pristatymas</Link><Link to="/grazinimas">Grąžinimas</Link></div>
-          <div><h3>Pagalba</h3><Link to="/admin">Prisijungti</Link><StoreSocialLinks /></div>
-        </div>
-        <div className="levitara-footer-bottom"><span>© {year} Milishop. Visos teisės saugomos.</span></div>
-      </footer>
+      <StoreFooter year={year} />
     </div>
   );
 }

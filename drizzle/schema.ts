@@ -8,6 +8,7 @@ export const productLandings = table("product_landings", {
   brandName: text("brand_name").notNull().default("atrinkta."),
   footerText: text("footer_text").notNull().default("Daiktai, kuriuos norisi turėti."),
   name: text("name").notNull().default(""),
+  category: text("category").notNull().default("kasdienai"),
   eyebrow: text("eyebrow").notNull().default(""),
   description: text("description").notNull().default(""),
   longDescription: text("long_description").notNull().default(""),

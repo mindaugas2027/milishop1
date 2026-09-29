@@ -23,6 +23,7 @@ const productInput = {
   brandName: "Milishop",
   footerText: "Kasdienai",
   name: "Telefono laikiklis",
+  category: "automobiliui",
   eyebrow: "Kelionei",
   description: "Patogesnė kelionė.",
   longDescription: "Laikyk telefoną saugiai.",
@@ -75,7 +76,9 @@ describe("update-product-landing", () => {
     const result = await action.run(productInput);
 
     expect(insertedValues?.supplierUrl).toBe(productInput.supplierUrl);
+    expect(insertedValues?.category).toBe(productInput.category);
     expect(result.supplierUrl).toBe(productInput.supplierUrl);
+    expect(result.category).toBe(productInput.category);
     expect(result.gallery).toEqual(productInput.gallery);
   });
 });
