@@ -9,7 +9,7 @@ const landingSchema = z.object({
   brandName: z.string().min(1).max(80).describe("Store brand shown in the footer"),
   footerText: z.string().max(200).describe("Short footer sentence"),
   name: z.string().min(1).max(160).describe("Product title"),
-  category: z.enum(["automobiliui", "kasdienai", "namams"]).describe("Product category: automobiliui, kasdienai, or namams"),
+  category: z.string().trim().min(1).max(80).regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/).describe("Product category slug"),
   eyebrow: z.string().max(120).describe("Small label above the product title"),
   description: z.string().max(500).describe("Short product description"),
   longDescription: z.string().max(4000).describe("Full product description"),

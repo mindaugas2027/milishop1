@@ -1,5 +1,20 @@
 import { index, now, table, text, uniqueIndex } from "@agent-native/core/db/schema";
 
+export const storeCategories = table("store_categories", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  slug: text("slug").notNull(),
+  name: text("name").notNull(),
+  caption: text("caption").notNull().default(""),
+  image: text("image").notNull().default(""),
+  enabled: text("enabled").notNull().default("true"),
+  sortOrder: text("sort_order").notNull().default("0"),
+  createdAt: text("created_at").notNull().default(now()),
+  updatedAt: text("updated_at").notNull().default(now()),
+}, (category) => [
+  uniqueIndex("store_categories_slug_uidx").on(category.slug),
+  index("store_categories_enabled_order_idx").on(category.enabled, category.sortOrder),
+]);
+
 export const productLandings = table("product_landings", {
   id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
   slug: text("slug").notNull(),

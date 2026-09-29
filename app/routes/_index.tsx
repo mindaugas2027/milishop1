@@ -7,7 +7,7 @@ import { APP_TITLE } from "@/lib/app-config";
 import { addCartItem, readCart, type CartLine, writeCart, calculateDiscount } from "@/lib/cart";
 import { StoreCartDrawer } from "@/components/StoreCartDrawer";
 import { StoreFooter, StorePaymentStrip } from "@/components/StorefrontChrome";
-import { isStoreCategory, storeCategories, type StoreCategory } from "@/lib/store-products";
+import { type StoreCategory, type StoreCategoryRecord } from "@/lib/store-products";
 
 type StorefrontProduct = {
   slug: string;
@@ -19,12 +19,6 @@ type StorefrontProduct = {
   tag: string;
   image: string;
 };
-
-const categories = [
-  { key: "automobiliui", label: "Automobiliui", caption: "Išmaniau kiekvienai kelionei", href: "/?category=automobiliui#produktai" },
-  { key: "kasdienai", label: "Kasdienai", caption: "Maži daiktai, didelis patogumas", href: "/?category=kasdienai#produktai" },
-  { key: "namams", label: "Namams", caption: "Ramūs akcentai tavo erdvei", href: "/?category=namams#produktai" },
-];
 
 const heroSlides = [
   {
@@ -88,17 +82,22 @@ export default function HomeRoute() {
   const [pageCursor, setPageCursor] = useState<string>();
   const [storefrontProducts, setStorefrontProducts] = useState<StorefrontProduct[]>([]);
   const year = new Date().getFullYear();
-  const activeCategory = storeCategories.find(({ value }) => value === searchParams.get("category"))?.value ?? "all";
+  const requestedCategory = searchParams.get("category");
+  const activeCategory = requestedCategory || "all";
   const { data: productPage, isPending: isProductsPending, isFetching: isProductsFetching, isError: isProductsError } = useActionQuery("list-product-landings", {
     cursor: pageCursor,
     category: activeCategory === "all" ? undefined : activeCategory,
     limit: 12,
   });
+  const storefrontCategories = (productPage?.categories ?? []) as StoreCategoryRecord[];
   const visibleHeroSlides = heroSlides;
   const visibleProducts = storefrontProducts;
-  const visibleCategories = categories.map((category) => ({
+  const visibleCategories = storefrontCategories.map((category) => ({
     ...category,
-    image: storefrontProducts.find((product) => product.category === category.key)?.image ?? heroSlides[0].src,
+    key: category.slug,
+    label: category.name,
+    href: `/?category=${category.slug}#produktai`,
+    image: category.image || storefrontProducts.find((product) => product.category === category.slug)?.image || heroSlides[0].src,
   }));
   const nextPageCursor = productPage?.nextCursor ?? null;
   const cartCount = cartItems.reduce((total, item) => total + item.quantity, 0);
@@ -112,7 +111,7 @@ export default function HomeRoute() {
     if (!productPage) return;
     const pageProducts: StorefrontProduct[] = productPage.items.map((landing) => ({
       slug: landing.slug,
-      category: isStoreCategory(landing.category) ? landing.category : "kasdienai",
+      category: landing.category,
       name: landing.name,
       description: landing.description,
       price: landing.price,
@@ -316,9 +315,9 @@ export default function HomeRoute() {
           </div>
           <nav className="levitara-category-filters" aria-label="Filtruoti produktus pagal kategoriją">
             <Link to="/#produktai" onClick={resetProductPages} aria-current={activeCategory === "all" ? "page" : undefined}>Visi</Link>
-            {storeCategories.map((category) => (
-              <Link key={category.value} to={`/?category=${category.value}#produktai`} onClick={resetProductPages} aria-current={activeCategory === category.value ? "page" : undefined}>
-                {category.label}
+            {storefrontCategories.map((category) => (
+              <Link key={category.slug} to={`/?category=${category.slug}#produktai`} onClick={resetProductPages} aria-current={activeCategory === category.slug ? "page" : undefined}>
+                {category.name}
               </Link>
             ))}
           </nav>

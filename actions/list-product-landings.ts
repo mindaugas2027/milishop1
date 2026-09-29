@@ -19,7 +19,7 @@ export default defineAction({
   description: "List a cursor-paginated page of active storefront products, optionally filtered by category.",
   schema: z.object({
     cursor: z.string().min(1).max(120).optional().describe("Return products after this slug"),
-    category: z.enum(["automobiliui", "kasdienai", "namams"]).optional().describe("Optional storefront category filter"),
+    category: z.string().trim().min(1).max(80).optional().describe("Optional storefront category slug filter"),
     limit: z.coerce.number().int().min(1).max(48).default(12).describe("Products per page; defaults to 12"),
   }),
   http: { method: "GET" },
@@ -27,7 +27,22 @@ export default defineAction({
   readOnly: true,
   run: async ({ cursor, category, limit }) => {
     const db = getDb();
-    const rows = await db
+    const categoriesQuery = schema.storeCategories
+      ? db.select({
+        id: schema.storeCategories.id,
+        slug: schema.storeCategories.slug,
+        name: schema.storeCategories.name,
+        caption: schema.storeCategories.caption,
+        image: schema.storeCategories.image,
+        enabled: schema.storeCategories.enabled,
+        sortOrder: schema.storeCategories.sortOrder,
+      })
+        .from(schema.storeCategories)
+        .where(eq(schema.storeCategories.enabled, "true"))
+        .orderBy(asc(schema.storeCategories.sortOrder), asc(schema.storeCategories.name))
+      : Promise.resolve([]);
+    const [rows, categories] = await Promise.all([
+      db
       .select({
         slug: schema.productLandings.slug,
         name: schema.productLandings.name,
@@ -46,13 +61,16 @@ export default defineAction({
         cursor ? gt(schema.productLandings.slug, cursor) : undefined,
       ))
       .orderBy(asc(schema.productLandings.slug))
-      .limit(limit + 1);
+      .limit(limit + 1),
+      categoriesQuery,
+    ]);
 
     const hasMore = rows.length > limit;
     const items = hasMore ? rows.slice(0, limit) : rows;
     return {
       items,
       nextCursor: hasMore ? items[items.length - 1]?.slug ?? null : null,
+      categories,
     };
   },
 });

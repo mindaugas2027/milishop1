@@ -75,6 +75,13 @@ Before building common workspace or agent UI, read `agent-native-toolkit`; read
 
 ## Data & actions (read these first)
 
+Storefront category management uses the `list-store-categories` public read
+action and the admin-only `list-admin-store-categories`, `update-store-category`,
+and `delete-store-category` actions. Categories are SQL records with a slug,
+caption, image URL, display order, and enabled flag; product records reference
+the category slug. Use the category actions instead of hardcoding category
+lists in new UI or agent workflows.
+
 Add persistence or auth **only when data must survive reload or be shared
 between users**. A pure UI, copy, or layout change needs no schema, action, or
 auth — build it directly and do **not** read the `security` or `storing-data`

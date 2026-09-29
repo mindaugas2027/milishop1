@@ -1,11 +1,12 @@
 import ProductManager from "@/components/admin/ProductManager";
+import CategoryManager from "@/components/admin/CategoryManager";
 import { Link, Outlet, useLocation } from "react-router";
 import { useActionMutation, useActionQuery } from "@agent-native/core/client/hooks";
 import { AgentSettingsContent } from "@agent-native/core/client/settings";
 import { useEffect, useState } from "react";
 
 export function getAdminTabConfig() {
-  return ["Produktai", "Užsakymai", "Nustatymai"];
+  return ["Produktai", "Kategorijos", "Užsakymai", "Nustatymai"];
 }
 
 export function meta() {
@@ -85,7 +86,7 @@ export default function AdminRoute() {
         <nav className="px-5" aria-label="Administravimas">
           <p className="admin-label px-3">Parduotuvė</p>
           <div className="mt-3 grid gap-1">
-            {navItems.map((item) => <button key={item} type="button" onClick={() => setActiveTab(item)} aria-pressed={activeTab === item} className={`admin-nav-item ${activeTab === item ? "admin-nav-item-active" : ""}`}><span className="admin-nav-symbol" aria-hidden="true">{item === "Produktai" ? "□" : item === "Užsakymai" ? "↗" : "◌"}</span>{item}</button>)}
+            {navItems.map((item) => <button key={item} type="button" onClick={() => setActiveTab(item)} aria-pressed={activeTab === item} className={`admin-nav-item ${activeTab === item ? "admin-nav-item-active" : ""}`}><span className="admin-nav-symbol" aria-hidden="true">{item === "Produktai" ? "□" : item === "Kategorijos" ? "⌘" : item === "Užsakymai" ? "↗" : "◌"}</span>{item}</button>)}
           </div>
         </nav>
         <div className="mt-auto px-5 pb-6">
@@ -113,7 +114,7 @@ export default function AdminRoute() {
             <h1 className="text-3xl font-semibold tracking-[-0.06em] sm:text-4xl">{activeTab}</h1>
             <Link to="/" className="rounded-full border border-[#203b40]/10 bg-white px-4 py-2.5 text-sm font-medium text-[#203b40]/65 transition-colors hover:text-[#203b40]">Parduotuvė ↗</Link>
           </div>
-          {activeTab === "Produktai" ? <ProductManager /> : activeTab === "Užsakymai" ? <OrdersPanel /> : <StoreSettingsPanel />}
+          {activeTab === "Produktai" ? <ProductManager /> : activeTab === "Kategorijos" ? <CategoryManager /> : activeTab === "Užsakymai" ? <OrdersPanel /> : <StoreSettingsPanel />}
         </main>
       </div>
     </div>

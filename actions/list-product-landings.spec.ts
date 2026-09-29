@@ -96,6 +96,7 @@ describe("list-product-landings", () => {
         status: "active",
       }],
       nextCursor: "obd2",
+      categories: [],
     });
   });
 });

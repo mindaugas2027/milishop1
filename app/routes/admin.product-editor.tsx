@@ -3,7 +3,7 @@ import { uploadEditorImage } from "@agent-native/core/client/uploads";
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router";
 import { calculateDiscount } from "@/lib/cart";
-import { isStoreCategory, storeCategories, type StoreCategory } from "@/lib/store-products";
+import { type StoreCategory, type StoreCategoryRecord } from "@/lib/store-products";
 
 type ProductDraft = {
   slug: string;
@@ -83,6 +83,8 @@ export default function AdminProductEditorRoute() {
   const slug = searchParams.get("slug") ?? "";
   const querySlug = slug || "__new_product_draft__";
   const { data, isPending: isLoading, isError: loadError } = useActionQuery("get-admin-product-landing", { slug: querySlug });
+  const { data: categoryData } = useActionQuery("list-admin-store-categories", {});
+  const categories = (categoryData ?? []) as StoreCategoryRecord[];
   const { mutate, isPending: isSaving, isSuccess, error: saveError } = useActionMutation("update-product-landing");
   const [draft, setDraft] = useState(() => createDraft(isNew ? "" : slug));
   const [formError, setFormError] = useState("");
@@ -93,7 +95,7 @@ export default function AdminProductEditorRoute() {
   useEffect(() => {
     if (data) {
       const baseDraft = createDraft(slug);
-      setDraft({ ...baseDraft, ...data, category: isStoreCategory(data.category) ? data.category : baseDraft.category });
+      setDraft({ ...baseDraft, ...data, category: data.category || baseDraft.category });
     }
   }, [data, slug]);
 
@@ -169,7 +171,8 @@ export default function AdminProductEditorRoute() {
               <Field label="Produkto adresas" value={draft.slug} onChange={(value) => update("slug", value)} required={!isNew} />
               <label className="grid gap-1.5 text-xs font-medium text-[#203b40]/70">Kategorija
                 <select className="w-full rounded-lg border border-[#203b40]/15 bg-white px-3 py-2.5 text-sm text-[#203b40] outline-none focus:border-[#2f7f7b]" value={draft.category} onChange={(event) => update("category", event.target.value as StoreCategory)}>
-                  {storeCategories.map((category) => <option key={category.value} value={category.value}>{category.label}</option>)}
+                  {categories.map((category) => <option key={category.slug} value={category.slug}>{category.name}</option>)}
+                    {categories.map((category) => <option key={category.slug} value={category.slug}>{category.name}</option>)}
                 </select>
               </label>
               <Field label="Kaina" value={draft.price} onChange={(value) => update("price", value)} required />
