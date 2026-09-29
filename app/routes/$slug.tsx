@@ -47,6 +47,28 @@ function ProductPage({ slug }: { slug: string }) {
   useEffect(() => {
     writeCart(cartItems);
   }, [cartItems]);
+  const imageCount = savedLanding
+    ? (savedLanding.heroImage ? 1 : 0) + savedLanding.gallery.filter((image) => image !== savedLanding.heroImage).length
+    : 0;
+
+  useEffect(() => {
+    if (!imageViewerOpen) return;
+    const handleImageViewerKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setImageViewerOpen(false);
+        return;
+      }
+      if (imageCount < 2) return;
+      const direction = event.key === "ArrowLeft" ? -1 : event.key === "ArrowRight" ? 1 : 0;
+      if (direction) {
+        event.preventDefault();
+        setActiveImage((current) => (current + direction + imageCount) % imageCount);
+      }
+    };
+    window.addEventListener("keydown", handleImageViewerKeyDown);
+    return () => window.removeEventListener("keydown", handleImageViewerKeyDown);
+  }, [imageCount, imageViewerOpen]);
+
   if (isLandingPending) {
     return <div className="min-h-[60vh] animate-pulse bg-[#f7f8f6]" aria-label="Įkeliamas produktas" />;
   }
@@ -83,29 +105,10 @@ function ProductPage({ slug }: { slug: string }) {
   };
   const discount = calculateDiscount(product.price, product.oldPrice);
   const activeImageSrc = product.images[activeImage] ?? product.image;
-  const imageCount = product.images.length;
   const changeActiveImage = (direction: number) => {
     if (product.images.length < 2) return;
     setActiveImage((current) => (current + direction + product.images.length) % product.images.length);
   };
-
-  useEffect(() => {
-    if (!imageViewerOpen) return;
-    const handleImageViewerKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        setImageViewerOpen(false);
-        return;
-      }
-      if (imageCount < 2) return;
-      const direction = event.key === "ArrowLeft" ? -1 : event.key === "ArrowRight" ? 1 : 0;
-      if (direction) {
-        event.preventDefault();
-        setActiveImage((current) => (current + direction + imageCount) % imageCount);
-      }
-    };
-    window.addEventListener("keydown", handleImageViewerKeyDown);
-    return () => window.removeEventListener("keydown", handleImageViewerKeyDown);
-  }, [imageCount, imageViewerOpen]);
 
   const addCurrentProductToCart = () => {
     const nextCart = addCartItem(cartItems, {
