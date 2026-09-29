@@ -39,7 +39,7 @@ function StoreSettingsPanel() {
         </div>
       </form>
       <div className="mt-7 border-t border-[#203b40]/8 pt-6">
-        <p className="mb-4 text-xs leading-5 text-[#203b40]/55">Supabase sukurkite viešą `product-images` bucket’ą ir S3 Access Key. Prijungus saugyklą produkto nuotraukos bus keliamos į Supabase Storage.</p>
+        <p className="mb-4 text-xs leading-5 text-[#203b40]/55">Supabase Storage sukurkite viešą `product-images` bucket’ą ir S3 Access Key. Endpoint formatas: `https://&lt;PROJECT_REF&gt;.supabase.co/storage/v1/s3`; regionas `us-east-1`; Public base URL: `https://&lt;PROJECT_REF&gt;.supabase.co/storage/v1/object/public/product-images`.</p>
         <AgentSettingsContent sections={["uploads"]} />
       </div>
     </section>
