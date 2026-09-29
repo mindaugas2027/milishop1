@@ -21,6 +21,8 @@ export default defineAction({
     slug: z.string().min(1).describe("Product slug, for example obd2"),
   }),
   http: { method: "GET" },
+  requiresAuth: false,
+  readOnly: true,
   run: async ({ slug }) => {
     const db = getDb();
     const [row] = await db

@@ -11,6 +11,7 @@ const REQUEST_SESSION_KEY = "__milishopSupabaseSession";
 const VERIFIED_SESSION_TTL_MS = 5_000;
 
 const verifiedSessions = new Map<string, { session: AuthSession; expiresAt: number }>();
+const pendingUserVerifications = new Map<string, Promise<SupabaseUser | null>>();
 
 type SupabaseUser = {
   id: string;
@@ -71,6 +72,7 @@ function toSession(user: SupabaseUser): AuthSession | null {
 async function fetchUser(url: string, apiKey: string, accessToken: string) {
   const response = await fetch(`${url}/auth/v1/user`, {
     headers: { apikey: apiKey, Authorization: `Bearer ${accessToken}` },
+    signal: AbortSignal.timeout(5_000),
   });
   if (!response.ok) return null;
   return (await response.json()) as SupabaseUser;
@@ -89,6 +91,21 @@ export async function getSupabaseAdminSession(event: H3Event): Promise<AuthSessi
 
 function sessionCacheKey(token: string) {
   return createHash("sha256").update(token).digest("hex");
+}
+
+function fetchUserOnce(url: string, apiKey: string, accessToken: string) {
+  const key = sessionCacheKey(accessToken);
+  const pending = pendingUserVerifications.get(key);
+  if (pending) return pending;
+
+  const request = fetchUser(url, apiKey, accessToken);
+  const sharedRequest = request.finally(() => {
+    if (pendingUserVerifications.get(key) === sharedRequest) {
+      pendingUserVerifications.delete(key);
+    }
+  });
+  pendingUserVerifications.set(key, sharedRequest);
+  return sharedRequest;
 }
 
 function cacheVerifiedSession(token: string, session: AuthSession) {
@@ -130,7 +147,7 @@ async function resolveSupabaseAdminSession(event: H3Event): Promise<AuthSession 
       const cachedSession = getCachedSession(accessToken);
       if (cachedSession) return cachedSession;
 
-      const user = await fetchUser(config.url, config.apiKey, accessToken);
+      const user = await fetchUserOnce(config.url, config.apiKey, accessToken);
       if (user) {
         const session = toSession(user);
         if (session) {
@@ -151,6 +168,7 @@ async function resolveSupabaseAdminSession(event: H3Event): Promise<AuthSession 
       method: "POST",
       headers: { apikey: config.apiKey, "Content-Type": "application/json" },
       body: JSON.stringify({ refresh_token: refreshToken }),
+      signal: AbortSignal.timeout(5_000),
     });
     if (!response.ok) {
       clearSessionCookies(event);
@@ -185,6 +203,7 @@ export async function signInSupabaseAdmin(event: H3Event, email: string, passwor
     method: "POST",
     headers: { apikey: config.apiKey, "Content-Type": "application/json" },
     body: JSON.stringify({ email: ADMIN_EMAIL, password }),
+    signal: AbortSignal.timeout(10_000),
   });
   if (!response.ok) {
     throw new Error("Neteisingas el. paštas arba slaptažodis.");
@@ -210,6 +229,7 @@ export async function signOutSupabaseAdmin(event: H3Event) {
       await fetch(`${config.url}/auth/v1/logout?scope=local`, {
         method: "POST",
         headers: { apikey: config.apiKey, Authorization: `Bearer ${accessToken}` },
+        signal: AbortSignal.timeout(3_000),
       });
     } catch {
       // Clear local cookies even if Supabase is temporarily unavailable.

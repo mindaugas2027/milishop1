@@ -10,6 +10,7 @@ vi.mock("../server/db.js", () => ({
     productLandings: {
       id: "id",
       slug: "slug",
+      status: "status",
       brandName: "brandName",
       footerText: "footerText",
       name: "name",
@@ -51,11 +52,22 @@ describe("list-product-landings", () => {
           {
             slug: "obd2",
             name: "OBD2",
-            gallery: '["https://example.com/1.jpg"]',
-            features: '["A","B"]',
-            steps: '["1","2"]',
-            specs: '[{"label":"Jungtis","value":"OBD2"}]',
-            faq: '[{"question":"Q","answer":"A"}]',
+            description: "OBD2 produktas",
+            price: "39,90 €",
+            oldPrice: "49,90 €",
+            saving: "Sutaupai 10 €",
+            heroImage: "https://example.com/1.jpg",
+            status: "active",
+          },
+          {
+            slug: "hidden-product",
+            name: "Paslėptas",
+            description: "",
+            price: "1,00 €",
+            oldPrice: "",
+            saving: "",
+            heroImage: "https://example.com/hidden.jpg",
+            status: "hidden",
           },
         ]),
       }),
@@ -63,15 +75,17 @@ describe("list-product-landings", () => {
 
     const result = await action.run({});
 
-    expect(result).toHaveLength(1);
+    expect(result).toHaveLength(2);
     expect(result[0]).toMatchObject({
       slug: "obd2",
       name: "OBD2",
-      gallery: ["https://example.com/1.jpg"],
-      features: ["A", "B"],
-      steps: ["1", "2"],
-      specs: [{ label: "Jungtis", value: "OBD2" }],
-      faq: [{ question: "Q", answer: "A" }],
+      description: "OBD2 produktas",
+      price: "39,90 €",
+      oldPrice: "49,90 €",
+      saving: "Sutaupai 10 €",
+      heroImage: "https://example.com/1.jpg",
+      status: "active",
     });
+    expect(result[1]).toMatchObject({ slug: "hidden-product", status: "hidden" });
   });
 });

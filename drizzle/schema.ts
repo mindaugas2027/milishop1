@@ -3,6 +3,7 @@ import { now, table, text } from "@agent-native/core/db/schema";
 export const productLandings = table("product_landings", {
   id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
   slug: text("slug").notNull(),
+  status: text("status").notNull().default("active"),
   brandName: text("brand_name").notNull().default("atrinkta."),
   footerText: text("footer_text").notNull().default("Daiktai, kuriuos norisi turėti."),
   name: text("name").notNull().default(""),

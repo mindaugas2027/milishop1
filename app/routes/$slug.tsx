@@ -177,6 +177,16 @@ function ProductPage({
   if (!baseProduct && !savedLanding && isLandingPending) {
     return <div className="min-h-[60vh] animate-pulse bg-[#f7f8f6]" aria-label="Įkeliamas produktas" />;
   }
+  if (savedLanding?.status === "hidden") {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background px-6 text-center">
+        <div>
+          <h1 className="text-3xl font-semibold tracking-[-0.05em]">Šios prekės šiuo metu nėra.</h1>
+          <Link to="/" className="mt-6 inline-flex rounded-full bg-[#2f7f7b] px-5 py-3 text-sm font-semibold text-white">Grįžti į katalogą</Link>
+        </div>
+      </div>
+    );
+  }
   if (!baseProduct && !savedLanding) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background px-6 text-center">

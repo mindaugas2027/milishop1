@@ -183,8 +183,9 @@ export default function HomeRoute() {
   const { data: savedProductLandings = [] } = useActionQuery("list-product-landings", {});
   const builtInSlugs = new Set(products.map((product) => product.slug));
   const savedProducts = new Map(savedProductLandings.map((landing) => [landing.slug, landing]));
+  const hiddenSlugs = new Set(savedProductLandings.filter((landing) => landing.status === "hidden").map((landing) => landing.slug));
   const storefrontProducts: StorefrontProduct[] = [
-    ...products.map((product) => {
+    ...products.filter((product) => !hiddenSlugs.has(product.slug)).map((product) => {
       const landing = savedProducts.get(product.slug);
       return landing
         ? {
@@ -199,7 +200,7 @@ export default function HomeRoute() {
         : product;
     }),
     ...savedProductLandings
-      .filter((landing) => !builtInSlugs.has(landing.slug))
+      .filter((landing) => landing.status !== "hidden" && !builtInSlugs.has(landing.slug))
       .map((landing) => ({
         slug: landing.slug,
         name: landing.name,
@@ -211,6 +212,11 @@ export default function HomeRoute() {
       })),
   ];
   const year = new Date().getFullYear();
+  const visibleHeroSlides = heroSlides.filter((slide) => {
+    const slug = slide.href === "/obd" ? "obd2" : slide.href.startsWith("/") ? slide.href.slice(1) : "";
+    return !slug || !hiddenSlugs.has(slug);
+  });
+  const visibleCategories = categories.filter((category) => !hiddenSlugs.has(category.href.slice(1)));
   const cartCount = cartItems.reduce((total, item) => total + item.quantity, 0);
   const cartTotal = cartItems.reduce((total, item) => total + priceValue(item.price) * item.quantity, 0);
 
@@ -254,19 +260,19 @@ export default function HomeRoute() {
 
   useEffect(() => {
     const timer = window.setInterval(() => {
-      setActiveHeroSlide((current) => (current + 1) % heroSlides.length);
+      setActiveHeroSlide((current) => (current + 1) % visibleHeroSlides.length);
     }, 6000);
 
     return () => window.clearInterval(timer);
-  }, []);
+  }, [visibleHeroSlides.length]);
 
   const changeHeroSlide = (direction: number) => {
     setActiveHeroSlide(
-      (current) => (current + direction + heroSlides.length) % heroSlides.length,
+      (current) => (current + direction + visibleHeroSlides.length) % visibleHeroSlides.length,
     );
   };
 
-  const activeSlide = heroSlides[activeHeroSlide];
+  const activeSlide = visibleHeroSlides[activeHeroSlide % visibleHeroSlides.length];
 
   return (
     <div className="levitara-storefront min-h-screen bg-white text-[#121212]">
@@ -411,7 +417,7 @@ export default function HomeRoute() {
             <button type="button" onClick={() => changeHeroSlide(1)} aria-label="Rodyti kitą nuotrauką">›</button>
           </div>
           <div className="levitara-hero-dots" role="tablist" aria-label="Hero nuotraukos">
-            {heroSlides.map((slide, index) => (
+            {visibleHeroSlides.map((slide, index) => (
               <button
                 key={slide.src}
                 type="button"
@@ -438,7 +444,7 @@ export default function HomeRoute() {
             <span className="levitara-heading-side">Paprasti sprendimai kasdienai</span>
           </div>
           <div className="levitara-category-grid">
-            {categories.map((category) => (
+            {visibleCategories.map((category) => (
               <Link
                 key={category.label}
                 to={category.href}
@@ -499,33 +505,33 @@ export default function HomeRoute() {
         <section className="levitara-section levitara-showcase-section">
           <div className="levitara-section-heading">
             <div>
-              <p className="levitara-kicker dark">Išskirtinis pasirinkimas</p>
-              <h2>Premium dalykai, kuriuos norisi nešiotis kasdien</h2>
+              <p className="levitara-kicker dark">Milishop pasirinkimas</p>
+              <h2>Daiktai kelionėms, namams ir kasdienai</h2>
             </div>
-            <span className="levitara-heading-side">Nauja kolekcija</span>
+            <span className="levitara-heading-side">Atrask katalogą</span>
           </div>
           <div className="levitara-feature-grid">
             <div className="levitara-feature-card levitara-feature-card-hero">
               <div>
-                <span>Rinkitės protingai</span>
-                <h3>Produkto kategorija</h3>
-                <p>Minimalūs, funkcionalūs ir gražūs daiktai, kurie vienodai tinka namams, automobiliui ir kasdienai.</p>
+                <span>Milishop katalogas</span>
+                <h3>Rask tai, ko reikia</h3>
+                <p>Automobilio priedai, namų akcentai ir praktiški radiniai dovanai – vienoje vietoje.</p>
               </div>
             </div>
             <div className="levitara-feature-card">
               <span>01</span>
-              <h3>Švarus dizainas</h3>
-              <p>Minimalūs paviršiai, šviesi paletė ir suformuotas premium look.</p>
+              <h3>Kelionėms</h3>
+              <p>OBD2 diagnostika ir telefono laikikliai patogesnėms kelionėms.</p>
             </div>
             <div className="levitara-feature-card">
               <span>02</span>
-              <h3>Patogi prekyba</h3>
-              <p>Greitas perėjimas į produktą, aiškios kainos, lengvas add-to-cart patyrimas.</p>
+              <h3>Namams</h3>
+              <p>Keraminiai akcentai ir jaukūs daiktai tavo namų erdvei.</p>
             </div>
             <div className="levitara-feature-card">
               <span>03</span>
-              <h3>Sklandi kokybė</h3>
-              <p>Intuityvūs skyriai, kokybiška prezentacija ir tvarus e-commerce jausmas.</p>
+              <h3>Dovanoms</h3>
+              <p>Žaislai, kvapai ir kiti radiniai įvairioms progoms.</p>
             </div>
           </div>
         </section>

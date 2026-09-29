@@ -65,7 +65,7 @@ export default defineAction({
       .limit(1);
 
     const [row] = existing
-      ? await db.update(schema.productLandings).set(values).where(eq(schema.productLandings.id, existing.id)).returning()
+      ? await db.update(schema.productLandings).set({ ...values, status: "active" }).where(eq(schema.productLandings.id, existing.id)).returning()
       : await db.insert(schema.productLandings).values(values).returning();
 
     return deserialize(row);

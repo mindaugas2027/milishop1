@@ -19,11 +19,7 @@ export default defineEventHandler(async (event) => {
 
   if (path === "/_agent-native/auth/session") {
     const session = await getSupabaseAdminSession(event);
-    if (!session) {
-      setResponseStatus(event, 401);
-      return { error: "Not authenticated" };
-    }
-    return session;
+    return session ?? { error: "Not authenticated" };
   }
 
   const isPublicAuthRoute =
@@ -32,8 +28,10 @@ export default defineEventHandler(async (event) => {
     method === "GET" &&
     (path === "/_agent-native/actions/list-product-landings" ||
       path === "/_agent-native/actions/get-product-landing");
+  const isFrameworkAuthRoute =
+    path.startsWith("/_agent-native/auth/") || path === "/_agent-native/sign-in";
 
-  if (isPublicAuthRoute || isPublicCatalogRead) {
+  if (isPublicAuthRoute || isPublicCatalogRead || isFrameworkAuthRoute) {
     return runAuthGuard(event);
   }
 

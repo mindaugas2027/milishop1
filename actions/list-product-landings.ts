@@ -19,10 +19,24 @@ export default defineAction({
   description: "List all product landing pages, newest first.",
   schema: z.object({}),
   http: { method: "GET" },
+  requiresAuth: false,
+  readOnly: true,
   run: async () => {
     const db = getDb();
-    const rows = await db.select().from(schema.productLandings).orderBy(desc(schema.productLandings.updatedAt));
+    const rows = await db
+      .select({
+        slug: schema.productLandings.slug,
+        name: schema.productLandings.name,
+        description: schema.productLandings.description,
+        price: schema.productLandings.price,
+        oldPrice: schema.productLandings.oldPrice,
+        saving: schema.productLandings.saving,
+        heroImage: schema.productLandings.heroImage,
+        status: schema.productLandings.status,
+      })
+      .from(schema.productLandings)
+      .orderBy(desc(schema.productLandings.updatedAt));
 
-    return rows.map(deserialize);
+    return rows;
   },
 });

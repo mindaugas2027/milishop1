@@ -1,0 +1,1 @@
+ALTER TABLE "product_landings" ADD COLUMN "status" text DEFAULT 'active' NOT NULL;
