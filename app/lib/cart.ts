@@ -8,6 +8,36 @@ export type CartLine = {
 
 export const CART_STORAGE_KEY = "milishop-cart";
 
+export type ProductDiscount = {
+  amount: number;
+  amountLabel: string;
+  percent: number;
+  percentLabel: string;
+};
+
+export function priceValue(price: string) {
+  return Number(price.replace(/[^\d,.-]/g, "").replace(",", ".")) || 0;
+}
+
+export function formatPrice(price: number) {
+  return `${price.toFixed(2).replace(".", ",")} €`;
+}
+
+export function calculateDiscount(price: string, oldPrice: string): ProductDiscount | null {
+  const current = priceValue(price);
+  const previous = priceValue(oldPrice);
+  if (!current || previous <= current) return null;
+
+  const amount = Math.round((previous - current) * 100) / 100;
+  const percent = Math.round((amount / previous) * 100);
+  return {
+    amount,
+    amountLabel: formatPrice(amount),
+    percent,
+    percentLabel: `-${percent}%`,
+  };
+}
+
 export function readCart(): CartLine[] {
   if (typeof window === "undefined") return [];
 

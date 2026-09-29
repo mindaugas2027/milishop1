@@ -57,8 +57,25 @@ if (!isProcessEntrypoint()) {
   );
 }
 
+let migrationSucceeded = false;
 try {
   await main();
+  migrationSucceeded = true;
 } finally {
-  await closeDbExec();
+  let timeout: ReturnType<typeof setTimeout> | undefined;
+  const closed = await Promise.race([
+    closeDbExec().then(() => true),
+    new Promise<boolean>((resolve) => {
+      timeout = setTimeout(() => resolve(false), 15_000);
+    }),
+  ]);
+  if (timeout) clearTimeout(timeout);
+
+  if (!closed) {
+    if (!migrationSucceeded) {
+      throw new Error("Database pool cleanup timed out after a failed migration.");
+    }
+    console.warn("[db] Pool cleanup timed out after successful migrations; exiting release process.");
+    process.exit(0);
+  }
 }
