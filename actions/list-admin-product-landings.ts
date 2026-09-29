@@ -16,6 +16,7 @@ export default defineAction({
         name: schema.productLandings.name,
         price: schema.productLandings.price,
         heroImage: schema.productLandings.heroImage,
+        supplierUrl: schema.productLandings.supplierUrl,
         status: schema.productLandings.status,
         updatedAt: schema.productLandings.updatedAt,
       })

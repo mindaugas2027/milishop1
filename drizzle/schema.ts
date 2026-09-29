@@ -4,6 +4,7 @@ export const productLandings = table("product_landings", {
   id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
   slug: text("slug").notNull(),
   status: text("status").notNull().default("active"),
+  supplierUrl: text("supplier_url").notNull().default(""),
   brandName: text("brand_name").notNull().default("atrinkta."),
   footerText: text("footer_text").notNull().default("Daiktai, kuriuos norisi turėti."),
   name: text("name").notNull().default(""),

@@ -22,6 +22,7 @@ export default function ProductManager() {
         price: saved?.price || product.price,
         image: saved?.heroImage || product.image,
         hidden: saved?.status === "hidden",
+        supplierUrl: saved?.supplierUrl ?? "",
       };
     }),
     ...(savedProducts ?? [])
@@ -32,6 +33,7 @@ export default function ProductManager() {
         price: product.price,
         image: product.heroImage,
         hidden: product.status === "hidden",
+        supplierUrl: product.supplierUrl,
       })),
   ].filter((product) => product.name.toLowerCase().includes(search.toLowerCase()));
 
@@ -50,6 +52,7 @@ export default function ProductManager() {
       {statusError && <p role="alert" className="mt-4 text-sm text-[#bd6659]">Nepavyko pakeisti produkto būsenos. Patikrinkite prisijungimą ir bandykite dar kartą.</p>}
       {!savedProducts && !isError && <p role="status" className="mt-5 text-sm text-[#203b40]/55">Įkeliami produktai…</p>}
       <div className="admin-table-wrap mt-5"><table className="admin-table"><thead><tr><th>Produktas</th><th>Būsena</th><th>Kaina</th><th className="text-right">Veiksmai</th></tr></thead><tbody>{products.map((product) => <tr key={product.slug}><td><div className="flex min-w-[230px] items-center gap-3">{product.image && <img src={product.image} alt="" className="size-11 rounded-lg object-cover" />}<div><p className="font-semibold text-[#203b40]">{product.name}</p><p className="mt-0.5 text-xs text-[#203b40]/40">/{product.slug}</p></div></div></td><td><StatusPill hidden={product.hidden} /></td><td className="font-semibold">{product.price}</td><td><div className="flex justify-end gap-2"><Link to={`/admin/product-editor?slug=${encodeURIComponent(product.slug)}`} className="admin-row-action">Redaguoti</Link><Link to={`/${product.slug}`} className="admin-row-action" target="_blank" rel="noreferrer">Peržiūrėti</Link>{savedProducts && <button type="button" disabled={isUpdating} onClick={() => product.hidden ? setProductStatus({ slug: product.slug, action: "restore" }) : removeProduct(product.slug, product.name)} className="admin-row-action text-[#bd6659] disabled:opacity-50">{product.hidden ? "Atkurti" : "Pašalinti"}</button>}</div></td></tr>)}</tbody></table>{products.length === 0 && <p className="py-10 text-center text-sm text-[#203b40]/45">Produktų nerasta.</p>}</div>
+        <div className="admin-table-wrap mt-5"><table className="admin-table"><thead><tr><th>Produktas</th><th>Būsena</th><th>Kaina</th><th className="text-right">Veiksmai</th></tr></thead><tbody>{products.map((product) => <tr key={product.slug}><td><div className="flex min-w-[230px] items-center gap-3">{product.image && <img src={product.image} alt="" className="size-11 rounded-lg object-cover" />}<div><p className="font-semibold text-[#203b40]">{product.name}</p><p className="mt-0.5 text-xs text-[#203b40]/40">/{product.slug}</p></div></div></td><td><StatusPill hidden={product.hidden} /></td><td className="font-semibold">{product.price}</td><td><div className="flex justify-end gap-2">{product.supplierUrl && <a href={product.supplierUrl} className="admin-row-action" target="_blank" rel="noopener noreferrer">Užsakyti ↗</a>}<Link to={`/admin/product-editor?slug=${encodeURIComponent(product.slug)}`} className="admin-row-action">Redaguoti</Link><Link to={`/${product.slug}`} className="admin-row-action" target="_blank" rel="noreferrer">Peržiūrėti</Link>{savedProducts && <button type="button" disabled={isUpdating} onClick={() => product.hidden ? setProductStatus({ slug: product.slug, action: "restore" }) : removeProduct(product.slug, product.name)} className="admin-row-action text-[#bd6659] disabled:opacity-50">{product.hidden ? "Atkurti" : "Pašalinti"}</button>}</div></td></tr>)}</tbody></table>{products.length === 0 && <p className="py-10 text-center text-sm text-[#203b40]/45">Produktų nerasta.</p>}</div>
       <div className="admin-mobile-products mt-5">
         {products.map((product) => (
           <article className="admin-mobile-product" key={product.slug}>
@@ -61,6 +64,7 @@ export default function ProductManager() {
             <div className="admin-mobile-product-actions">
               <Link to={`/admin/product-editor?slug=${encodeURIComponent(product.slug)}`} className="admin-row-action">Redaguoti</Link>
               <Link to={`/${product.slug}`} className="admin-row-action" target="_blank" rel="noreferrer">Peržiūrėti</Link>
+              {product.supplierUrl && <a href={product.supplierUrl} className="admin-row-action" target="_blank" rel="noopener noreferrer">Užsakyti ↗</a>}
               {savedProducts && <button type="button" disabled={isUpdating} onClick={() => product.hidden ? setProductStatus({ slug: product.slug, action: "restore" }) : removeProduct(product.slug, product.name)} className="admin-row-action text-[#bd6659] disabled:opacity-50">{product.hidden ? "Atkurti" : "Pašalinti"}</button>}
             </div>
           </article>

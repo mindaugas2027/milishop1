@@ -16,6 +16,14 @@ const landingSchema = z.object({
   oldPrice: z.string().max(40).describe("Optional old display price"),
   saving: z.string().max(80).describe("Optional savings label"),
   heroImage: z.string().url().describe("Primary product image URL"),
+  supplierUrl: z.string().trim().max(2048).refine((value) => {
+    if (!value) return true;
+    try {
+      return new URL(value).protocol === "https:";
+    } catch {
+      return false;
+    }
+  }, "Supplier URL must use HTTPS.").describe("Private HTTPS link where the administrator orders this product"),
   gallery: z.array(z.string().url()).max(12).describe("Product gallery image URLs"),
   features: z.array(z.string().max(160)).max(20).describe("Feature highlights"),
   steps: z.array(z.string().max(240)).max(20).describe("Usage steps"),

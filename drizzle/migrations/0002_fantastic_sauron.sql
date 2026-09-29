@@ -1,0 +1,1 @@
+ALTER TABLE "product_landings" ADD COLUMN "supplier_url" text DEFAULT '' NOT NULL;
