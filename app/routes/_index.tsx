@@ -20,101 +20,11 @@ type StorefrontProduct = {
   image: string;
 };
 
-const products: StorefrontProduct[] = [
-  {
-    slug: "didelis-plepus-zaislas",
-    category: "namams",
-    name: "Didelis pūkus žaislas 180 cm – baltas",
-    description: "Minkštas ir jaukus žaislas namams.",
-    price: "131,82 €",
-    oldPrice: "€131,82",
-    tag: "-5%",
-    image:
-      "https://images.unsplash.com/photo-1517849845537-4d257902454a?auto=format&fit=crop&w=900&q=80",
-  },
-  {
-    slug: "obd2",
-    category: "automobiliui",
-    name: "OBD2 automobilio diagnostikos įrenginys",
-    description: "Greitai suprask, ką sako tavo automobilis.",
-    price: "39,90 €",
-    oldPrice: "49,90 €",
-    tag: "-20%",
-    image:
-      "https://cdn.builder.io/api/v1/image/assets%2Fd04450a0da6f48df807f14687fdbf7fe%2F1cf73157227448c7a9abcdea548b4cb3?format=webp&width=800&height=1200",
-  },
-  {
-    slug: "automobilio-laikiklis",
-    category: "automobiliui",
-    name: "Magnetinis automobilio telefono laikiklis",
-    description: "Stabilus laikiklis kiekvienai kelionei.",
-    price: "24,90 €",
-    oldPrice: "29,90 €",
-    tag: "-17%",
-    image:
-      "https://images.pexels.com/photos/16017150/pexels-photo-16017150.jpeg?auto=compress&cs=tinysrgb&w=1200",
-  },
-  {
-    slug: "namu-akcentas",
-    category: "namams",
-    name: "Keraminė stalo detalė „Forma“",
-    description: "Mažas akcentas jaukesniems namams.",
-    price: "32,00 €",
-    oldPrice: "",
-    tag: "Naujiena",
-    image:
-      "https://cdn.builder.io/api/v1/image/assets%2Fd04450a0da6f48df807f14687fdbf7fe%2F003c69477ff24c93a0de402ab9247d9f?format=webp&width=800&height=1200",
-  },
-  {
-    slug: "medinis-svyravimas",
-    category: "namams",
-    name: "Medinis vaikų sūpynės – su virve",
-    description: "Namuose laimingas ir aktyvus laikas.",
-    price: "€142,00",
-    oldPrice: "€162,00",
-    tag: "-22%",
-    image: "https://images.unsplash.com/photo-1517705008128-361805f42e86?auto=format&fit=crop&w=900&q=80",
-  },
-  {
-    slug: "garso-modulis",
-    category: "kasdienai",
-    name: "Garso elektronikos sistema „Tesla“",
-    description: "Garsas, stiprumas ir paprastas dizainas.",
-    price: "€68,00",
-    oldPrice: "€72,00",
-    tag: "-8%",
-    image: "https://images.unsplash.com/photo-1518444065439-e933c06ce9a9?auto=format&fit=crop&w=900&q=80",
-  },
-  {
-    slug: "daugiafunkcinis-kratytuvas",
-    category: "kasdienai",
-    name: "VAYOX insect killer – elektrinis",
-    description: "Efektyvus apsauga nuo vabzdžių.",
-    price: "€84,00",
-    oldPrice: "€104,00",
-    tag: "-21%",
-    image: "https://images.unsplash.com/photo-1555099962-4199c345e5dd?auto=format&fit=crop&w=900&q=80",
-  },
-  {
-    slug: "parfumas",
-    category: "kasdienai",
-    name: "Perceive Gift Set – perfumed",
-    description: "Gaivus ir subtilus kvapas kasdienai.",
-    price: "€80,00",
-    oldPrice: "€100,00",
-    tag: "-20%",
-    image: "https://images.unsplash.com/photo-1528740561666-dc2479d461a6?auto=format&fit=crop&w=900&q=80",
-  },
-];
-
 const categories = [
-  { key: "automobiliui", label: "Automobiliui", caption: "Išmaniau kiekvienai kelionei", image: products[1].image, href: "/?category=automobiliui#produktai" },
-  { key: "kasdienai", label: "Kasdienai", caption: "Maži daiktai, didelis patogumas", image: products[5].image, href: "/?category=kasdienai#produktai" },
-  { key: "namams", label: "Namams", caption: "Ramūs akcentai tavo erdvei", image: products[0].image, href: "/?category=namams#produktai" },
+  { key: "automobiliui", label: "Automobiliui", caption: "Išmaniau kiekvienai kelionei", href: "/?category=automobiliui#produktai" },
+  { key: "kasdienai", label: "Kasdienai", caption: "Maži daiktai, didelis patogumas", href: "/?category=kasdienai#produktai" },
+  { key: "namams", label: "Namams", caption: "Ramūs akcentai tavo erdvei", href: "/?category=namams#produktai" },
 ];
-
-const getProductImage = (slug: string) =>
-  products.find((product) => product.slug === slug)?.image ?? "";
 
 const heroSlides = [
   {
@@ -138,7 +48,7 @@ const heroSlides = [
     href: "#produktai",
   },
   {
-    src: getProductImage("automobilio-laikiklis"),
+    src: "https://images.pexels.com/photos/16017150/pexels-photo-16017150.jpeg?auto=compress&cs=tinysrgb&w=1200",
     alt: "Magnetinis automobilio telefono laikiklis",
     label: "Kelionei · Patogu",
     eyebrow: "Patogiau kiekvienoje kelionėje",
@@ -148,7 +58,7 @@ const heroSlides = [
     href: "/automobilio-laikiklis",
   },
   {
-    src: getProductImage("namu-akcentas"),
+    src: "https://images.pexels.com/photos/15028227/pexels-photo-15028227.jpeg?auto=compress&cs=tinysrgb&w=1600",
     alt: "Keraminė namų interjero detalė",
     label: "Namams · Forma",
     eyebrow: "Namams · Forma ir jaukumas",
@@ -175,50 +85,48 @@ export default function HomeRoute() {
   const [activeHeroSlide, setActiveHeroSlide] = useState(0);
   const [cartOpen, setCartOpen] = useState(false);
   const [cartItems, setCartItems] = useState<CartLine[]>([]);
-  const { data: savedProductLandings = [] } = useActionQuery("list-product-landings", {});
-  const builtInSlugs = new Set(products.map((product) => product.slug));
-  const savedProducts = new Map(savedProductLandings.map((landing) => [landing.slug, landing]));
-  const hiddenSlugs = new Set(savedProductLandings.filter((landing) => landing.status === "hidden").map((landing) => landing.slug));
-  const storefrontProducts: StorefrontProduct[] = [
-    ...products.filter((product) => !hiddenSlugs.has(product.slug)).map((product) => {
-      const landing = savedProducts.get(product.slug);
-      return landing
-        ? {
-            ...product,
-            name: landing.name || product.name,
-            category: isStoreCategory(landing.category) ? landing.category : product.category,
-            description: landing.description || product.description,
-            price: landing.price || product.price,
-            oldPrice: landing.oldPrice,
-            tag: calculateDiscount(landing.price || product.price, landing.oldPrice)?.percentLabel || product.tag,
-            image: landing.heroImage || product.image,
-          }
-        : product;
-    }),
-    ...savedProductLandings
-      .filter((landing) => landing.status !== "hidden" && !builtInSlugs.has(landing.slug))
-      .map((landing) => ({
-        slug: landing.slug,
-        category: isStoreCategory(landing.category) ? landing.category : "kasdienai",
-        name: landing.name,
-        description: landing.description,
-        price: landing.price,
-        oldPrice: landing.oldPrice,
-        tag: calculateDiscount(landing.price, landing.oldPrice)?.percentLabel || "Naujiena",
-        image: landing.heroImage,
-      })),
-  ];
+  const [pageCursor, setPageCursor] = useState<string>();
+  const [storefrontProducts, setStorefrontProducts] = useState<StorefrontProduct[]>([]);
   const year = new Date().getFullYear();
-  const visibleHeroSlides = heroSlides.filter((slide) => {
-    const slug = slide.href === "/obd" ? "obd2" : slide.href.startsWith("/") ? slide.href.slice(1) : "";
-    return !slug || !hiddenSlugs.has(slug);
-  });
   const activeCategory = storeCategories.find(({ value }) => value === searchParams.get("category"))?.value ?? "all";
-  const visibleProducts = activeCategory === "all"
-    ? storefrontProducts
-    : storefrontProducts.filter((product) => product.category === activeCategory);
-  const visibleCategories = categories.filter((category) => storefrontProducts.some((product) => product.category === category.key));
+  const { data: productPage, isPending: isProductsPending, isFetching: isProductsFetching, isError: isProductsError } = useActionQuery("list-product-landings", {
+    cursor: pageCursor,
+    category: activeCategory === "all" ? undefined : activeCategory,
+    limit: 12,
+  });
+  const visibleHeroSlides = heroSlides;
+  const visibleProducts = storefrontProducts;
+  const visibleCategories = categories.map((category) => ({
+    ...category,
+    image: storefrontProducts.find((product) => product.category === category.key)?.image ?? heroSlides[0].src,
+  }));
+  const nextPageCursor = productPage?.nextCursor ?? null;
   const cartCount = cartItems.reduce((total, item) => total + item.quantity, 0);
+
+  useEffect(() => {
+    setPageCursor(undefined);
+    setStorefrontProducts([]);
+  }, [activeCategory]);
+
+  useEffect(() => {
+    if (!productPage) return;
+    const pageProducts: StorefrontProduct[] = productPage.items.map((landing) => ({
+      slug: landing.slug,
+      category: isStoreCategory(landing.category) ? landing.category : "kasdienai",
+      name: landing.name,
+      description: landing.description,
+      price: landing.price,
+      oldPrice: landing.oldPrice,
+      tag: calculateDiscount(landing.price, landing.oldPrice)?.percentLabel || "Naujiena",
+      image: landing.heroImage,
+    }));
+    setStorefrontProducts((current) => {
+      if (!pageCursor) return pageProducts;
+      const merged = new Map(current.map((product) => [product.slug, product]));
+      for (const product of pageProducts) merged.set(product.slug, product);
+      return [...merged.values()];
+    });
+  }, [pageCursor, productPage]);
 
   useEffect(() => {
     setCartItems(readCart());
@@ -256,6 +164,11 @@ export default function HomeRoute() {
       const quantity = item.quantity + amount;
       return quantity > 0 ? [{ ...item, quantity }] : [];
     }));
+  };
+
+  const resetProductPages = () => {
+    setPageCursor(undefined);
+    setStorefrontProducts([]);
   };
 
   useEffect(() => {
@@ -378,6 +291,7 @@ export default function HomeRoute() {
               <Link
                 key={category.key}
                 to={category.href}
+                onClick={resetProductPages}
                 className={`levitara-category-card ${category.label !== "Automobiliui" ? "levitara-category-card-light" : ""}`}
               >
                 <img src={category.image} alt={category.label} loading="lazy" />
@@ -401,14 +315,14 @@ export default function HomeRoute() {
             <span className="levitara-heading-side">{visibleProducts.length.toString().padStart(2, "0")} produktai</span>
           </div>
           <nav className="levitara-category-filters" aria-label="Filtruoti produktus pagal kategoriją">
-            <Link to="/#produktai" aria-current={activeCategory === "all" ? "page" : undefined}>Visi</Link>
+            <Link to="/#produktai" onClick={resetProductPages} aria-current={activeCategory === "all" ? "page" : undefined}>Visi</Link>
             {storeCategories.map((category) => (
-              <Link key={category.value} to={`/?category=${category.value}#produktai`} aria-current={activeCategory === category.value ? "page" : undefined}>
+              <Link key={category.value} to={`/?category=${category.value}#produktai`} onClick={resetProductPages} aria-current={activeCategory === category.value ? "page" : undefined}>
                 {category.label}
               </Link>
             ))}
           </nav>
-          <div className="levitara-product-grid">
+          <div className="levitara-product-grid" aria-busy={isProductsFetching}>
             {visibleProducts.map((product) => (
               <article key={product.slug} className="levitara-product-card">
                 <div className="levitara-product-media">
@@ -437,7 +351,14 @@ export default function HomeRoute() {
               </article>
             ))}
           </div>
+          {isProductsPending && visibleProducts.length === 0 && <p role="status" className="levitara-empty-category">Įkeliami produktai…</p>}
+          {isProductsError && <p role="alert" className="levitara-empty-category">Produktų nepavyko įkelti. Pabandykite perkrauti puslapį.</p>}
           {visibleProducts.length === 0 && <p className="levitara-empty-category">Šioje kategorijoje produktų nėra.</p>}
+          {nextPageCursor && (
+            <button type="button" className="levitara-dark-button" onClick={() => setPageCursor(nextPageCursor)} disabled={isProductsFetching}>
+              {isProductsFetching ? "Įkeliama…" : "Rodyti daugiau"}
+            </button>
+          )}
         </section>
 
         <section className="levitara-section levitara-showcase-section">

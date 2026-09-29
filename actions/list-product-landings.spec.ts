@@ -11,6 +11,7 @@ vi.mock("../server/db.js", () => ({
       id: "id",
       slug: "slug",
       status: "status",
+      category: "category",
       brandName: "brandName",
       footerText: "footerText",
       name: "name",
@@ -46,10 +47,12 @@ describe("list-product-landings", () => {
     vi.clearAllMocks();
   });
 
-  it("returns parsed product landing rows in newest-first order", async () => {
+  it("returns an active product page with a next cursor", async () => {
     mockDb.select.mockReturnValue({
       from: vi.fn().mockReturnValue({
-        orderBy: vi.fn().mockResolvedValue([
+        where: vi.fn().mockReturnValue({
+          orderBy: vi.fn().mockReturnValue({
+            limit: vi.fn().mockResolvedValue([
           {
             slug: "obd2",
             name: "OBD2",
@@ -62,33 +65,37 @@ describe("list-product-landings", () => {
             status: "active",
           },
           {
-            slug: "hidden-product",
-            name: "Paslėptas",
-            description: "",
-            price: "1,00 €",
+            slug: "namu-akcentas",
+            name: "Keraminė detalė",
+            category: "namams",
+            description: "Namams",
+            price: "32,00 €",
             oldPrice: "",
             saving: "",
-            heroImage: "https://example.com/hidden.jpg",
-            status: "hidden",
+            heroImage: "https://example.com/2.jpg",
+            status: "active",
           },
-        ]),
+            ]),
+          }),
+        }),
       }),
     });
 
-    const result = await action.run({});
+    const result = await action.run({ limit: 1 });
 
-    expect(result).toHaveLength(2);
-    expect(result[0]).toMatchObject({
-      slug: "obd2",
-      name: "OBD2",
-      category: "automobiliui",
-      description: "OBD2 produktas",
-      price: "39,90 €",
-      oldPrice: "49,90 €",
-      saving: "Sutaupai 10 €",
-      heroImage: "https://example.com/1.jpg",
-      status: "active",
+    expect(result).toEqual({
+      items: [{
+        slug: "obd2",
+        name: "OBD2",
+        category: "automobiliui",
+        description: "OBD2 produktas",
+        price: "39,90 €",
+        oldPrice: "49,90 €",
+        saving: "Sutaupai 10 €",
+        heroImage: "https://example.com/1.jpg",
+        status: "active",
+      }],
+      nextCursor: "obd2",
     });
-    expect(result[1]).toMatchObject({ slug: "hidden-product", status: "hidden" });
   });
 });

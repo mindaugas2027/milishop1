@@ -3,7 +3,7 @@ import { uploadEditorImage } from "@agent-native/core/client/uploads";
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router";
 import { calculateDiscount } from "@/lib/cart";
-import { builtInProducts, isStoreCategory, storeCategories, type StoreCategory } from "@/lib/store-products";
+import { isStoreCategory, storeCategories, type StoreCategory } from "@/lib/store-products";
 
 type ProductDraft = {
   slug: string;
@@ -33,24 +33,23 @@ type ProductDraft = {
 };
 
 function createDraft(slug: string): ProductDraft {
-  const product = builtInProducts.find((item) => item.slug === slug);
-  const name = product?.name ?? "";
-  const description = product?.description ?? "";
+  const name = "";
+  const description = "";
   return {
     slug,
     brandName: "Milishop",
     footerText: "Apgalvoti daiktai kasdienai.",
     name,
-    category: product?.category ?? "kasdienai",
-    eyebrow: product ? "Milishop kolekcija" : "",
+    category: "kasdienai",
+    eyebrow: "",
     description,
     longDescription: description,
-    price: product?.price ?? "",
-    oldPrice: product?.oldPrice ?? "",
-    saving: product?.saving ?? "",
-    heroImage: product?.image ?? "",
+    price: "",
+    oldPrice: "",
+    saving: "",
+    heroImage: "",
     supplierUrl: "",
-    gallery: product ? [product.image] : [],
+    gallery: [],
     features: [],
     steps: [],
     specs: [],

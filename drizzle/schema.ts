@@ -1,4 +1,4 @@
-import { now, table, text } from "@agent-native/core/db/schema";
+import { index, now, table, text, uniqueIndex } from "@agent-native/core/db/schema";
 
 export const productLandings = table("product_landings", {
   id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
@@ -29,4 +29,7 @@ export const productLandings = table("product_landings", {
   finalCtaText: text("final_cta_text").notNull().default("Pirkti dabar"),
   createdAt: text("created_at").notNull().default(now()),
   updatedAt: text("updated_at").notNull().default(now()),
-});
+}, (product) => [
+  uniqueIndex("product_landings_slug_uidx").on(product.slug),
+  index("product_landings_status_slug_idx").on(product.status, product.slug),
+]);

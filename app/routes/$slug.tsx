@@ -8,152 +8,6 @@ import { StoreCartDrawer } from "@/components/StoreCartDrawer";
 import { StoreFooter, StorePaymentStrip } from "@/components/StorefrontChrome";
 import { addCartItem, calculateDiscount, readCart, type CartLine, writeCart } from "@/lib/cart";
 
-const catalog = {
-  obd2: {
-    name: "OBD2 automobilio diagnostikos įrenginys",
-    eyebrow: "Milishop #01 · Automobiliui",
-    description:
-      "Daugiau aiškumo prieš kelionę, servisą ar tiesiog kasdienį važiavimą.",
-    longDescription:
-      "Kompaktiškas OBD2 įrenginys padeda suprasti, kas vyksta tavo automobilyje. Prijunk, atsidaryk programėlę ir matyk svarbiausią informaciją vienoje vietoje — be sudėtingų meniu ar spėlionių. Tai patogus pirmas žingsnis, kai nori geriau pažinti savo automobilį.",
-    price: "39,90 €",
-    oldPrice: "49,90 €",
-    saving: "Sutaupai 10 €",
-    image:
-      "https://cdn.builder.io/api/v1/image/assets%2Fd04450a0da6f48df807f14687fdbf7fe%2F1cf73157227448c7a9abcdea548b4cb3?format=webp&width=800&height=1200",
-    images: [
-      "https://cdn.builder.io/api/v1/image/assets%2Fd04450a0da6f48df807f14687fdbf7fe%2F1cf73157227448c7a9abcdea548b4cb3?format=webp&width=800&height=1200",
-      "https://cdn.builder.io/api/v1/image/assets%2Fd04450a0da6f48df807f14687fdbf7fe%2F539cd33740b54e819abe0b450e6b2e03?format=webp&width=800&height=1200",
-      "https://cdn.builder.io/api/v1/image/assets%2Fd04450a0da6f48df807f14687fdbf7fe%2F88e523bfe09b4316949e448a2f14c72b?format=webp&width=800&height=1200",
-      "https://cdn.builder.io/api/v1/image/assets%2Fd04450a0da6f48df807f14687fdbf7fe%2F74a6c2b42d5e4c23b5bbe39577b18ed1?format=webp&width=800&height=1200",
-      "https://cdn.builder.io/api/v1/image/assets%2Fd04450a0da6f48df807f14687fdbf7fe%2F23e189594a364d70b3cf875d33aa04f9?format=webp&width=800&height=1200",
-      "https://cdn.builder.io/api/v1/image/assets%2Fd04450a0da6f48df807f14687fdbf7fe%2F4f167c94667d4251a5b5a12948ff41f6?format=webp&width=800&height=1200",
-    ],
-    features: [
-      "Aiškesnė automobilio būklė",
-      "Paprastas prijungimas",
-      "Kompaktiškas dydis",
-    ],
-    steps: [
-      "Prijunk įrenginį prie OBD2 jungties",
-      "Atidaryk suderinamą programėlę",
-      "Peržiūrėk informaciją ir klaidų kodus",
-    ],
-    specs: [
-      ["Jungtis", "OBD2 / 16 pin"],
-      ["Suderinamumas", "12 V automobiliai"],
-      ["Naudojimas", "Asmeniniam naudojimui"],
-      ["Komplektacija", "Įrenginys, instrukcija"],
-    ],
-    faq: [
-      [
-        "Ar tiks mano automobiliui?",
-        "Įrenginys skirtas daugumai automobilių su standartine OBD2 jungtimi. Prieš perkant rekomenduojame patikrinti savo automobilio modelio suderinamumą.",
-      ],
-      [
-        "Ar programėlė pridedama?",
-        "Įrenginys veikia su populiariomis suderinamomis diagnostikos programėlėmis. Trumpa prijungimo instrukcija yra komplekte.",
-      ],
-      [
-        "Per kiek laiko gausiu prekę?",
-        "Užsakymus Lietuvoje išsiunčiame per 1–2 darbo dienas.",
-      ],
-    ],
-  },
-  "automobilio-laikiklis": {
-    name: "Magnetinis automobilio telefono laikiklis",
-    eyebrow: "Milishop #02 · Kelionei",
-    description: "Stabilus, minimalus ir pasiruošęs kiekvienai kelionei.",
-    longDescription:
-      "Laikiklis, kuris netrukdo. Tvirtas magnetas, patogus kampas ir minimalus dizainas padeda telefoną turėti ten, kur jo reikia — prieš akis, bet ne kelyje. Jis lengvai įsilieja į automobilio saloną ir neužima daugiau vietos nei būtina.",
-    price: "24,90 €",
-    oldPrice: "29,90 €",
-    saving: "Sutaupai 5 €",
-    image:
-      "https://images.pexels.com/photos/12953565/pexels-photo-12953565.jpeg?auto=compress&cs=tinysrgb&w=1600",
-    images: [
-      "https://images.pexels.com/photos/12953565/pexels-photo-12953565.jpeg?auto=compress&cs=tinysrgb&w=1600",
-      "https://images.pexels.com/photos/86993/pexels-photo-86993.jpeg?auto=compress&cs=tinysrgb&w=1200",
-    ],
-    features: [
-      "Stiprus magnetinis laikymas",
-      "Pasukamas žiūrėjimo kampas",
-      "Montuojamas be įrankių",
-    ],
-    steps: [
-      "Nuvalyk pasirinkto paviršiaus vietą",
-      "Pritvirtink laikiklio pagrindą",
-      "Uždėk magnetinį žiedą ir telefoną",
-    ],
-    specs: [
-      ["Tvirtinimas", "Magnetinis"],
-      ["Korpusas", "Aliuminis ir ABS"],
-      ["Reguliavimas", "360° kampas"],
-      ["Komplektacija", "Laikiklis, žiedas, lipni bazė"],
-    ],
-    faq: [
-      [
-        "Ar laikiklis tiks storam telefono dėklui?",
-        "Dažniausiai taip, jei magnetinis žiedas pritvirtintas prie dėklo išorės. Labai stori ar metaliniai dėklai gali sumažinti laikymo jėgą.",
-      ],
-      [
-        "Ar galima keisti kampą?",
-        "Taip, laikiklio galvutė pasisuka 360°, todėl patogų kampą rasi tiek navigacijai, tiek skambučiams.",
-      ],
-      [
-        "Ar galima nuimti nepaliekant žymių?",
-        "Pagrindą nuimk lėtai, šildydamas lipnią dalį. Naudojant pagal instrukciją, paviršius lieka švarus.",
-      ],
-    ],
-  },
-  "namu-akcentas": {
-    name: "Keraminė stalo detalė „Forma“",
-    eyebrow: "Milishop #03 · Namams",
-    description: "Mažas akcentas, kuris suteikia erdvei daugiau jaukumo.",
-    longDescription:
-      "Rankų darbo įkvėpta keraminė detalė su natūralia tekstūra ir tyliu charakteriu. Tinka vienai, poroje ar kaip maža dovana žmogui, kuris vertina daiktų paprastumą. Kiekvienas paviršius turi subtilių skirtumų, todėl kiekviena detalė yra šiek tiek sava.",
-    price: "32,00 €",
-    oldPrice: "",
-    saving: "",
-    image:
-      "https://images.pexels.com/photos/15028227/pexels-photo-15028227.jpeg?auto=compress&cs=tinysrgb&w=1600",
-    images: [
-      "https://images.pexels.com/photos/15028227/pexels-photo-15028227.jpeg?auto=compress&cs=tinysrgb&w=1600",
-      "https://images.pexels.com/photos/86993/pexels-photo-86993.jpeg?auto=compress&cs=tinysrgb&w=1200",
-    ],
-    features: [
-      "Natūrali keramikos tekstūra",
-      "Tinka įvairiam interjerui",
-      "Gera dovanos idėja",
-    ],
-    steps: [
-      "Išsirink vietą, kur norisi mažo akcento",
-      "Sukomponuok su mėgstamais daiktais",
-      "Mėgaukis tyliu kasdieniu grožiu",
-    ],
-    specs: [
-      ["Medžiaga", "Keramika"],
-      ["Priežiūra", "Valyti sausa šluoste"],
-      ["Spalva", "Natūrali smėlio"],
-      ["Komplektacija", "1 keraminė detalė"],
-    ],
-    faq: [
-      [
-        "Ar kiekviena detalė vienoda?",
-        "Ne visai. Natūrali tekstūra ir rankų darbo įkvėptas procesas reiškia, kad kiekvienas paviršius gali turėti mažų, gražių skirtumų.",
-      ],
-      [
-        "Kaip ją prižiūrėti?",
-        "Valykite minkšta sausa arba vos drėgna šluoste. Nenaudokite abrazyvių valiklių.",
-      ],
-      [
-        "Ar tinka dovanai?",
-        "Taip. Detalė siunčiama saugiai supakuota ir tinka kaip subtili dovana įkurtuvių ar gimtadienio proga.",
-      ],
-    ],
-  },
-} as const;
-
 const deliveryPartners = [
   { name: "DPD", brand: "dpd" },
   { name: "Omniva", brand: "omniva" },
@@ -169,24 +23,14 @@ const paymentBrands = [
   { name: "VISA", brand: "visa" },
 ] as const;
 
-type Product = (typeof catalog)[keyof typeof catalog];
-
-export function meta({ params }: { params: { slug?: string } }) {
-  const slug = params.slug === "obd" ? "obd2" : params.slug;
-  const product = slug ? catalog[slug as keyof typeof catalog] : undefined;
+export function meta() {
   return [
-    { title: product ? `${product.name} — Milishop` : "Produktas — Milishop" },
+    { title: "Produktas — Milishop" },
   ];
 }
 
-function ProductPage({
-  baseProduct,
-  slug,
-}: {
-  baseProduct?: Product;
-  slug: string;
-}) {
-  const { data: savedLanding, isPending: isLandingPending } = useActionQuery("get-product-landing", {
+function ProductPage({ slug }: { slug: string }) {
+  const { data: savedLanding, isPending: isLandingPending, isError: isLandingError } = useActionQuery("get-product-landing", {
     slug,
   });
   const [activeImage, setActiveImage] = useState(0);
@@ -203,8 +47,11 @@ function ProductPage({
   useEffect(() => {
     writeCart(cartItems);
   }, [cartItems]);
-  if (!baseProduct && !savedLanding && isLandingPending) {
+  if (isLandingPending) {
     return <div className="min-h-[60vh] animate-pulse bg-[#f7f8f6]" aria-label="Įkeliamas produktas" />;
+  }
+  if (isLandingError) {
+    return <div role="alert" className="flex min-h-[60vh] items-center justify-center px-6 text-sm text-[#9a3939]">Nepavyko įkelti produkto. Bandykite dar kartą.</div>;
   }
   if (savedLanding?.status === "hidden") {
     return (
@@ -216,7 +63,7 @@ function ProductPage({
       </div>
     );
   }
-  if (!baseProduct && !savedLanding) {
+  if (!savedLanding) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background px-6 text-center">
         <div>
@@ -227,62 +74,12 @@ function ProductPage({
       </div>
     );
   }
-  const fallbackProduct = baseProduct ?? catalog.obd2;
   const product = {
-    ...fallbackProduct,
-    brandName: "Milishop",
-    footerText: "Daiktai, kuriuos norisi turėti.",
-    deliveryInfo: "Pristatymas per 1–2 d. d.",
-    returnsInfo: "14 dienų grąžinimas",
-    ctaText: "Pirkti dabar",
-    finalCtaEyebrow: "Pasiruošę išbandyti?",
-    finalCtaTitle: fallbackProduct.name,
-    finalCtaText: "Pirkti dabar",
-    ...(savedLanding
-      ? {
-          brandName: savedLanding.brandName,
-          footerText: savedLanding.footerText,
-          name: savedLanding.name,
-          eyebrow: savedLanding.eyebrow,
-          description: savedLanding.description,
-          longDescription: savedLanding.longDescription,
-          price: savedLanding.price,
-          oldPrice: savedLanding.oldPrice,
-          saving: savedLanding.saving,
-          image: savedLanding.heroImage || baseProduct?.image || "",
-          images: savedLanding.heroImage
-            ? [
-                savedLanding.heroImage,
-                ...savedLanding.gallery.filter(
-                  (image) => image !== savedLanding.heroImage,
-                ),
-              ]
-            : baseProduct?.images ?? [],
-          features: savedLanding.features.length
-            ? savedLanding.features
-            : baseProduct?.features ?? [],
-          steps: savedLanding.steps.length
-            ? savedLanding.steps
-            : baseProduct?.steps ?? [],
-          specs: savedLanding.specs.length
-            ? savedLanding.specs.map(
-                ({ label, value }) => [label, value] as [string, string],
-              )
-            : baseProduct?.specs ?? [],
-          faq: savedLanding.faq.length
-            ? savedLanding.faq.map(
-                ({ question, answer }) =>
-                  [question, answer] as [string, string],
-              )
-            : baseProduct?.faq ?? [],
-          deliveryInfo: savedLanding.deliveryInfo,
-          returnsInfo: savedLanding.returnsInfo,
-          ctaText: savedLanding.ctaText,
-          finalCtaEyebrow: savedLanding.finalCtaEyebrow,
-          finalCtaTitle: savedLanding.finalCtaTitle,
-          finalCtaText: savedLanding.finalCtaText,
-        }
-      : {}),
+    ...savedLanding,
+    image: savedLanding.heroImage,
+    images: [savedLanding.heroImage, ...savedLanding.gallery.filter((image) => image !== savedLanding.heroImage)],
+    specs: savedLanding.specs.map(({ label, value }) => [label, value] as [string, string]),
+    faq: savedLanding.faq.map(({ question, answer }) => [question, answer] as [string, string]),
   };
   const discount = calculateDiscount(product.price, product.oldPrice);
   const activeImageSrc = product.images[activeImage] ?? product.image;
@@ -556,9 +353,6 @@ function ProductPage({
 export default function ProductRoute() {
   const { slug } = useParams();
   const productSlug = slug === "obd" ? "obd2" : slug;
-  const product = productSlug
-    ? catalog[productSlug as keyof typeof catalog]
-    : undefined;
   useLayoutEffect(() => {
     document
       .querySelector<HTMLElement>(".agent-native-app-main")
@@ -583,5 +377,5 @@ export default function ProductRoute() {
         </div>
       </div>
     );
-  return <ProductPage baseProduct={product} slug={productSlug ?? slug} />;
+  return <ProductPage slug={productSlug ?? slug} />;
 }
