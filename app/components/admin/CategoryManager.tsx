@@ -1,9 +1,8 @@
-import { actionErrorMessage, useActionMutation, useActionQuery } from "@agent-native/core/client/hooks";
-import { uploadEditorImage } from "@agent-native/core/client/uploads";
+import { useActionMutation, useActionQuery } from "@agent-native/core/client/hooks";
 import { useEffect, useState } from "react";
 
-import { prepareImageUpload } from "@/lib/prepare-image-upload";
 import { slugify, type StoreCategoryRecord } from "@/lib/store-products";
+import { uploadProductImage } from "@/lib/upload-product-image";
 
 type CategoryDraft = {
   id?: string;
@@ -74,11 +73,11 @@ export default function CategoryManager() {
     setFormError("");
     try {
       if (!file.type.startsWith("image/")) throw new Error("Pasirinkite nuotraukos failą.");
-      if (file.size > 10 * 1024 * 1024) throw new Error("Nuotrauka turi būti mažesnė nei 10 MB.");
-      const uploaded = await uploadEditorImage(await prepareImageUpload(file));
+      if (file.size > 4 * 1024 * 1024) throw new Error("Nuotrauka turi būti ne didesnė nei 4 MB.");
+      const uploaded = await uploadProductImage(file);
       update("image", uploaded.src);
     } catch (error) {
-      setFormError(actionErrorMessage(error) ?? "Nuotraukos įkelti nepavyko. Patikrinkite Supabase Storage serverio nustatymus ir bandykite dar kartą.");
+      setFormError(error instanceof Error ? error.message : "Nuotraukos įkelti nepavyko. Patikrinkite Supabase Storage nustatymus.");
     } finally {
       setIsUploading(false);
     }
