@@ -2,7 +2,7 @@ import { fail } from "@agent-native/core/action";
 import type { FileUploadProvider } from "@agent-native/core/file-upload";
 
 const bucketName = "product-images";
-const maxImageSize = 10 * 1024 * 1024;
+const maxImageSize = 4 * 1024 * 1024;
 const allowedImageTypes = ["image/avif", "image/gif", "image/heic", "image/heif", "image/jpeg", "image/png", "image/webp"];
 
 function getSupabaseConfig() {
@@ -75,11 +75,10 @@ async function ensurePublicBucket(url: string, serviceRoleKey: string) {
     "Content-Type": "application/json",
   };
   const bucketConfig = {
-    id: bucketName,
     name: bucketName,
     public: true,
-    file_size_limit: maxImageSize,
-    allowed_mime_types: allowedImageTypes,
+    fileSizeLimit: maxImageSize,
+    allowedMimeTypes: allowedImageTypes,
   };
   const createResponse = await storageFetch(`${url}/storage/v1/bucket`, {
     method: "POST",
@@ -97,8 +96,8 @@ async function ensurePublicBucket(url: string, serviceRoleKey: string) {
     headers,
     body: JSON.stringify({
       public: true,
-      file_size_limit: maxImageSize,
-      allowed_mime_types: allowedImageTypes,
+      fileSizeLimit: maxImageSize,
+      allowedMimeTypes: allowedImageTypes,
     }),
   });
   if (!updateResponse.ok) {

@@ -29,7 +29,12 @@ describe("Supabase product image upload provider", () => {
 
     expect(fetchMock).toHaveBeenCalledTimes(2);
     expect(fetchMock.mock.calls[0]?.[0]).toBe("https://milishop-example.supabase.co/storage/v1/bucket");
-    expect(JSON.parse(String(fetchMock.mock.calls[0]?.[1]?.body))).toMatchObject({ id: "product-images", public: true });
+    expect(JSON.parse(String(fetchMock.mock.calls[0]?.[1]?.body))).toEqual({
+      name: "product-images",
+      public: true,
+      fileSizeLimit: 4 * 1024 * 1024,
+      allowedMimeTypes: expect.arrayContaining(["image/png", "image/jpeg"]),
+    });
     expect(fetchMock.mock.calls[1]?.[0]).toMatch(/^https:\/\/milishop-example\.supabase\.co\/storage\/v1\/object\/product-images\//);
     expect(result).toMatchObject({
       provider: "milishop-supabase-product-images",
@@ -51,6 +56,11 @@ describe("Supabase product image upload provider", () => {
 
     expect(fetchMock.mock.calls[1]?.[0]).toBe("https://milishop-example.supabase.co/storage/v1/bucket/product-images");
     expect(fetchMock.mock.calls[1]?.[1]?.method).toBe("PUT");
+    expect(JSON.parse(String(fetchMock.mock.calls[1]?.[1]?.body))).toMatchObject({
+      public: true,
+      fileSizeLimit: 4 * 1024 * 1024,
+      allowedMimeTypes: expect.arrayContaining(["image/png"]),
+    });
   });
 
   it("surfaces storage permission failures as actionable action errors", async () => {
