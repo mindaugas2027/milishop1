@@ -9,7 +9,11 @@ function getSupabaseConfig() {
   const url = process.env.SUPABASE_URL?.trim().replace(/\/+$/, ""); // guard:allow-env-credential — Supabase project URL is deploy-scoped storage configuration.
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY?.trim(); // guard:allow-env-credential — service-role key is a deploy-scoped server secret for Supabase Storage.
   if (!url || !serviceRoleKey) {
-    fail("Nuotraukų saugykla nesukonfigūruota. Vercel aplinkoje nustatykite SUPABASE_URL ir SUPABASE_SERVICE_ROLE_KEY.", {
+    const missing = [
+      !url ? "SUPABASE_URL" : null,
+      !serviceRoleKey ? "SUPABASE_SERVICE_ROLE_KEY" : null,
+    ].filter((key): key is string => key !== null);
+    fail(`Nuotraukų saugykla nesukonfigūruota. Vercel serverio aplinkoje trūksta: ${missing.join(", ")}.`, {
       errorCode: "upload_storage_not_configured",
       statusCode: 503,
     });

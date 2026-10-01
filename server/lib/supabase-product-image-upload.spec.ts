@@ -67,13 +67,23 @@ describe("Supabase product image upload provider", () => {
     });
   });
 
-  it("fails with setup guidance when Supabase credentials are missing", async () => {
+  it("identifies a missing project URL without naming configured secrets", async () => {
     vi.stubEnv("SUPABASE_URL", "");
 
     await expect(supabaseProductImageUploadProvider.upload({
       data: new Uint8Array([1]),
       mimeType: "image/png",
-    })).rejects.toThrow("Vercel aplinkoje nustatykite SUPABASE_URL ir SUPABASE_SERVICE_ROLE_KEY");
+    })).rejects.toThrow("Vercel serverio aplinkoje trūksta: SUPABASE_URL.");
+    expect(fetch).not.toHaveBeenCalled();
+  });
+
+  it("identifies a missing service role key", async () => {
+    vi.stubEnv("SUPABASE_SERVICE_ROLE_KEY", "");
+
+    await expect(supabaseProductImageUploadProvider.upload({
+      data: new Uint8Array([1]),
+      mimeType: "image/png",
+    })).rejects.toThrow("Vercel serverio aplinkoje trūksta: SUPABASE_SERVICE_ROLE_KEY.");
     expect(fetch).not.toHaveBeenCalled();
   });
 });
