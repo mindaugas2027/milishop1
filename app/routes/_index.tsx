@@ -1,8 +1,9 @@
-import { Link, useSearchParams } from "react-router";
+import { Link, useLoaderData, useSearchParams } from "react-router";
 import { useEffect, useState } from "react";
 import { useActionQuery } from "@agent-native/core/client/hooks";
 import { IconShoppingCartPlus } from "@tabler/icons-react";
 
+import listProductLandings from "../../actions/list-product-landings.js";
 import { APP_TITLE } from "@/lib/app-config";
 import { addCartItem, readCart, type CartLine, writeCart, calculateDiscount } from "@/lib/cart";
 import { StoreCartDrawer } from "@/components/StoreCartDrawer";
@@ -19,6 +20,52 @@ type StorefrontProduct = {
   tag: string;
   image: string;
 };
+
+type ProductLandingPage = Awaited<ReturnType<typeof listProductLandings.run>>;
+
+type HomeLoaderData = {
+  category?: string;
+  productPage: ProductLandingPage | null;
+  loadedAt: number;
+};
+
+export async function loader({ request }: { request: Request }): Promise<HomeLoaderData> {
+  const category = new URL(request.url).searchParams.get("category") || undefined;
+  try {
+    const productPage = await listProductLandings.run({ category, limit: 12 });
+    return { category, productPage, loadedAt: Date.now() };
+  } catch {
+    return { category, productPage: null, loadedAt: 0 };
+  }
+}
+
+export function shouldRevalidate({
+  currentUrl,
+  nextUrl,
+  defaultShouldRevalidate,
+}: {
+  currentUrl: URL;
+  nextUrl: URL;
+  defaultShouldRevalidate: boolean;
+}) {
+  if (currentUrl.pathname === "/" && nextUrl.pathname === "/" && currentUrl.search !== nextUrl.search) {
+    return false;
+  }
+  return defaultShouldRevalidate;
+}
+
+function mapStorefrontProducts(items: ProductLandingPage["items"]): StorefrontProduct[] {
+  return items.map((landing) => ({
+    slug: landing.slug,
+    category: landing.category,
+    name: landing.name,
+    description: landing.description,
+    price: landing.price,
+    oldPrice: landing.oldPrice,
+    tag: calculateDiscount(landing.price, landing.oldPrice)?.percentLabel || "Naujiena",
+    image: landing.heroImage,
+  }));
+}
 
 const heroSlides = [
   {
@@ -74,13 +121,16 @@ export function meta() {
 }
 
 export default function HomeRoute() {
+  const initialPage = useLoaderData<typeof loader>();
   const [searchParams] = useSearchParams();
   const [menuOpen, setMenuOpen] = useState(false);
   const [activeHeroSlide, setActiveHeroSlide] = useState(0);
   const [cartOpen, setCartOpen] = useState(false);
   const [cartItems, setCartItems] = useState<CartLine[]>([]);
   const [pageCursor, setPageCursor] = useState<string>();
-  const [storefrontProducts, setStorefrontProducts] = useState<StorefrontProduct[]>([]);
+  const [storefrontProducts, setStorefrontProducts] = useState<StorefrontProduct[]>(() =>
+    initialPage.productPage ? mapStorefrontProducts(initialPage.productPage.items) : [],
+  );
   const year = new Date().getFullYear();
   const requestedCategory = searchParams.get("category");
   const activeCategory = requestedCategory || "all";
@@ -88,37 +138,34 @@ export default function HomeRoute() {
     cursor: pageCursor,
     category: activeCategory === "all" ? undefined : activeCategory,
     limit: 12,
+  }, {
+    staleTime: 10 * 60_000,
+    initialData: pageCursor === undefined && initialPage.category === (activeCategory === "all" ? undefined : activeCategory)
+      ? initialPage.productPage ?? undefined
+      : undefined,
+    initialDataUpdatedAt: initialPage.loadedAt || undefined,
   });
+  const currentPageProducts = productPage ? mapStorefrontProducts(productPage.items) : [];
+  const visibleProducts = pageCursor || !productPage ? storefrontProducts : currentPageProducts;
   const storefrontCategories = (productPage?.categories ?? []) as StoreCategoryRecord[];
   const visibleHeroSlides = heroSlides;
-  const visibleProducts = storefrontProducts;
   const visibleCategories = storefrontCategories.map((category) => ({
     ...category,
     key: category.slug,
     label: category.name,
     href: `/?category=${category.slug}#produktai`,
-    image: category.image || storefrontProducts.find((product) => product.category === category.slug)?.image || heroSlides[0].src,
+    image: category.image || currentPageProducts.find((product) => product.category === category.slug)?.image || storefrontProducts.find((product) => product.category === category.slug)?.image || heroSlides[0].src,
   }));
   const nextPageCursor = productPage?.nextCursor ?? null;
   const cartCount = cartItems.reduce((total, item) => total + item.quantity, 0);
 
   useEffect(() => {
     setPageCursor(undefined);
-    setStorefrontProducts([]);
   }, [activeCategory]);
 
   useEffect(() => {
     if (!productPage) return;
-    const pageProducts: StorefrontProduct[] = productPage.items.map((landing) => ({
-      slug: landing.slug,
-      category: landing.category,
-      name: landing.name,
-      description: landing.description,
-      price: landing.price,
-      oldPrice: landing.oldPrice,
-      tag: calculateDiscount(landing.price, landing.oldPrice)?.percentLabel || "Naujiena",
-      image: landing.heroImage,
-    }));
+    const pageProducts = mapStorefrontProducts(productPage.items);
     setStorefrontProducts((current) => {
       if (!pageCursor) return pageProducts;
       const merged = new Map(current.map((product) => [product.slug, product]));
@@ -167,7 +214,6 @@ export default function HomeRoute() {
 
   const resetProductPages = () => {
     setPageCursor(undefined);
-    setStorefrontProducts([]);
   };
 
   useEffect(() => {
