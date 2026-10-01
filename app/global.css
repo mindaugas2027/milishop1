@@ -553,7 +553,6 @@
 .levitara-category-card { position: relative; display: block; aspect-ratio: 1 / .86; overflow: hidden; color: #fff; text-decoration: none; }
 .levitara-category-card img { width: 100%; height: 100%; object-fit: cover; transition: transform 700ms cubic-bezier(.165,.84,.44,1); }
 .levitara-category-card:hover img { transform: scale(1.045); }
-.levitara-category-card-light img { object-fit: contain; padding: 28px; background: #f4f1eb; filter: brightness(1.08) saturate(.86); }
 .levitara-category-card-light:hover img { transform: scale(1.015); }
 .levitara-category-shade { position: absolute; inset: 0; background: linear-gradient(0deg, rgb(0 0 0 / .68), rgb(0 0 0 / .07) 75%); }
 .levitara-category-card-light .levitara-category-shade { background: linear-gradient(0deg, rgb(0 0 0 / .36), rgb(0 0 0 / .01) 75%); }
@@ -1081,7 +1080,6 @@
   .levitara-category-grid, .levitara-product-grid { gap: 10px; grid-template-columns: repeat(2, 1fr); }
   .levitara-feature-grid { grid-template-columns: minmax(0, 1fr); }
   .levitara-feature-card-hero { grid-column: auto; }
-  .levitara-category-card:first-child { grid-column: span 2; aspect-ratio: 1.65 / 1; }
   .levitara-category-content { right: 16px; bottom: 16px; left: 16px; }
   .levitara-category-content strong { font-size: 21px; }
   .levitara-category-content small { font-size: 10px; }
