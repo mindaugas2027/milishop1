@@ -127,9 +127,7 @@ export default function AdminProductEditorRoute() {
       }
     } catch (error) {
       const message = error instanceof Error ? error.message : "Upload failed";
-      setUploadError(message.includes("not configured") || message.includes("Connect or reconnect")
-        ? "Nuotraukų saugykla neprijungta. Prijunkite S3/R2 failų saugyklą ir bandykite dar kartą."
-        : message);
+      setUploadError(message);
     } finally {
       setIsUploading(false);
     }

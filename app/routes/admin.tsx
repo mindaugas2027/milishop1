@@ -2,7 +2,6 @@ import ProductManager from "@/components/admin/ProductManager";
 import CategoryManager from "@/components/admin/CategoryManager";
 import { Link, Outlet, useLocation } from "react-router";
 import { useActionMutation, useActionQuery } from "@agent-native/core/client/hooks";
-import { AgentSettingsContent } from "@agent-native/core/client/settings";
 import { useEffect, useState } from "react";
 
 export function getAdminTabConfig() {
@@ -39,10 +38,6 @@ function StoreSettingsPanel() {
           {error && <span role="alert" className="text-sm text-[#bd6659]">Išsaugoti nepavyko. Patikrinkite HTTPS nuorodas.</span>}
         </div>
       </form>
-      <div className="mt-7 border-t border-[#203b40]/8 pt-6">
-        <p className="mb-4 text-xs leading-5 text-[#203b40]/55">Supabase Storage sukurkite viešą `product-images` bucket’ą ir S3 Access Key. Endpoint formatas: `https://&lt;PROJECT_REF&gt;.supabase.co/storage/v1/s3`; regionas `us-east-1`; Public base URL: `https://&lt;PROJECT_REF&gt;.supabase.co/storage/v1/object/public/product-images`.</p>
-        <AgentSettingsContent sections={["hosting", "uploads"]} />
-      </div>
     </section>
   );
 }
