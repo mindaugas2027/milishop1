@@ -1,7 +1,8 @@
-import { useActionMutation, useActionQuery } from "@agent-native/core/client/hooks";
+import { actionErrorMessage, useActionMutation, useActionQuery } from "@agent-native/core/client/hooks";
 import { uploadEditorImage } from "@agent-native/core/client/uploads";
 import { useEffect, useState } from "react";
 
+import { prepareImageUpload } from "@/lib/prepare-image-upload";
 import { slugify, type StoreCategoryRecord } from "@/lib/store-products";
 
 type CategoryDraft = {
@@ -74,17 +75,17 @@ export default function CategoryManager() {
     try {
       if (!file.type.startsWith("image/")) throw new Error("Pasirinkite nuotraukos failą.");
       if (file.size > 10 * 1024 * 1024) throw new Error("Nuotrauka turi būti mažesnė nei 10 MB.");
-      const uploaded = await uploadEditorImage(file);
+      const uploaded = await uploadEditorImage(await prepareImageUpload(file));
       update("image", uploaded.src);
     } catch (error) {
-      setFormError(error instanceof Error ? error.message : "Nuotraukos įkelti nepavyko.");
+      setFormError(actionErrorMessage(error) ?? "Nuotraukos įkelti nepavyko. Patikrinkite Supabase Storage serverio nustatymus ir bandykite dar kartą.");
     } finally {
       setIsUploading(false);
     }
   };
 
   return (
-    <section className="mt-6 grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
+    <section className="mx-auto mt-6 grid w-full max-w-[1280px] items-start gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(360px,400px)]">
       <div className="admin-panel min-w-0">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
@@ -117,23 +118,23 @@ export default function CategoryManager() {
         {deleteError && <p role="alert" className="mt-4 text-sm text-[#bd6659]">Kategorijos ištrinti nepavyko. Pirmiausia perkelkite arba paslėpkite jai priskirtus produktus.</p>}
       </div>
 
-      <form className="admin-panel h-fit grid gap-4" onSubmit={save}>
+      <form className="admin-panel grid h-fit w-full min-w-0 gap-4" onSubmit={save}>
         <div className="flex items-center justify-between gap-3">
           <h2 className="admin-panel-title">{draft.id ? "Redaguoti kategoriją" : "Nauja kategorija"}</h2>
           {draft.id && <button type="button" className="text-xs font-semibold text-[#2f7f7b]" onClick={() => setDraft({ ...emptyDraft, sortOrder: ((categories?.length ?? 0) + 1) * 10 })}>Atšaukti</button>}
         </div>
-        <label className="grid gap-1.5 text-xs font-medium text-[#203b40]/70">Pavadinimas<input className="rounded-lg border border-[#203b40]/15 bg-white px-3 py-2.5 text-sm" value={draft.name} onChange={(event) => update("name", event.target.value)} required /></label>
-        <label className="grid gap-1.5 text-xs font-medium text-[#203b40]/70">Slug<input className="rounded-lg border border-[#203b40]/15 bg-white px-3 py-2.5 text-sm" value={draft.slug} onChange={(event) => update("slug", event.target.value)} placeholder="pvz. dovanos" required /></label>
-        <label className="grid gap-1.5 text-xs font-medium text-[#203b40]/70">Trumpas aprašymas<textarea className="rounded-lg border border-[#203b40]/15 bg-white px-3 py-2.5 text-sm" rows={3} value={draft.caption} onChange={(event) => update("caption", event.target.value)} /></label>
-        <label className="grid gap-1.5 text-xs font-medium text-[#203b40]/70">Nuotraukos URL<input className="rounded-lg border border-[#203b40]/15 bg-white px-3 py-2.5 text-sm" type="url" value={draft.image} onChange={(event) => update("image", event.target.value)} placeholder="https://..." /></label>
-        <label className="grid gap-1.5 text-xs font-medium text-[#203b40]/70">Arba įkelkite nuotrauką<input type="file" accept="image/*" disabled={isUploading} onChange={(event) => { void uploadImage(event.currentTarget.files); event.currentTarget.value = ""; }} className="rounded-lg border border-[#203b40]/15 bg-white px-3 py-2.5 text-sm" /></label>
+        <label className="grid min-w-0 gap-1.5 text-xs font-medium text-[#203b40]/70">Pavadinimas<input className="w-full min-w-0 rounded-lg border border-[#203b40]/15 bg-white px-3 py-2.5 text-sm" value={draft.name} onChange={(event) => update("name", event.target.value)} required /></label>
+        <label className="grid min-w-0 gap-1.5 text-xs font-medium text-[#203b40]/70">Slug<input className="w-full min-w-0 rounded-lg border border-[#203b40]/15 bg-white px-3 py-2.5 text-sm" value={draft.slug} onChange={(event) => update("slug", event.target.value)} placeholder="pvz. dovanos" required /></label>
+        <label className="grid min-w-0 gap-1.5 text-xs font-medium text-[#203b40]/70">Trumpas aprašymas<textarea className="w-full min-w-0 rounded-lg border border-[#203b40]/15 bg-white px-3 py-2.5 text-sm" rows={3} value={draft.caption} onChange={(event) => update("caption", event.target.value)} /></label>
+        <label className="grid min-w-0 gap-1.5 text-xs font-medium text-[#203b40]/70">Nuotraukos URL<input className="w-full min-w-0 rounded-lg border border-[#203b40]/15 bg-white px-3 py-2.5 text-sm" type="url" value={draft.image} onChange={(event) => update("image", event.target.value)} placeholder="https://..." /></label>
+        <label className="grid min-w-0 gap-1.5 text-xs font-medium text-[#203b40]/70">Arba įkelkite nuotrauką<input type="file" accept="image/*" disabled={isUploading} onChange={(event) => { void uploadImage(event.currentTarget.files); event.currentTarget.value = ""; }} className="w-full min-w-0 rounded-lg border border-[#203b40]/15 bg-white px-3 py-2.5 text-sm" /></label>
         {draft.image && <img src={draft.image} alt="Kategorijos peržiūra" className="aspect-[1.7] w-full rounded-lg object-cover" />}
-        <div className="grid grid-cols-2 gap-3">
-          <label className="grid gap-1.5 text-xs font-medium text-[#203b40]/70">Tvarka<input className="rounded-lg border border-[#203b40]/15 bg-white px-3 py-2.5 text-sm" type="number" min="0" value={draft.sortOrder} onChange={(event) => update("sortOrder", Number(event.target.value))} /></label>
-          <label className="flex items-end gap-2 pb-2 text-sm font-medium text-[#203b40]/70"><input type="checkbox" checked={draft.enabled} onChange={(event) => update("enabled", event.target.checked)} /> Rodyti parduotuvėje</label>
+        <div className="grid gap-3">
+          <label className="grid min-w-0 gap-1.5 text-xs font-medium text-[#203b40]/70">Tvarka<input className="w-full min-w-0 rounded-lg border border-[#203b40]/15 bg-white px-3 py-2.5 text-sm" type="number" min="0" value={draft.sortOrder} onChange={(event) => update("sortOrder", Number(event.target.value))} /></label>
+          <label className="flex min-h-11 w-full min-w-0 items-center gap-3 rounded-lg border border-[#203b40]/15 bg-white px-3 py-2.5 text-sm leading-5 text-[#203b40]/70"><input className="size-4 shrink-0 accent-[#2f7f7b]" type="checkbox" checked={draft.enabled} onChange={(event) => update("enabled", event.target.checked)} /><span className="min-w-0">Rodyti parduotuvėje</span></label>
         </div>
         {(formError || saveError) && <p role="alert" className="text-sm text-[#bd6659]">{formError || "Kategorijos išsaugoti nepavyko."}</p>}
-        <button type="submit" className="admin-primary-action disabled:opacity-60" disabled={isSaving || isUploading}>{isSaving ? "Saugoma…" : isUploading ? "Įkeliama…" : "Išsaugoti kategoriją"}</button>
+        <button type="submit" className="admin-primary-action w-full disabled:opacity-60" disabled={isSaving || isUploading}>{isSaving ? "Saugoma…" : isUploading ? "Įkeliama…" : "Išsaugoti kategoriją"}</button>
       </form>
     </section>
   );

@@ -53,13 +53,27 @@ describe("Supabase product image upload provider", () => {
     expect(fetchMock.mock.calls[1]?.[1]?.method).toBe("PUT");
   });
 
+  it("surfaces storage permission failures as actionable action errors", async () => {
+    vi.mocked(fetch).mockResolvedValueOnce(new Response(null, { status: 403 }));
+
+    await expect(supabaseProductImageUploadProvider.upload({
+      data: new Uint8Array([1]),
+      mimeType: "image/png",
+    })).rejects.toMatchObject({
+      actionContractError: true,
+      errorCode: "upload_storage_forbidden",
+      statusCode: 503,
+      message: expect.stringContaining("SUPABASE_SERVICE_ROLE_KEY"),
+    });
+  });
+
   it("fails with setup guidance when Supabase credentials are missing", async () => {
     vi.stubEnv("SUPABASE_URL", "");
 
     await expect(supabaseProductImageUploadProvider.upload({
       data: new Uint8Array([1]),
       mimeType: "image/png",
-    })).rejects.toThrow("SUPABASE_URL arba SUPABASE_SERVICE_ROLE_KEY");
+    })).rejects.toThrow("Vercel aplinkoje nustatykite SUPABASE_URL ir SUPABASE_SERVICE_ROLE_KEY");
     expect(fetch).not.toHaveBeenCalled();
   });
 });

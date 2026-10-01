@@ -1,3 +1,4 @@
+import { fail } from "@agent-native/core/action";
 import type { FileUploadProvider } from "@agent-native/core/file-upload";
 
 const bucketName = "product-images";
@@ -8,17 +9,26 @@ function getSupabaseConfig() {
   const url = process.env.SUPABASE_URL?.trim().replace(/\/+$/, ""); // guard:allow-env-credential — Supabase project URL is deploy-scoped storage configuration.
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY?.trim(); // guard:allow-env-credential — service-role key is a deploy-scoped server secret for Supabase Storage.
   if (!url || !serviceRoleKey) {
-    throw new Error("Nuotraukų saugykla nesukonfigūruota. Serverio aplinkoje trūksta SUPABASE_URL arba SUPABASE_SERVICE_ROLE_KEY.");
+    fail("Nuotraukų saugykla nesukonfigūruota. Vercel aplinkoje nustatykite SUPABASE_URL ir SUPABASE_SERVICE_ROLE_KEY.", {
+      errorCode: "upload_storage_not_configured",
+      statusCode: 503,
+    });
   }
 
   let parsedUrl: URL;
   try {
     parsedUrl = new URL(url);
   } catch {
-    throw new Error("Supabase nuotraukų saugyklos URL yra netinkamas.");
+    fail("Supabase nuotraukų saugyklos URL yra netinkamas.", {
+      errorCode: "upload_storage_invalid_url",
+      statusCode: 503,
+    });
   }
   if (parsedUrl.protocol !== "https:" && process.env.NODE_ENV === "production") {
-    throw new Error("Produkcijoje Supabase URL turi naudoti HTTPS.");
+    fail("Produkcijoje Supabase URL turi naudoti HTTPS.", {
+      errorCode: "upload_storage_invalid_url",
+      statusCode: 503,
+    });
   }
 
   return { url: parsedUrl.origin, serviceRoleKey };
@@ -29,6 +39,30 @@ function authHeaders(serviceRoleKey: string) {
     apikey: serviceRoleKey,
     Authorization: `Bearer ${serviceRoleKey}`,
   };
+}
+
+async function storageFetch(url: string, options: RequestInit) {
+  try {
+    return await fetch(url, options);
+  } catch {
+    fail("Nepavyksta pasiekti Supabase Storage. Patikrinkite SUPABASE_URL ir serverio tinklo ryšį.", {
+      errorCode: "upload_storage_unreachable",
+      statusCode: 503,
+    });
+  }
+}
+
+function storageResponseError(operation: string, status: number): never {
+  if (status === 401 || status === 403) {
+    fail(`Supabase atmetė ${operation} užklausą (HTTP ${status}). Patikrinkite SUPABASE_SERVICE_ROLE_KEY ir projekto Storage teises.`, {
+      errorCode: "upload_storage_forbidden",
+      statusCode: 503,
+    });
+  }
+  fail(`Supabase ${operation} nepavyko (HTTP ${status}). Patikrinkite Storage projekto būseną ir bandykite dar kartą.`, {
+    errorCode: "upload_storage_request_failed",
+    statusCode: 502,
+  });
 }
 
 async function ensurePublicBucket(url: string, serviceRoleKey: string) {
@@ -43,7 +77,7 @@ async function ensurePublicBucket(url: string, serviceRoleKey: string) {
     file_size_limit: maxImageSize,
     allowed_mime_types: allowedImageTypes,
   };
-  const createResponse = await fetch(`${url}/storage/v1/bucket`, {
+  const createResponse = await storageFetch(`${url}/storage/v1/bucket`, {
     method: "POST",
     headers,
     body: JSON.stringify(bucketConfig),
@@ -51,10 +85,10 @@ async function ensurePublicBucket(url: string, serviceRoleKey: string) {
 
   if (createResponse.ok) return;
   if (createResponse.status !== 409) {
-    throw new Error(`Supabase nuotraukų saugyklos paruošti nepavyko (HTTP ${createResponse.status}).`);
+    storageResponseError("nuotraukų saugyklos paruošimas", createResponse.status);
   }
 
-  const updateResponse = await fetch(`${url}/storage/v1/bucket/${bucketName}`, {
+  const updateResponse = await storageFetch(`${url}/storage/v1/bucket/${bucketName}`, {
     method: "PUT",
     headers,
     body: JSON.stringify({
@@ -64,7 +98,7 @@ async function ensurePublicBucket(url: string, serviceRoleKey: string) {
     }),
   });
   if (!updateResponse.ok) {
-    throw new Error(`Supabase nuotraukų saugyklos paruošti nepavyko (HTTP ${updateResponse.status}).`);
+    storageResponseError("nuotraukų saugyklos atnaujinimas", updateResponse.status);
   }
 }
 
@@ -75,16 +109,22 @@ export const supabaseProductImageUploadProvider: FileUploadProvider = {
   async upload({ data, mimeType }) {
     const { url, serviceRoleKey } = getSupabaseConfig();
     if (!mimeType || !allowedImageTypes.includes(mimeType)) {
-      throw new Error("Palaikomi tik AVIF, GIF, HEIC, JPEG, PNG ir WebP vaizdai.");
+      fail("Pasirinkite AVIF, GIF, HEIC, JPEG, PNG arba WebP nuotrauką.", {
+        errorCode: "upload_image_unsupported_type",
+        statusCode: 400,
+      });
     }
     if (data.byteLength === 0 || data.byteLength > maxImageSize) {
-      throw new Error("Nuotrauka turi būti nuo 1 baito iki 10 MB.");
+      fail("Nuotraukos dydis turi būti nuo 1 baito iki 10 MB.", {
+        errorCode: "upload_image_invalid_size",
+        statusCode: 413,
+      });
     }
 
     await ensurePublicBucket(url, serviceRoleKey);
 
     const objectName = crypto.randomUUID();
-    const uploadResponse = await fetch(`${url}/storage/v1/object/${bucketName}/${objectName}`, {
+    const uploadResponse = await storageFetch(`${url}/storage/v1/object/${bucketName}/${objectName}`, {
       method: "POST",
       headers: {
         ...authHeaders(serviceRoleKey),
@@ -95,7 +135,7 @@ export const supabaseProductImageUploadProvider: FileUploadProvider = {
       body: Uint8Array.from(data),
     });
     if (!uploadResponse.ok) {
-      throw new Error(`Supabase nuotraukos įkelti nepavyko (HTTP ${uploadResponse.status}).`);
+      storageResponseError("nuotraukos įkėlimas", uploadResponse.status);
     }
 
     return {

@@ -1,8 +1,9 @@
-import { useActionMutation, useActionQuery } from "@agent-native/core/client/hooks";
+import { actionErrorMessage, useActionMutation, useActionQuery } from "@agent-native/core/client/hooks";
 import { uploadEditorImage } from "@agent-native/core/client/uploads";
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router";
 import { calculateDiscount } from "@/lib/cart";
+import { prepareImageUpload } from "@/lib/prepare-image-upload";
 import { type StoreCategory, type StoreCategoryRecord } from "@/lib/store-products";
 
 type ProductDraft = {
@@ -120,14 +121,13 @@ export default function AdminProductEditorRoute() {
         if (!file.type.startsWith("image/")) throw new Error("Pasirinkite nuotraukos failą.");
         if (file.size > 10 * 1024 * 1024) throw new Error("Nuotrauka turi būti mažesnė nei 10 MB.");
         if (nextGallery.length >= 12) throw new Error("Galerijoje galima turėti iki 12 nuotraukų.");
-        const uploaded = await uploadEditorImage(file);
+        const uploaded = await uploadEditorImage(await prepareImageUpload(file));
         if (!nextGallery.includes(uploaded.src)) nextGallery = [...nextGallery, uploaded.src];
         if (!nextHeroImage) nextHeroImage = uploaded.src;
         setDraft((current) => ({ ...current, gallery: nextGallery, heroImage: nextHeroImage }));
       }
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Upload failed";
-      setUploadError(message);
+      setUploadError(actionErrorMessage(error) ?? "Nuotraukos įkelti nepavyko. Patikrinkite Supabase Storage serverio nustatymus ir bandykite dar kartą.");
     } finally {
       setIsUploading(false);
     }
