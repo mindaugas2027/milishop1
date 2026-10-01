@@ -18,6 +18,7 @@ describe("Supabase product image upload provider", () => {
   it("creates a public product-images bucket and uploads the image", async () => {
     const fetchMock = vi.mocked(fetch);
     fetchMock
+      .mockResolvedValueOnce(new Response(null, { status: 404 }))
       .mockResolvedValueOnce(new Response(null, { status: 201 }))
       .mockResolvedValueOnce(new Response(null, { status: 200 }));
 
@@ -27,32 +28,47 @@ describe("Supabase product image upload provider", () => {
       mimeType: "image/png",
     });
 
-    expect(fetchMock).toHaveBeenCalledTimes(2);
-    expect(fetchMock.mock.calls[0]?.[0]).toBe("https://milishop-example.supabase.co/storage/v1/bucket");
-    expect(JSON.parse(String(fetchMock.mock.calls[0]?.[1]?.body))).toEqual({
+    expect(fetchMock).toHaveBeenCalledTimes(3);
+    expect(fetchMock.mock.calls[0]?.[0]).toBe("https://milishop-example.supabase.co/storage/v1/bucket/product-images");
+    expect(fetchMock.mock.calls[0]?.[1]?.method).toBe("GET");
+    expect(fetchMock.mock.calls[1]?.[0]).toBe("https://milishop-example.supabase.co/storage/v1/bucket");
+    expect(JSON.parse(String(fetchMock.mock.calls[1]?.[1]?.body))).toEqual({
       name: "product-images",
       public: true,
       fileSizeLimit: 4 * 1024 * 1024,
       allowedMimeTypes: expect.arrayContaining(["image/png", "image/jpeg"]),
     });
-    expect(fetchMock.mock.calls[1]?.[0]).toMatch(/^https:\/\/milishop-example\.supabase\.co\/storage\/v1\/object\/product-images\//);
+    expect(fetchMock.mock.calls[2]?.[0]).toMatch(/^https:\/\/milishop-example\.supabase\.co\/storage\/v1\/object\/product-images\//);
     expect(result).toMatchObject({
       provider: "milishop-supabase-product-images",
       url: expect.stringMatching(/^https:\/\/milishop-example\.supabase\.co\/storage\/v1\/object\/public\/product-images\//),
     });
   });
 
-  it("makes an existing bucket public before uploading", async () => {
+  it("uses an existing public bucket without trying to recreate it", async () => {
     const fetchMock = vi.mocked(fetch);
     fetchMock
-      .mockResolvedValueOnce(new Response(null, { status: 409 }))
-      .mockResolvedValueOnce(new Response(null, { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ public: true, file_size_limit: 4 * 1024 * 1024 }), { status: 200 }))
       .mockResolvedValueOnce(new Response(null, { status: 200 }));
 
     await supabaseProductImageUploadProvider.upload({
       data: new Uint8Array([1]),
       mimeType: "image/jpeg",
     });
+
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(fetchMock.mock.calls[0]?.[1]?.method).toBe("GET");
+    expect(fetchMock.mock.calls[1]?.[0]).toMatch(/^https:\/\/milishop-example\.supabase\.co\/storage\/v1\/object\/product-images\//);
+  });
+
+  it("makes an existing private bucket public before uploading", async () => {
+    const fetchMock = vi.mocked(fetch);
+    fetchMock
+      .mockResolvedValueOnce(new Response(JSON.stringify({ public: false, file_size_limit: 1 * 1024 * 1024 }), { status: 200 }))
+      .mockResolvedValueOnce(new Response(null, { status: 200 }))
+      .mockResolvedValueOnce(new Response(null, { status: 200 }));
+
+    await supabaseProductImageUploadProvider.upload({ data: new Uint8Array([1]), mimeType: "image/jpeg" });
 
     expect(fetchMock.mock.calls[1]?.[0]).toBe("https://milishop-example.supabase.co/storage/v1/bucket/product-images");
     expect(fetchMock.mock.calls[1]?.[1]?.method).toBe("PUT");

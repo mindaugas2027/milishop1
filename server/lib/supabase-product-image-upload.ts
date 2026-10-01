@@ -74,34 +74,45 @@ async function ensurePublicBucket(url: string, serviceRoleKey: string) {
     ...authHeaders(serviceRoleKey),
     "Content-Type": "application/json",
   };
-  const bucketConfig = {
-    name: bucketName,
+  const bucketSettings = {
     public: true,
     fileSizeLimit: maxImageSize,
     allowedMimeTypes: allowedImageTypes,
   };
+  const bucketUrl = `${url}/storage/v1/bucket/${bucketName}`;
+  const existingResponse = await storageFetch(bucketUrl, {
+    method: "GET",
+    headers: authHeaders(serviceRoleKey),
+  });
+
+  if (existingResponse.ok) {
+    const existing = await existingResponse.json().catch(() => null) as { public?: unknown; file_size_limit?: unknown } | null;
+    const needsUpdate = existing?.public !== true ||
+      (typeof existing.file_size_limit === "number" && existing.file_size_limit < maxImageSize);
+    if (!needsUpdate) return;
+
+    const updateResponse = await storageFetch(bucketUrl, {
+      method: "PUT",
+      headers,
+      body: JSON.stringify(bucketSettings),
+    });
+    if (!updateResponse.ok) {
+      storageResponseError("nuotraukų saugyklos atnaujinimas", updateResponse.status);
+    }
+    return;
+  }
+
+  if (existingResponse.status !== 404) {
+    storageResponseError("nuotraukų saugyklos patikra", existingResponse.status);
+  }
+
   const createResponse = await storageFetch(`${url}/storage/v1/bucket`, {
     method: "POST",
     headers,
-    body: JSON.stringify(bucketConfig),
+    body: JSON.stringify({ name: bucketName, ...bucketSettings }),
   });
-
-  if (createResponse.ok) return;
-  if (createResponse.status !== 409) {
-    storageResponseError("nuotraukų saugyklos paruošimas", createResponse.status);
-  }
-
-  const updateResponse = await storageFetch(`${url}/storage/v1/bucket/${bucketName}`, {
-    method: "PUT",
-    headers,
-    body: JSON.stringify({
-      public: true,
-      fileSizeLimit: maxImageSize,
-      allowedMimeTypes: allowedImageTypes,
-    }),
-  });
-  if (!updateResponse.ok) {
-    storageResponseError("nuotraukų saugyklos atnaujinimas", updateResponse.status);
+  if (!createResponse.ok && createResponse.status !== 409) {
+    storageResponseError("nuotraukų saugyklos sukūrimas", createResponse.status);
   }
 }
 
