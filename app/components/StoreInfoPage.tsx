@@ -23,14 +23,20 @@ export function StoreInfoPage({
   intro,
   paragraphs,
   children,
+  eyebrow = "Milishop",
+  className = "",
+  eyebrowPlacement = "above",
 }: {
   title: string;
-  intro: string;
+  intro: ReactNode;
   paragraphs?: string[];
   children?: ReactNode;
+  eyebrow?: string;
+  className?: string;
+  eyebrowPlacement?: "above" | "below";
 }) {
   return (
-    <div className="store-info-page">
+    <div className={`store-info-page ${className}`.trim()}>
       <header className="store-info-header">
         <Link to="/" className="levitara-logo" aria-label="Milishop pradžia">
           <span className="levitara-logo-mark" aria-hidden="true">M</span>
@@ -39,8 +45,9 @@ export function StoreInfoPage({
         <Link to="/" className="store-info-back">Į parduotuvę</Link>
       </header>
       <main className="store-info-content">
-        <p className="levitara-kicker dark">Milishop</p>
+        {eyebrowPlacement === "above" && <p className="levitara-kicker dark">{eyebrow}</p>}
         <h1>{title}</h1>
+        {eyebrowPlacement === "below" && <p className="levitara-kicker dark">{eyebrow}</p>}
         <p className="store-info-intro">{intro}</p>
         <div className="store-info-copy">
           {paragraphs?.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}

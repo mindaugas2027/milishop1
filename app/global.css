@@ -702,6 +702,25 @@
 .store-info-copy p + p { margin-top: 18px; }
 .store-info-copy section + section { margin-top: 36px; }
 .store-info-copy h2 { margin: 0 0 12px; color: #17232a; font-size: 20px; font-weight: 600; line-height: 1.35; }
+.store-info-return .store-info-content { width: min(100%, 800px); padding-top: 58px; }
+.store-info-return .store-info-content h1 { font-size: 42px; }
+.store-info-return .levitara-kicker { margin: 14px 0 0; text-align: center; }
+.store-info-return .store-info-intro { display: flex; align-items: flex-start; gap: 9px; margin-top: 20px; border-bottom: 1px solid #e8eceb; padding-bottom: 22px; color: #17232a; font-size: 17px; font-weight: 650; }
+.store-info-return .store-info-intro svg { flex: 0 0 auto; margin-top: 3px; color: #2f7f7b; }
+.store-info-return .store-info-copy { max-width: none; margin-top: 24px; }
+.store-info-return .store-info-copy section + section { margin-top: 28px; }
+.store-info-return .store-info-copy h2 { display: flex; align-items: center; gap: 8px; border-bottom: 1px solid #17232a; padding-bottom: 10px; font-size: 17px; }
+.store-info-return .store-info-copy h2 svg { flex: 0 0 auto; color: #2f7f7b; }
+.store-info-return .return-policy-guarantee { border: 1px solid #17232a; border-radius: 8px; padding: 20px; }
+.store-info-return .return-policy-guarantee h2 { border-bottom: 0; padding-bottom: 0; }
+.store-info-return .return-policy-notice { margin-top: 16px; border-left: 3px solid #bd6659; border-radius: 4px; background: #fff0ee; padding: 12px 14px; color: #783c38; font-size: 13px; }
+.store-info-return .return-policy-notice strong { color: #a64239; }
+.store-info-return .return-policy-notice p { margin-top: 5px; }
+.store-info-return .return-policy-line { border-left: 2px solid #17232a; padding: 6px 12px; color: #36454a; }
+.store-info-return .return-policy-line + .return-policy-line { margin-top: 12px; }
+.store-info-return .return-policy-shipping { margin-top: 16px; border-radius: 4px; background: #f1f3f2; padding: 11px 13px; font-size: 13px; }
+.store-info-return .return-policy-refunds { display: grid; gap: 11px; padding-left: 20px; color: #36454a; }
+.store-info-return .return-policy-refunds li::marker { color: #2f7f7b; }
 .store-info-footer { display: flex; align-items: center; justify-content: space-between; gap: 24px; border-top: 1px solid #e8eceb; padding: 24px max(24px, calc((100% - 1200px) / 2)); }
 .store-info-footer .store-social-links { margin: 0; }
 .store-info-footer .store-social-links a { color: #356d79; }
@@ -1010,6 +1029,11 @@
 }
 
 @media (max-width: 720px) {
+  .store-info-return .store-info-content { padding: 52px 20px 64px; }
+  .store-info-return .store-info-content h1 { font-size: 36px; }
+  .store-info-return .store-info-intro { font-size: 15px; }
+  .store-info-return .store-info-copy { font-size: 14px; }
+  .store-info-return .return-policy-guarantee { padding: 16px; }
   .milishop-product-page > header {
     min-height: 64px;
   }
