@@ -19,18 +19,16 @@ export default function ReturnsRoute() {
     >
       <section className="return-policy-guarantee">
         <h2><IconShieldCheck size={18} aria-hidden="true" />Garantija ir prekės kokybė</h2>
-        <p>Visoms prekėms suteikiama 14 dienų komercinė garantija nuo prekės gavimo dienos, jei nenurodyta kitaip.</p>
+        <p>Visoms prekėms suteikiama <strong>14 dienų garantija</strong> nuo prekės gavimo dienos (jei nenurodyta kitaip).</p>
         <p>Garantija taikoma tik gamykliniams defektams, atsiradusiems naudojant prekę pagal paskirtį.</p>
-        <p>Dėl prekės neatitikties įstatymines teises vartotojas paprastai gali įgyvendinti per dvejus metus nuo prekės pristatymo. Atsižvelgiant į situaciją, gali būti taikomas taisymas, pakeitimas, kainos sumažinimas arba pinigų grąžinimas. Šios teisės nėra ribojamos komercinės garantijos sąlygomis.</p>
         <aside className="return-policy-notice">
-          <strong>Komercinė garantija netaikoma, jei prekė:</strong>
+          <strong>Garantija netaikoma, jei prekė:</strong>
           <ul>
             <li>Sugadinta dėl netinkamo naudojimo ar aplaidumo.</li>
             <li>Turi mechaninių pažeidimų, pavyzdžiui, smūgių, įbrėžimų ar sulaužymų.</li>
             <li>Buvo remontuota ar ardyta neįgaliotų asmenų.</li>
             <li>Naudota ne pagal paskirtį arba natūraliai susidėvėjo.</li>
           </ul>
-          <p>Šios komercinės garantijos išimtys nepanaikina įstatyminių vartotojo teisių dėl prekės neatitikties.</p>
         </aside>
       </section>
 
