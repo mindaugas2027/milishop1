@@ -19,8 +19,9 @@ export default function ReturnsRoute() {
     >
       <section className="return-policy-guarantee">
         <h2><IconShieldCheck size={18} aria-hidden="true" />Garantija ir prekės kokybė</h2>
-        <p>14 dienų yra nuotolinio pirkimo atsisakymo terminas, o ne garantijos laikotarpis. Dėl prekės neatitikties įstatymines teises vartotojas paprastai gali įgyvendinti per dvejus metus nuo prekės pristatymo.</p>
-        <p>Atsižvelgiant į situaciją, gali būti taikomas taisymas, pakeitimas, kainos sumažinimas arba pinigų grąžinimas. Šios teisės nėra ribojamos komercinės garantijos sąlygomis.</p>
+        <p>Visoms prekėms suteikiama 14 dienų komercinė garantija nuo prekės gavimo dienos, jei nenurodyta kitaip.</p>
+        <p>Garantija taikoma tik gamykliniams defektams, atsiradusiems naudojant prekę pagal paskirtį.</p>
+        <p>Dėl prekės neatitikties įstatymines teises vartotojas paprastai gali įgyvendinti per dvejus metus nuo prekės pristatymo. Atsižvelgiant į situaciją, gali būti taikomas taisymas, pakeitimas, kainos sumažinimas arba pinigų grąžinimas. Šios teisės nėra ribojamos komercinės garantijos sąlygomis.</p>
         <aside className="return-policy-notice">
           <strong>Komercinė garantija netaikoma, jei prekė:</strong>
           <ul>
