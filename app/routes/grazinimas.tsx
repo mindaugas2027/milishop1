@@ -22,8 +22,14 @@ export default function ReturnsRoute() {
         <p>14 dienų yra nuotolinio pirkimo atsisakymo terminas, o ne garantijos laikotarpis. Dėl prekės neatitikties įstatymines teises vartotojas paprastai gali įgyvendinti per dvejus metus nuo prekės pristatymo.</p>
         <p>Atsižvelgiant į situaciją, gali būti taikomas taisymas, pakeitimas, kainos sumažinimas arba pinigų grąžinimas. Šios teisės nėra ribojamos komercinės garantijos sąlygomis.</p>
         <aside className="return-policy-notice">
-          <strong>Svarbu</strong>
-          <p>Prekę galite apžiūrėti tiek, kiek būtina jos savybėms patikrinti. Jei ji naudota daugiau, gali tekti atlyginti sumažėjusią vertę. Originali pakuotė pageidautina, bet nėra būtina sąlyga pasinaudoti įstatymine teise atsisakyti pirkimo.</p>
+          <strong>Komercinė garantija netaikoma, jei prekė:</strong>
+          <ul>
+            <li>Sugadinta dėl netinkamo naudojimo ar aplaidumo.</li>
+            <li>Turi mechaninių pažeidimų, pavyzdžiui, smūgių, įbrėžimų ar sulaužymų.</li>
+            <li>Buvo remontuota ar ardyta neįgaliotų asmenų.</li>
+            <li>Naudota ne pagal paskirtį arba natūraliai susidėvėjo.</li>
+          </ul>
+          <p>Šios komercinės garantijos išimtys nepanaikina įstatyminių vartotojo teisių dėl prekės neatitikties.</p>
         </aside>
       </section>
 
