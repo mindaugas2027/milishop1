@@ -211,14 +211,14 @@ export default function AdminProductEditorRoute() {
             <h2 className="landing-editor-heading mb-5 text-lg font-semibold">Specifikacijos ir klausimai</h2>
             <div className="grid gap-6">
               <div className="grid gap-3">
-                <label className="flex items-center gap-2 text-sm font-medium text-[#203b40]"><input type="checkbox" checked={draft.showSpecs} onChange={(event) => update("showSpecs", event.target.checked)} className="size-4 accent-[#2f7f7b]" />Rodyti specifikacijų skiltį</label>
+                <label className="flex items-center gap-2 text-sm font-medium text-[#203b40]"><input type="checkbox" checked={!draft.showSpecs} onChange={(event) => update("showSpecs", !event.target.checked)} className="size-4 accent-[#2f7f7b]" />Nerodyti specifikacijų skilties</label>
                 {draft.showSpecs && <div className="grid gap-3">
                   {draft.specs.map((spec, specIndex) => <div key={specIndex} className="grid items-end gap-3 sm:grid-cols-[1fr_1fr_auto]"><Field label="Specifikacija" value={spec.label} onChange={(value) => update("specs", draft.specs.map((item, itemIndex) => itemIndex === specIndex ? { ...item, label: value } : item))} /><Field label="Reikšmė" value={spec.value} onChange={(value) => update("specs", draft.specs.map((item, itemIndex) => itemIndex === specIndex ? { ...item, value } : item))} /><button type="button" onClick={() => update("specs", draft.specs.filter((_, itemIndex) => itemIndex !== specIndex))} className="admin-row-action">Pašalinti</button></div>)}
                   <button type="button" onClick={() => update("specs", [...draft.specs, { label: "", value: "" }])} className="admin-row-action justify-self-start">Pridėti specifikaciją</button>
                 </div>}
               </div>
               <div className="grid gap-3">
-                <label className="flex items-center gap-2 text-sm font-medium text-[#203b40]"><input type="checkbox" checked={draft.showFaq} onChange={(event) => update("showFaq", event.target.checked)} className="size-4 accent-[#2f7f7b]" />Rodyti DUK skiltį</label>
+                <label className="flex items-center gap-2 text-sm font-medium text-[#203b40]"><input type="checkbox" checked={!draft.showFaq} onChange={(event) => update("showFaq", !event.target.checked)} className="size-4 accent-[#2f7f7b]" />Nerodyti DUK skilties</label>
                 {draft.showFaq && <div className="grid gap-4">
                   {draft.faq.map((item, faqIndex) => <div key={faqIndex} className="grid gap-3 rounded-lg border border-[#203b40]/10 p-3 sm:grid-cols-[1fr_1fr_auto]"><Field label="Klausimas" value={item.question} onChange={(value) => update("faq", draft.faq.map((entry, entryIndex) => entryIndex === faqIndex ? { ...entry, question: value } : entry))} /><Field label="Atsakymas" value={item.answer} onChange={(value) => update("faq", draft.faq.map((entry, entryIndex) => entryIndex === faqIndex ? { ...entry, answer: value } : entry))} multiline /><button type="button" onClick={() => update("faq", draft.faq.filter((_, entryIndex) => entryIndex !== faqIndex))} className="admin-row-action">Pašalinti</button></div>)}
                   <button type="button" onClick={() => update("faq", [...draft.faq, { question: "", answer: "" }])} className="admin-row-action justify-self-start">Pridėti klausimą</button>
