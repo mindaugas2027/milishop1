@@ -150,7 +150,7 @@ export default function AdminProductEditorRoute() {
       setFormError("Įkelkite nuotrauką ir pažymėkite pagrindinę.");
       return;
     }
-    mutate({ ...draft, saving: discount ? `Sutaupai ${discount.amountLabel}` : "", slug: nextSlug, name: draft.name.trim(), supplierUrl: draft.supplierUrl.trim() });
+    mutate({ ...draft, saving: discount ? `Sutaupai ${discount.amountLabel}` : "", slug: nextSlug, name: draft.name.trim(), finalCtaTitle: draft.finalCtaTitle.trim() || draft.name.trim(), supplierUrl: draft.supplierUrl.trim() });
   };
 
   return (
