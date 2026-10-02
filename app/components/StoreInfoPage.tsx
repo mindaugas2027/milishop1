@@ -59,7 +59,10 @@ export function StoreInfoPage({
           <span className="levitara-logo-mark" aria-hidden="true">M</span>
           <span>milishop</span>
         </Link>
-        <StoreSocialLinks />
+        <div className="flex items-center gap-4">
+          <Link to="/privatumo-politika" className="store-info-back">Privatumo politika</Link>
+          <StoreSocialLinks />
+        </div>
       </footer>
     </div>
   );

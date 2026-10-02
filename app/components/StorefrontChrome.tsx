@@ -37,7 +37,7 @@ export function StoreFooter({ year = new Date().getFullYear() }: { year?: number
           <p>Apgalvoti daiktai automobiliui, namams ir kasdienai.</p>
         </div>
         <div><h3>Kategorijos</h3><a href="/?category=automobiliui#produktai">Automobiliui</a><a href="/?category=kasdienai#produktai">Kasdienai</a><a href="/?category=namams#produktai">Namams</a></div>
-        <div><h3>Informacija</h3><Link to="/apie-mus">Apie mus</Link><Link to="/pristatymas">Pristatymas</Link><Link to="/grazinimas">Grąžinimas</Link></div>
+        <div><h3>Informacija</h3><Link to="/apie-mus">Apie mus</Link><Link to="/pristatymas">Pristatymas</Link><Link to="/grazinimas">Grąžinimas</Link><Link to="/privatumo-politika">Privatumo politika</Link></div>
         <div><h3>Pagalba</h3><Link to="/admin">Prisijungti</Link><StoreSocialLinks /></div>
       </div>
       <div className="levitara-footer-bottom"><span>© {year} Milishop. Visos teisės saugomos.</span></div>
