@@ -549,19 +549,21 @@
 .levitara-section-heading { display: flex; align-items: end; justify-content: space-between; gap: 24px; margin-bottom: 28px; }
 .levitara-section-heading h2 { margin: 0; font-size: clamp(1.7rem, 3vw, 2.45rem); font-weight: 500; letter-spacing: -.055em; }
 .levitara-heading-side { color: #999; font-size: 11px; }
-.levitara-category-intro { max-width: 60ch; margin: 10px 0 0; color: #777; font-size: 13px; line-height: 1.6; }
-.levitara-category-grid { display: grid; gap: 16px; grid-template-columns: repeat(3, 1fr); }
-.levitara-category-card { position: relative; display: block; aspect-ratio: 1 / .86; overflow: hidden; color: #fff; text-decoration: none; }
-.levitara-category-card img { width: 100%; height: 100%; object-fit: cover; transition: transform 700ms cubic-bezier(.165,.84,.44,1); }
-.levitara-category-card:hover img { transform: scale(1.045); }
-.levitara-category-card-light:hover img { transform: scale(1.015); }
-.levitara-category-shade { position: absolute; inset: 0; background: linear-gradient(0deg, rgb(0 0 0 / .68), rgb(0 0 0 / .07) 75%); }
-.levitara-category-card-light .levitara-category-shade { background: linear-gradient(0deg, rgb(0 0 0 / .36), rgb(0 0 0 / .01) 75%); }
-.levitara-category-content { position: absolute; inset: auto 24px 24px; display: flex; flex-direction: column; align-items: flex-start; }
-.levitara-category-content strong { font-size: 26px; font-weight: 400; letter-spacing: -.04em; }
-.levitara-category-content .levitara-category-number { margin: 0 0 5px; color: rgb(255 255 255 / .72); font-size: 10px; font-weight: 700; }
-.levitara-category-content small { margin-top: 5px; color: rgb(255 255 255 / .72); font-size: 11px; }
-.levitara-white-button { margin-top: 17px; background: #fff; padding: 10px 14px; color: #121212; font-size: 10px; font-weight: 700; }
+.levitara-catalog-heading { align-items: center; }
+.levitara-catalog-heading h2 { font-size: 38px; }
+.levitara-catalog-heading .levitara-heading-side { display: block; }
+.levitara-catalog-grid { display: grid; gap: 18px; grid-template-columns: minmax(0, 1.4fr) repeat(3, minmax(0, 1fr)); }
+.levitara-catalog-intro, .levitara-catalog-card { min-width: 0; min-height: 220px; border: 1px solid #e4e6e4; border-radius: 28px; padding: 24px 20px; }
+.levitara-catalog-intro { display: flex; flex-direction: column; justify-content: center; background: #edf2f0; }
+.levitara-catalog-intro .levitara-kicker { margin: 0 0 9px; }
+.levitara-catalog-intro h3 { margin: 0; color: #121817; font-size: 32px; font-weight: 500; line-height: 1.15; }
+.levitara-catalog-intro > p:last-child { max-width: 34ch; margin: 10px 0 0; color: #606965; font-size: 14px; line-height: 1.55; }
+.levitara-catalog-card { display: flex; flex-direction: column; justify-content: space-between; background: #f7f6f3; color: #17201e; text-decoration: none; transition: border-color 180ms ease, background-color 180ms ease; }
+.levitara-catalog-card:hover { border-color: #9ba9a3; background: #f2f2ee; }
+.levitara-catalog-number { color: #398b86; font-size: 10px; font-weight: 700; }
+.levitara-catalog-card-copy { display: grid; gap: 12px; }
+.levitara-catalog-card-copy strong { font-size: 22px; font-weight: 500; line-height: 1.2; }
+.levitara-catalog-card-copy small { color: #68716e; font-size: 14px; line-height: 1.5; }
 .levitara-product-grid { display: grid; gap: 28px 18px; grid-template-columns: repeat(4, minmax(0, 1fr)); }
 .levitara-product-card { position: relative; display: block; color: inherit; text-decoration: none; }
 .levitara-product-media { position: relative; aspect-ratio: 1 / 1; overflow: hidden; border-radius: 22px; background: #f8f6f3; }
@@ -1090,6 +1092,8 @@
   .levitara-feature-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .levitara-feature-card { min-width: 0; }
   .levitara-feature-card-hero { grid-column: span 2; }
+  .levitara-catalog-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .levitara-catalog-intro { grid-column: span 2; }
 }
 
 @media (max-width: 720px) {
@@ -1117,13 +1121,16 @@
   .levitara-section { padding: 50px 18px; }
   .levitara-section-heading { align-items: flex-start; flex-direction: column; gap: 8px; margin-bottom: 22px; }
   .levitara-heading-side { display: none; }
-  .levitara-category-grid, .levitara-product-grid { gap: 10px; grid-template-columns: repeat(2, 1fr); }
+  .levitara-catalog-heading .levitara-heading-side { display: block; }
+  .levitara-catalog-heading h2 { font-size: 28px; }
+  .levitara-catalog-grid { gap: 10px; grid-template-columns: minmax(0, 1fr); }
+  .levitara-catalog-intro { grid-column: auto; min-height: 190px; }
+  .levitara-catalog-card { min-height: 150px; padding: 18px; }
+  .levitara-catalog-intro h3 { font-size: 28px; }
+  .levitara-catalog-card-copy strong { font-size: 20px; }
+  .levitara-product-grid { gap: 10px; grid-template-columns: repeat(2, 1fr); }
   .levitara-feature-grid { grid-template-columns: minmax(0, 1fr); }
   .levitara-feature-card-hero { grid-column: auto; }
-  .levitara-category-content { right: 16px; bottom: 16px; left: 16px; }
-  .levitara-category-content strong { font-size: 21px; }
-  .levitara-category-content small { font-size: 10px; }
-  .levitara-white-button { margin-top: 12px; padding: 8px 11px; }
   .levitara-product-info { padding-top: 12px; }
   .levitara-product-info h3 { font-size: 13px; }
   .levitara-product-info p { font-size: 11px; }
