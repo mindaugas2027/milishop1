@@ -209,6 +209,7 @@ function ProductPage({ slug }: { slug: string }) {
             </Dialog.Root>
           </div>
           <div className="product-detail-content flex flex-col py-2 lg:py-8">
+            {product.productBrand && <p className="mb-2 text-xs font-semibold uppercase text-[#398b86]">{product.productBrand}</p>}
             <p className="mb-5 text-xs font-semibold uppercase tracking-[0.16em] text-[#398b86]">
               {product.eyebrow}
             </p>

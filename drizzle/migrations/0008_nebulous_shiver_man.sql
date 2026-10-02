@@ -1,0 +1,1 @@
+ALTER TABLE "product_landings" ADD COLUMN "product_brand" text DEFAULT '' NOT NULL;

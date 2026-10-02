@@ -46,6 +46,7 @@ export default defineAction({
       .select({
         slug: schema.productLandings.slug,
         name: schema.productLandings.name,
+        productBrand: schema.productLandings.productBrand,
         category: schema.productLandings.category,
         description: schema.productLandings.description,
         price: schema.productLandings.price,

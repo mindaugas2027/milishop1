@@ -1,12 +1,13 @@
 import { actionErrorMessage, useActionMutation, useActionQuery } from "@agent-native/core/client/hooks";
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router";
-import { calculateDiscount } from "@/lib/cart";
+import { calculateDiscount, calculateGrossProfit, formatPrice } from "@/lib/cart";
 import { uploadProductImage } from "@/lib/upload-product-image";
 import { type StoreCategory, type StoreCategoryRecord } from "@/lib/store-products";
 
 type ProductDraft = {
   slug: string;
+  productBrand: string;
   brandName: string;
   footerText: string;
   name: string;
@@ -40,6 +41,7 @@ function createDraft(slug: string): ProductDraft {
   const description = "";
   return {
     slug,
+    productBrand: "",
     brandName: "Milishop",
     footerText: "Apgalvoti daiktai kasdienai.",
     name,
@@ -97,6 +99,7 @@ export default function AdminProductEditorRoute() {
   const [uploadError, setUploadError] = useState("");
   const [isUploading, setIsUploading] = useState(false);
   const discount = calculateDiscount(draft.price, draft.oldPrice);
+  const grossProfit = calculateGrossProfit(draft.price, draft.costPrice);
 
   useEffect(() => {
     if (data) {
@@ -186,8 +189,12 @@ export default function AdminProductEditorRoute() {
                   {categories.map((category) => <option key={category.slug} value={category.slug}>{category.name}</option>)}
                 </select>
               </label>
+              <Field label="Prekės ženklas (pasirinktinai)" value={draft.productBrand} onChange={(value) => update("productBrand", value)} />
               <Field label="Kaina" value={draft.price} onChange={(value) => update("price", value)} required />
-              <Field label="Savikaina (€), tik administratoriui" value={draft.costPrice} onChange={(value) => update("costPrice", value)} />
+              <div className="grid gap-2">
+                <Field label="Savikaina (€), tik administratoriui" value={draft.costPrice} onChange={(value) => update("costPrice", value)} />
+                {grossProfit !== null && <p className="text-xs font-semibold text-[#2f7f7b]" aria-live="polite">Pelnas prieš kitas išlaidas: {formatPrice(grossProfit)}</p>}
+              </div>
               <Field label="Sena kaina" value={draft.oldPrice} onChange={(value) => update("oldPrice", value)} />
               <p className="self-end pb-2 text-xs font-medium text-[#2f7f7b]" aria-live="polite">
                 {discount ? `Sutaupote ${discount.amountLabel} (${discount.percentLabel})` : "Nuolaida bus rodoma įvedus didesnę seną kainą."}

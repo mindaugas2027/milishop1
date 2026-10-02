@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { calculateDiscount, formatPrice, priceValue } from "./cart";
+import { calculateDiscount, calculateGrossProfit, formatPrice, priceValue } from "./cart";
 
 describe("store price helpers", () => {
   it("parses localized prices and formats savings in euros", () => {
@@ -21,5 +21,12 @@ describe("store price helpers", () => {
     expect(calculateDiscount("100,00 €", "100,00 €")).toBeNull();
     expect(calculateDiscount("120,00 €", "100,00 €")).toBeNull();
     expect(calculateDiscount("100,00 €", "")).toBeNull();
+  });
+
+  it("calculates gross profit from the selling price and cost", () => {
+    expect(calculateGrossProfit("24,90 €", "10,50")).toBe(14.4);
+    expect(calculateGrossProfit("10,00 €", "12,10")).toBe(-2.1);
+    expect(calculateGrossProfit("24,90 €", "")).toBeNull();
+    expect(calculateGrossProfit("24,90 €", "not a price")).toBeNull();
   });
 });

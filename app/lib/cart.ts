@@ -23,6 +23,13 @@ export function formatPrice(price: number) {
   return `${price.toFixed(2).replace(".", ",")} €`;
 }
 
+export function calculateGrossProfit(price: string, costPrice: string): number | null {
+  const normalizedCost = costPrice.trim();
+  const sellingPrice = priceValue(price);
+  if (!price.trim() || sellingPrice <= 0 || !/^\d+(?:[,.]\d{1,2})?$/.test(normalizedCost)) return null;
+  return Math.round((sellingPrice - Number(normalizedCost.replace(",", "."))) * 100) / 100;
+}
+
 export function calculateDiscount(price: string, oldPrice: string): ProductDiscount | null {
   const current = priceValue(price);
   const previous = priceValue(oldPrice);

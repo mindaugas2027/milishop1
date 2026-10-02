@@ -13,6 +13,7 @@ import { type StoreCategory, type StoreCategoryRecord } from "@/lib/store-produc
 type StorefrontProduct = {
   slug: string;
   category: StoreCategory;
+  productBrand: string;
   name: string;
   description: string;
   price: string;
@@ -58,6 +59,7 @@ function mapStorefrontProducts(items: ProductLandingPage["items"]): StorefrontPr
   return items.map((landing) => ({
     slug: landing.slug,
     category: landing.category,
+    productBrand: landing.productBrand,
     name: landing.name,
     description: landing.description,
     price: landing.price,
@@ -386,6 +388,7 @@ export default function HomeRoute() {
                   </button>
                 </div>
                 <Link to={product.slug === "obd2" ? "/obd" : `/${product.slug}`} className="levitara-product-info">
+                  {product.productBrand && <p className="mb-1 font-semibold text-[#398b86]">{product.productBrand}</p>}
                   <h3>{product.name}</h3>
                   <p>{product.description}</p>
                   <div className="levitara-price-row">

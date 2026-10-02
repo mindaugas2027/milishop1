@@ -20,6 +20,7 @@ import action from "./update-product-landing";
 
 const productInput = {
   slug: "car-mount",
+  productBrand: "RoadPro",
   brandName: "Milishop",
   footerText: "Kasdienai",
   name: "Telefono laikiklis",
@@ -79,6 +80,7 @@ describe("update-product-landing", () => {
 
     expect(insertedValues?.supplierUrl).toBe(productInput.supplierUrl);
     expect(insertedValues?.category).toBe(productInput.category);
+    expect(insertedValues?.productBrand).toBe(productInput.productBrand);
     expect(result.supplierUrl).toBe(productInput.supplierUrl);
     expect(result.category).toBe(productInput.category);
     expect(insertedValues?.showSpecs).toBe(false);

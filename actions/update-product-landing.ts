@@ -6,6 +6,7 @@ import { getDb, schema } from "../server/db.js";
 
 const landingSchema = z.object({
   slug: z.string().min(1).max(120).describe("Product slug, for example obd2"),
+  productBrand: z.string().trim().max(100).default("").describe("Optional manufacturer or product brand shown on the storefront; blank hides it"),
   brandName: z.string().min(1).max(80).describe("Store brand shown in the footer"),
   footerText: z.string().max(200).describe("Short footer sentence"),
   name: z.string().min(1).max(160).describe("Product title"),
