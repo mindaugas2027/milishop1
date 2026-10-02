@@ -294,7 +294,6 @@ function ProductPage({ slug }: { slug: string }) {
 
             <section className="product-detail-section mt-12 border-t border-foreground/10 pt-10">
               <p className="mb-3 text-xs font-semibold uppercase tracking-[0.16em] text-[#398b86]">Kaip naudoti</p>
-              <h2 className="text-3xl font-semibold tracking-[-0.06em] text-[#203b40]">Trys žingsniai į paprasčiau.</h2>
               <div className="mt-6 grid gap-3">
                 {product.steps.map((step, index) => (
                   <div key={step} className="flex items-center gap-4 border-b border-foreground/10 px-1 py-4">
@@ -307,7 +306,6 @@ function ProductPage({ slug }: { slug: string }) {
 
             {product.showSpecs && product.specs.length > 0 && <section className="product-detail-section mt-12 border-t border-foreground/10 pt-10">
               <p className="mb-3 text-xs font-semibold uppercase tracking-[0.16em] text-[#398b86]">Specifikacija</p>
-              <h2 className="text-3xl font-semibold tracking-[-0.06em] text-[#203b40]">Svarbiausia vienoje vietoje.</h2>
               <div className="mt-6 divide-y divide-foreground/10 border-y border-foreground/10">
                 {product.specs.map(([label, value]) => (
                   <div key={label} className="flex items-center justify-between gap-5 py-4 text-sm">
