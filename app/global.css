@@ -704,6 +704,14 @@
 .store-info-copy p + p { margin-top: 18px; }
 .store-info-copy section + section { margin-top: 36px; }
 .store-info-copy h2 { margin: 0 0 12px; color: #17232a; font-size: 20px; font-weight: 600; line-height: 1.35; }
+.store-info-delivery .store-info-content { width: min(100%, 800px); padding-top: 58px; }
+.store-info-delivery .store-info-content h1 { font-size: 42px; }
+.store-info-delivery .store-info-copy { max-width: none; margin-top: 56px; }
+.store-info-delivery .delivery-policy-section + .delivery-policy-section { margin-top: 34px; }
+.store-info-delivery .delivery-policy-section h2 { border-bottom: 1px solid #17232a; padding-bottom: 10px; font-size: 13px; }
+.store-info-delivery .delivery-policy-item { margin-top: 18px; border-left: 3px solid #17232a; padding: 1px 0 1px 14px; color: #36454a; font-size: 16px; line-height: 1.65; }
+.store-info-delivery .delivery-policy-item strong { color: #17232a; }
+.store-info-delivery .delivery-policy-note { border-radius: 4px; background: #f1f1f1; padding: 16px; color: #36454a; font-size: 16px; line-height: 1.65; }
 .store-info-return .store-info-content { width: min(100%, 800px); padding-top: 58px; }
 .store-info-return .store-info-content h1 { font-size: 42px; }
 .store-info-return .levitara-kicker { margin: 14px 0 0; text-align: center; }
@@ -1031,6 +1039,10 @@
 }
 
 @media (max-width: 720px) {
+  .store-info-delivery .store-info-content { padding: 52px 20px 64px; }
+  .store-info-delivery .store-info-content h1 { font-size: 36px; }
+  .store-info-delivery .store-info-copy { margin-top: 42px; }
+  .store-info-delivery .delivery-policy-item, .store-info-delivery .delivery-policy-note { font-size: 14px; }
   .store-info-return .store-info-content { padding: 52px 20px 64px; }
   .store-info-return .store-info-content h1 { font-size: 36px; }
   .store-info-return .store-info-intro { font-size: 15px; }

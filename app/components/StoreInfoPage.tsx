@@ -28,7 +28,7 @@ export function StoreInfoPage({
   eyebrowPlacement = "above",
 }: {
   title: string;
-  intro: ReactNode;
+  intro?: ReactNode;
   paragraphs?: string[];
   children?: ReactNode;
   eyebrow?: string;
@@ -45,10 +45,10 @@ export function StoreInfoPage({
         <Link to="/" className="store-info-back">Į parduotuvę</Link>
       </header>
       <main className="store-info-content">
-        {eyebrowPlacement === "above" && <p className="levitara-kicker dark">{eyebrow}</p>}
+        {eyebrow && eyebrowPlacement === "above" && <p className="levitara-kicker dark">{eyebrow}</p>}
         <h1>{title}</h1>
-        {eyebrowPlacement === "below" && <p className="levitara-kicker dark">{eyebrow}</p>}
-        <p className="store-info-intro">{intro}</p>
+        {eyebrow && eyebrowPlacement === "below" && <p className="levitara-kicker dark">{eyebrow}</p>}
+        {intro && <p className="store-info-intro">{intro}</p>}
         <div className="store-info-copy">
           {paragraphs?.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
           {children}
