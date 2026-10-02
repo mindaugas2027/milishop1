@@ -87,9 +87,9 @@ Set them through `update-product-landing`; the public product actions never
 return them. Guest checkout uses `create-order`, which accepts customer contact
 and address details plus product slugs and quantities, then snapshots current
 server-side selling prices and costs. Use `list-orders` for the authenticated
-admin order list and `update-order` to set fulfillment (`received`,
+admin order list, `update-order` to set fulfillment (`received`,
 `processing`, `shipped`, `completed`, `cancelled`) or payment (`unpaid`, `paid`,
-`refunded`) status. Mark payment as paid only after verifying it manually;
+`refunded`) status, and `delete-order` to permanently remove an order. Mark payment as paid only after verifying it manually;
 online payment processing is not connected. Profit is gross product margin and
 excludes shipping and other operating costs. To open the order-management tab,
 navigate to `/admin?tab=orders`; `view-screen` reports that selection.

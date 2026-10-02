@@ -44,11 +44,17 @@ function formatDate(value: string) {
 export default function OrderManager() {
   const { data, isPending, isError } = useActionQuery("list-orders", {});
   const { mutate: updateOrder, isPending: isUpdating, error: updateError } = useActionMutation("update-order");
+  const { mutate: deleteOrder, isPending: isDeleting, error: deleteError } = useActionMutation("delete-order");
   const orders = (data ?? []) as AdminOrder[];
   const completedOrders = orders.filter((order) => order.status === "completed" && order.paymentStatus === "paid" && order.profitCents !== "");
   const grossProfitCents = completedOrders.reduce((sum, order) => sum + Number(order.profitCents), 0);
   const grossRevenueCents = completedOrders.reduce((sum, order) => sum + Number(order.totalCents), 0);
   const fieldClass = "rounded-lg border border-[#203b40]/15 bg-white px-2.5 py-2 text-xs text-[#203b40]";
+
+  const removeOrder = (order: AdminOrder) => {
+    if (!window.confirm(`Visam laikui ištrinti užsakymą ${order.orderNumber}? Šio veiksmo atšaukti nepavyks.`)) return;
+    deleteOrder({ id: order.id });
+  };
 
   return (
     <section className="admin-panel mt-6" aria-busy={isPending || isUpdating}>
@@ -61,6 +67,7 @@ export default function OrderManager() {
       )}
       {isError && <p role="alert" className="py-8 text-sm text-[#bd6659]">Užsakymų įkelti nepavyko. Patikrinkite administratoriaus prisijungimą ir duomenų bazę.</p>}
       {updateError && <p role="alert" className="mt-4 text-sm text-[#bd6659]">{actionErrorMessage(updateError) ?? "Užsakymo būsenos išsaugoti nepavyko."}</p>}
+      {deleteError && <p role="alert" className="mt-4 text-sm text-[#bd6659]">{actionErrorMessage(deleteError) ?? "Užsakymo ištrinti nepavyko."}</p>}
       {isPending && <p role="status" className="py-8 text-sm text-[#203b40]/55">Įkeliami užsakymai…</p>}
       {!isPending && !isError && orders.length === 0 && <p className="py-12 text-center text-sm text-[#203b40]/50">Užsakymų dar nėra.</p>}
       <div>
@@ -86,6 +93,7 @@ export default function OrderManager() {
                       <option value="refunded">Grąžintas</option>
                     </select>
                   </label>
+                  <button type="button" className="admin-row-action self-end text-[#bd6659] disabled:opacity-50" disabled={isDeleting} onClick={() => removeOrder(order)}>Ištrinti</button>
                 </div>
               </div>
               <div className="mt-4 grid gap-5 text-sm md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
