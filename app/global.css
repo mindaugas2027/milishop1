@@ -700,6 +700,8 @@
 .store-info-intro { max-width: 640px; margin: 24px 0 0; color: #36454a; font-size: 20px; line-height: 1.55; }
 .store-info-copy { max-width: 640px; margin-top: 32px; color: #657176; font-size: 15px; line-height: 1.8; }
 .store-info-copy p + p { margin-top: 18px; }
+.store-info-copy section + section { margin-top: 36px; }
+.store-info-copy h2 { margin: 0 0 12px; color: #17232a; font-size: 20px; font-weight: 600; line-height: 1.35; }
 .store-info-footer { display: flex; align-items: center; justify-content: space-between; gap: 24px; border-top: 1px solid #e8eceb; padding: 24px max(24px, calc((100% - 1200px) / 2)); }
 .store-info-footer .store-social-links { margin: 0; }
 .store-info-footer .store-social-links a { color: #356d79; }

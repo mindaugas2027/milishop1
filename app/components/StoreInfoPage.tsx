@@ -1,4 +1,5 @@
 import { useActionQuery } from "@agent-native/core/client/hooks";
+import type { ReactNode } from "react";
 import { Link } from "react-router";
 
 export function StoreSocialLinks() {
@@ -21,10 +22,12 @@ export function StoreInfoPage({
   title,
   intro,
   paragraphs,
+  children,
 }: {
   title: string;
   intro: string;
-  paragraphs: string[];
+  paragraphs?: string[];
+  children?: ReactNode;
 }) {
   return (
     <div className="store-info-page">
@@ -40,7 +43,8 @@ export function StoreInfoPage({
         <h1>{title}</h1>
         <p className="store-info-intro">{intro}</p>
         <div className="store-info-copy">
-          {paragraphs.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
+          {paragraphs?.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
+          {children}
         </div>
       </main>
       <footer className="store-info-footer">
