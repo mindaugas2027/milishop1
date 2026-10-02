@@ -15,6 +15,7 @@ type ProductDraft = {
   description: string;
   longDescription: string;
   price: string;
+  costPrice: string;
   oldPrice: string;
   saving: string;
   heroImage: string;
@@ -47,6 +48,7 @@ function createDraft(slug: string): ProductDraft {
     description,
     longDescription: description,
     price: "",
+    costPrice: "",
     oldPrice: "",
     saving: "",
     heroImage: "",
@@ -185,6 +187,7 @@ export default function AdminProductEditorRoute() {
                 </select>
               </label>
               <Field label="Kaina" value={draft.price} onChange={(value) => update("price", value)} required />
+              <Field label="Savikaina (€), tik administratoriui" value={draft.costPrice} onChange={(value) => update("costPrice", value)} />
               <Field label="Sena kaina" value={draft.oldPrice} onChange={(value) => update("oldPrice", value)} />
               <p className="self-end pb-2 text-xs font-medium text-[#2f7f7b]" aria-live="polite">
                 {discount ? `Sutaupote ${discount.amountLabel} (${discount.percentLabel})` : "Nuolaida bus rodoma įvedus didesnę seną kainą."}

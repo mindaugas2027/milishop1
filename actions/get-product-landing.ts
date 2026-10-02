@@ -4,7 +4,7 @@ import { z } from "zod";
 
 import { getDb, schema } from "../server/db.js";
 
-type PublicLanding = Omit<typeof schema.productLandings.$inferSelect, "supplierUrl">;
+type PublicLanding = Omit<typeof schema.productLandings.$inferSelect, "supplierUrl" | "costPrice">;
 
 function deserialize(row: PublicLanding) {
   return {

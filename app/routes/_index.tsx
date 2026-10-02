@@ -257,7 +257,7 @@ export default function HomeRoute() {
           </nav>
 
           <div className="levitara-header-tools">
-            <StoreCartDrawer items={cartItems} open={cartOpen} onOpenChange={setCartOpen} onQuantityChange={changeCartQuantity} />
+            <StoreCartDrawer items={cartItems} open={cartOpen} onOpenChange={setCartOpen} onQuantityChange={changeCartQuantity} onOrderCreated={() => { setCartItems([]); writeCart([]); }} />
             <Link className="levitara-admin-link" to="/admin">Prisijungti</Link>
             <button
               className="levitara-menu-button"

@@ -28,6 +28,7 @@ export const productLandings = table("product_landings", {
   description: text("description").notNull().default(""),
   longDescription: text("long_description").notNull().default(""),
   price: text("price").notNull().default(""),
+  costPrice: text("cost_price").notNull().default(""),
   oldPrice: text("old_price").notNull().default(""),
   saving: text("saving").notNull().default(""),
   heroImage: text("hero_image").notNull().default(""),
@@ -49,4 +50,27 @@ export const productLandings = table("product_landings", {
 }, (product) => [
   uniqueIndex("product_landings_slug_uidx").on(product.slug),
   index("product_landings_status_slug_idx").on(product.status, product.slug),
+]);
+
+export const orders = table("orders", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  orderNumber: text("order_number").notNull(),
+  customerName: text("customer_name").notNull(),
+  customerEmail: text("customer_email").notNull(),
+  customerPhone: text("customer_phone").notNull(),
+  shippingAddress: text("shipping_address").notNull(),
+  paymentMethod: text("payment_method").notNull().default("bank_transfer"),
+  paymentStatus: text("payment_status").notNull().default("unpaid"),
+  status: text("status").notNull().default("received"),
+  items: text("items").notNull().default("[]"),
+  totalCents: text("total_cents").notNull().default("0"),
+  costCents: text("cost_cents").notNull().default("0"),
+  profitCents: text("profit_cents").notNull().default("0"),
+  trackingCode: text("tracking_code").notNull().default(""),
+  createdAt: text("created_at").notNull().default(now()),
+  updatedAt: text("updated_at").notNull().default(now()),
+}, (order) => [
+  uniqueIndex("orders_order_number_uidx").on(order.orderNumber),
+  index("orders_status_created_at_idx").on(order.status, order.createdAt),
+  index("orders_created_at_idx").on(order.createdAt),
 ]);

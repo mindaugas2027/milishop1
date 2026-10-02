@@ -8,6 +8,7 @@ export interface NavigationState {
   path?: string;
   threadId?: string;
   activeCategory?: string;
+  activeTab?: string;
 }
 
 export function useNavigationState() {
@@ -17,11 +18,13 @@ export function useNavigationState() {
     getNavigationState: ({ pathname, searchParams }) => {
       const threadId = threadIdFromPath(pathname);
       const activeCategory = searchParams.get("category");
+      const activeTab = searchParams.get("tab");
       return {
         view: viewForPath(pathname),
         path: appPath(pathname),
         ...(threadId ? { threadId } : {}),
         ...(activeCategory ? { activeCategory } : {}),
+        ...(activeTab === "orders" ? { activeTab } : {}),
       };
     },
     getCommandPath: (command) =>
@@ -42,6 +45,7 @@ function threadIdFromPath(pathname: string): string | null {
 
 function viewForPath(pathname: string): string {
   if (pathname === "/") return "home";
+  if (pathname === "/admin") return "admin";
   if (pathname === "/apie-mus") return "about";
   if (pathname === "/pristatymas") return "delivery";
   if (pathname === "/grazinimas") return "returns";

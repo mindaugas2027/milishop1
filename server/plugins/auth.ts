@@ -98,6 +98,7 @@ export default createAuthPlugin({
     "/_agent-native/auth/session",
     "/_agent-native/actions/list-product-landings",
     "/_agent-native/actions/get-product-landing",
+    "/_agent-native/actions/create-order",
     "/api/admin-auth/login",
     "/api/admin-auth/logout",
   ],

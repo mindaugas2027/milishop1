@@ -47,6 +47,19 @@ describe("view-screen", () => {
     });
   });
 
+  it("identifies the admin order-management view", async () => {
+    mocks.readAppState.mockImplementation(async (key: string) => key === "navigation"
+      ? { view: "admin", path: "/admin", activeTab: "orders" }
+      : null);
+
+    const result = await action.run({});
+
+    expect(result).toEqual({
+      navigation: { view: "admin", path: "/admin", activeTab: "orders" },
+      adminView: "orders",
+    });
+  });
+
   it("is marked read-only", () => {
     expect(action.readOnly).toBe(true);
   });

@@ -1,12 +1,20 @@
 import ProductManager from "@/components/admin/ProductManager";
 import CategoryManager from "@/components/admin/CategoryManager";
-import { Link, Outlet, useLocation } from "react-router";
+import OrderManager from "@/components/admin/OrderManager";
+import { Link, Outlet, useLocation, useSearchParams } from "react-router";
 import { useActionMutation, useActionQuery } from "@agent-native/core/client/hooks";
 import { useEffect, useState } from "react";
 
 export function getAdminTabConfig() {
   return ["Produktai", "Kategorijos", "Užsakymai", "Nustatymai"];
 }
+
+const tabKeys: Record<string, string> = {
+  Produktai: "products",
+  Kategorijos: "categories",
+  Užsakymai: "orders",
+  Nustatymai: "settings",
+};
 
 export function meta() {
   return [{ title: "Produktai — Milishop" }];
@@ -43,19 +51,20 @@ function StoreSettingsPanel() {
 }
 
 function OrdersPanel() {
-  return (
-    <section className="admin-panel mt-6 max-w-3xl">
-      <h2 className="admin-panel-title">Užsakymai</h2>
-      <p className="mt-4 text-sm leading-6 text-[#203b40]/65">Užsakymų dar nėra, nes dabartinis krepšelis užsakymo neįrašo ir mokėjimas nėra prijungtas.</p>
-      <p className="mt-2 text-sm leading-6 text-[#203b40]/65">Kai bus prijungtas atsiskaitymas ir užsakymų registravimas, čia matysite pirkėjus, prekes ir užsakymo būseną.</p>
-    </section>
-  );
+  return <OrderManager />;
 }
 
 export default function AdminRoute() {
   const location = useLocation();
-  const [activeTab, setActiveTab] = useState("Produktai");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const activeTab = navItemsFromSearch(searchParams.get("tab"));
   const navItems = getAdminTabConfig();
+
+  function navItemsFromSearch(tab: string | null) {
+    return getAdminTabConfig().find((item) => tabKeys[item] === tab) ?? "Produktai";
+  }
+
+  const selectTab = (item: string) => setSearchParams(item === "Produktai" ? {} : { tab: tabKeys[item] }, { replace: true });
 
   const signOut = async () => {
     try {
@@ -81,7 +90,7 @@ export default function AdminRoute() {
         <nav className="px-5" aria-label="Administravimas">
           <p className="admin-label px-3">Parduotuvė</p>
           <div className="mt-3 grid gap-1">
-            {navItems.map((item) => <button key={item} type="button" onClick={() => setActiveTab(item)} aria-pressed={activeTab === item} className={`admin-nav-item ${activeTab === item ? "admin-nav-item-active" : ""}`}><span className="admin-nav-symbol" aria-hidden="true">{item === "Produktai" ? "□" : item === "Kategorijos" ? "⌘" : item === "Užsakymai" ? "↗" : "◌"}</span>{item}</button>)}
+            {navItems.map((item) => <button key={item} type="button" onClick={() => selectTab(item)} aria-pressed={activeTab === item} className={`admin-nav-item ${activeTab === item ? "admin-nav-item-active" : ""}`}><span className="admin-nav-symbol" aria-hidden="true">{item === "Produktai" ? "□" : item === "Kategorijos" ? "⌘" : item === "Užsakymai" ? "↗" : "◌"}</span>{item}</button>)}
           </div>
         </nav>
         <div className="mt-auto px-5 pb-6">
@@ -102,7 +111,7 @@ export default function AdminRoute() {
           <button type="button" onClick={signOut} className="text-xs font-semibold text-[#2f7f7b]">Atsijungti</button>
         </header>
         <nav className="flex gap-2 overflow-x-auto border-b border-[#203b40]/8 bg-white px-5 lg:hidden" aria-label="Administravimo skirtukai">
-          {navItems.map((item) => <button key={item} type="button" onClick={() => setActiveTab(item)} aria-pressed={activeTab === item} className={`shrink-0 border-b-2 px-3 py-3 text-xs font-semibold ${activeTab === item ? "border-[#2f7f7b] text-[#2f7f7b]" : "border-transparent text-[#203b40]/55"}`}>{item}</button>)}
+          {navItems.map((item) => <button key={item} type="button" onClick={() => selectTab(item)} aria-pressed={activeTab === item} className={`shrink-0 border-b-2 px-3 py-3 text-xs font-semibold ${activeTab === item ? "border-[#2f7f7b] text-[#2f7f7b]" : "border-transparent text-[#203b40]/55"}`}>{item}</button>)}
         </nav>
         <main className="mx-auto max-w-[1380px] px-5 py-7 sm:px-8 sm:py-10 lg:px-12 lg:py-12">
           <div className="flex items-center justify-between gap-4">

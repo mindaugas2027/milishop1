@@ -29,6 +29,9 @@ export default defineAction({
     if (category && ["automobiliui", "kasdienai", "namams"].includes(category)) {
       screen.activeFilters = { category };
     }
+    if (navigation?.activeTab === "orders" && navigation?.path === "/admin") {
+      screen.adminView = "orders";
+    }
 
     if (Object.keys(screen).length === 0) {
       return "No application state found. Is the app running?";

@@ -14,6 +14,7 @@ const landingSchema = z.object({
   description: z.string().max(500).describe("Short product description"),
   longDescription: z.string().max(4000).describe("Full product description"),
   price: z.string().min(1).max(40).describe("Current display price"),
+  costPrice: z.string().trim().max(40).refine((value) => !value || /^\d+(?:[,.]\d{1,2})?$/.test(value), "Savikainą įveskite skaičiumi, pvz., 12,50.").default("").describe("Private unit purchase cost in euros; leave blank if unknown"),
   oldPrice: z.string().max(40).describe("Optional old display price"),
   saving: z.string().max(80).describe("Optional savings label"),
   heroImage: z.string().url().describe("Primary product image URL"),

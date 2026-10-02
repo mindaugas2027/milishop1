@@ -147,7 +147,7 @@ function ProductPage({ slug }: { slug: string }) {
           </span>
         </Link>
         <div className="flex items-center gap-2">
-          <StoreCartDrawer items={cartItems} open={cartOpen} onOpenChange={setCartOpen} onQuantityChange={changeCartQuantity} />
+          <StoreCartDrawer items={cartItems} open={cartOpen} onOpenChange={setCartOpen} onQuantityChange={changeCartQuantity} onOrderCreated={() => { setCartItems([]); writeCart([]); }} />
           <Link to="/" className="rounded-full border border-foreground/10 bg-white px-4 py-2 text-sm font-medium text-foreground/70 transition-colors hover:border-[#61aaa3] hover:text-foreground">← Visi produktai</Link>
         </div>
       </header>
