@@ -169,7 +169,6 @@ export default function AdminProductEditorRoute() {
               <label className="grid gap-1.5 text-xs font-medium text-[#203b40]/70">Kategorija
                 <select className="w-full rounded-lg border border-[#203b40]/15 bg-white px-3 py-2.5 text-sm text-[#203b40] outline-none focus:border-[#2f7f7b]" value={draft.category} onChange={(event) => update("category", event.target.value as StoreCategory)}>
                   {categories.map((category) => <option key={category.slug} value={category.slug}>{category.name}</option>)}
-                    {categories.map((category) => <option key={category.slug} value={category.slug}>{category.name}</option>)}
                 </select>
               </label>
               <Field label="Kaina" value={draft.price} onChange={(value) => update("price", value)} required />
