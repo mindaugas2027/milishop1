@@ -1,4 +1,5 @@
 import { actionErrorMessage, useActionMutation, useActionQuery } from "@agent-native/core/client/hooks";
+import { useState } from "react";
 
 type OrderItem = {
   slug: string;
@@ -45,7 +46,8 @@ export default function OrderManager() {
   const { data, isPending, isError } = useActionQuery("list-orders", {});
   const { mutate: updateOrder, isPending: isUpdating, error: updateError } = useActionMutation("update-order");
   const { mutate: deleteOrder, isPending: isDeleting, error: deleteError } = useActionMutation("delete-order");
-  const orders = (data ?? []) as AdminOrder[];
+  const [removedOrderIds, setRemovedOrderIds] = useState<string[]>([]);
+  const orders = ((data ?? []) as AdminOrder[]).filter((order) => !removedOrderIds.includes(order.id));
   const completedOrders = orders.filter((order) => order.status === "completed" && order.paymentStatus === "paid" && order.profitCents !== "");
   const grossProfitCents = completedOrders.reduce((sum, order) => sum + Number(order.profitCents), 0);
   const grossRevenueCents = completedOrders.reduce((sum, order) => sum + Number(order.totalCents), 0);
@@ -53,11 +55,14 @@ export default function OrderManager() {
 
   const removeOrder = (order: AdminOrder) => {
     if (!window.confirm(`Visam laikui ištrinti užsakymą ${order.orderNumber}? Šio veiksmo atšaukti nepavyks.`)) return;
-    deleteOrder({ id: order.id });
+    setRemovedOrderIds((current) => [...current, order.id]);
+    deleteOrder({ id: order.id }, {
+      onError: () => setRemovedOrderIds((current) => current.filter((id) => id !== order.id)),
+    });
   };
 
   return (
-    <section className="admin-panel mt-6" aria-busy={isPending || isUpdating}>
+    <section className="admin-panel mt-6" aria-busy={isPending || isUpdating || isDeleting}>
       {orders.length > 0 && (
         <div className="flex flex-wrap gap-x-8 gap-y-2 border-b border-[#203b40]/8 pb-5 text-sm">
           <p><span className="text-[#203b40]/55">Pardavimai</span> <strong className="ml-2">{formatCents(grossRevenueCents)}</strong></p>
