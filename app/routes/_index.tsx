@@ -24,21 +24,6 @@ type StorefrontProduct = {
 
 type ProductLandingPage = Awaited<ReturnType<typeof listProductLandings.run>>;
 
-const categoryCardCopy: Record<string, { caption: string; number: string }> = {
-  automobiliui: {
-    caption: "OBD2 diagnostika ir telefono laikikliai patogesnėms kelionėms.",
-    number: "01",
-  },
-  kasdienai: {
-    caption: "Žaislai, kvapai ir kiti radiniai įvairioms progoms.",
-    number: "02",
-  },
-  namams: {
-    caption: "Keraminiai akcentai ir jaukūs daiktai tavo namų erdvei.",
-    number: "03",
-  },
-};
-
 type HomeLoaderData = {
   category?: string;
   productPage: ProductLandingPage | null;
@@ -166,18 +151,13 @@ export default function HomeRoute() {
   const visibleProducts = pageCursor || !productPage ? storefrontProducts : currentPageProducts;
   const storefrontCategories = (productPage?.categories ?? []) as StoreCategoryRecord[];
   const visibleHeroSlides = heroSlides;
-  const visibleCategories = storefrontCategories.map((category) => {
-    const copy = categoryCardCopy[category.slug];
-    return {
-      ...category,
-      key: category.slug,
-      label: category.name,
-      caption: copy?.caption ?? category.caption,
-      number: copy?.number ?? "",
-      href: `/?category=${category.slug}#produktai`,
-      image: category.image || currentPageProducts.find((product) => product.category === category.slug)?.image || storefrontProducts.find((product) => product.category === category.slug)?.image || heroSlides[0].src,
-    };
-  });
+  const visibleCategories = storefrontCategories.map((category) => ({
+    ...category,
+    key: category.slug,
+    label: category.name,
+    href: `/?category=${category.slug}#produktai`,
+    image: category.image || currentPageProducts.find((product) => product.category === category.slug)?.image || storefrontProducts.find((product) => product.category === category.slug)?.image || heroSlides[0].src,
+  }));
   const nextPageCursor = productPage?.nextCursor ?? null;
   const cartCount = cartItems.reduce((total, item) => total + item.quantity, 0);
 
@@ -346,27 +326,27 @@ export default function HomeRoute() {
         </div>
 
         <section id="kategorijos" className="levitara-section levitara-category-section">
-          <div className="levitara-section-heading levitara-catalog-heading">
-            <h2>Daiktai kelionėms, namams ir kasdienai</h2>
-            <span className="levitara-heading-side">Atrask katalogą</span>
-          </div>
-          <div className="levitara-catalog-grid">
-            <div className="levitara-catalog-intro">
-              <p className="levitara-kicker dark">Milishop katalogas</p>
-              <h3>Rask tai, ko reikia</h3>
-              <p>Automobilio priedai, namų akcentai ir praktiški radiniai dovanai – vienoje vietoje.</p>
+          <div className="levitara-section-heading">
+            <div>
+              <p className="levitara-kicker dark">Milishop kolekcija</p>
+              <h2>Rask tai, kas tinka tau.</h2>
             </div>
+            <span className="levitara-heading-side">Paprasti sprendimai kasdienai</span>
+          </div>
+          <div className="levitara-category-grid">
             {visibleCategories.map((category) => (
               <Link
                 key={category.key}
                 to={category.href}
                 onClick={resetProductPages}
-                className="levitara-catalog-card"
+                className={`levitara-category-card ${category.label !== "Automobiliui" ? "levitara-category-card-light" : ""}`}
               >
-                {category.number && <span className="levitara-catalog-number" aria-hidden="true">{category.number}</span>}
-                <span className="levitara-catalog-card-copy">
+                <img src={category.image} alt={category.label} loading="lazy" />
+                <span className="levitara-category-shade" />
+                <span className="levitara-category-content">
                   <strong>{category.label}</strong>
                   <small>{category.caption}</small>
+                  <span className="levitara-white-button">Peržiūrėti</span>
                 </span>
               </Link>
             ))}
