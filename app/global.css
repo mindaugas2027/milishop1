@@ -549,6 +549,7 @@
 .levitara-section-heading { display: flex; align-items: end; justify-content: space-between; gap: 24px; margin-bottom: 28px; }
 .levitara-section-heading h2 { margin: 0; font-size: clamp(1.7rem, 3vw, 2.45rem); font-weight: 500; letter-spacing: -.055em; }
 .levitara-heading-side { color: #999; font-size: 11px; }
+.levitara-category-intro { max-width: 60ch; margin: 10px 0 0; color: #777; font-size: 13px; line-height: 1.6; }
 .levitara-category-grid { display: grid; gap: 16px; grid-template-columns: repeat(3, 1fr); }
 .levitara-category-card { position: relative; display: block; aspect-ratio: 1 / .86; overflow: hidden; color: #fff; text-decoration: none; }
 .levitara-category-card img { width: 100%; height: 100%; object-fit: cover; transition: transform 700ms cubic-bezier(.165,.84,.44,1); }
@@ -558,6 +559,7 @@
 .levitara-category-card-light .levitara-category-shade { background: linear-gradient(0deg, rgb(0 0 0 / .36), rgb(0 0 0 / .01) 75%); }
 .levitara-category-content { position: absolute; inset: auto 24px 24px; display: flex; flex-direction: column; align-items: flex-start; }
 .levitara-category-content strong { font-size: 26px; font-weight: 400; letter-spacing: -.04em; }
+.levitara-category-content .levitara-category-number { margin: 0 0 5px; color: rgb(255 255 255 / .72); font-size: 10px; font-weight: 700; }
 .levitara-category-content small { margin-top: 5px; color: rgb(255 255 255 / .72); font-size: 11px; }
 .levitara-white-button { margin-top: 17px; background: #fff; padding: 10px 14px; color: #121212; font-size: 10px; font-weight: 700; }
 .levitara-product-grid { display: grid; gap: 28px 18px; grid-template-columns: repeat(4, minmax(0, 1fr)); }

@@ -24,6 +24,24 @@ type StorefrontProduct = {
 
 type ProductLandingPage = Awaited<ReturnType<typeof listProductLandings.run>>;
 
+const categoryCardCopy: Record<string, { label: string; caption: string; number: string }> = {
+  automobiliui: {
+    label: "Kelionėms",
+    caption: "OBD2 diagnostika ir telefono laikikliai patogesnėms kelionėms.",
+    number: "01",
+  },
+  namams: {
+    label: "Namams",
+    caption: "Keraminiai akcentai ir jaukūs daiktai tavo namų erdvei.",
+    number: "02",
+  },
+  kasdienai: {
+    label: "Dovanoms",
+    caption: "Žaislai, kvapai ir kiti radiniai įvairioms progoms.",
+    number: "03",
+  },
+};
+
 type HomeLoaderData = {
   category?: string;
   productPage: ProductLandingPage | null;
@@ -151,13 +169,19 @@ export default function HomeRoute() {
   const visibleProducts = pageCursor || !productPage ? storefrontProducts : currentPageProducts;
   const storefrontCategories = (productPage?.categories ?? []) as StoreCategoryRecord[];
   const visibleHeroSlides = heroSlides;
-  const visibleCategories = storefrontCategories.map((category) => ({
-    ...category,
-    key: category.slug,
-    label: category.name,
-    href: `/?category=${category.slug}#produktai`,
-    image: category.image || currentPageProducts.find((product) => product.category === category.slug)?.image || storefrontProducts.find((product) => product.category === category.slug)?.image || heroSlides[0].src,
-  }));
+  const visibleCategories = storefrontCategories.map((category) => {
+    const copy = categoryCardCopy[category.slug];
+    return {
+      ...category,
+      ...copy,
+      key: category.slug,
+      label: copy?.label ?? category.name,
+      caption: copy?.caption ?? category.caption,
+      number: copy?.number ?? "",
+      href: `/?category=${category.slug}#produktai`,
+      image: category.image || currentPageProducts.find((product) => product.category === category.slug)?.image || storefrontProducts.find((product) => product.category === category.slug)?.image || heroSlides[0].src,
+    };
+  }).sort((first, second) => (Number(first.number) || 99) - (Number(second.number) || 99));
   const nextPageCursor = productPage?.nextCursor ?? null;
   const cartCount = cartItems.reduce((total, item) => total + item.quantity, 0);
 
@@ -329,9 +353,9 @@ export default function HomeRoute() {
           <div className="levitara-section-heading">
             <div>
               <p className="levitara-kicker dark">Milishop kolekcija</p>
-              <h2>Rask tai, kas tinka tau.</h2>
+              <h2>Rask tai, ko reikia</h2>
+              <p className="levitara-category-intro">Automobilio priedai, namų akcentai ir praktiški radiniai dovanai – vienoje vietoje.</p>
             </div>
-            <span className="levitara-heading-side">Paprasti sprendimai kasdienai</span>
           </div>
           <div className="levitara-category-grid">
             {visibleCategories.map((category) => (
@@ -344,6 +368,7 @@ export default function HomeRoute() {
                 <img src={category.image} alt={category.label} loading="lazy" />
                 <span className="levitara-category-shade" />
                 <span className="levitara-category-content">
+                  {category.number && <small className="levitara-category-number" aria-hidden="true">{category.number}</small>}
                   <strong>{category.label}</strong>
                   <small>{category.caption}</small>
                   <span className="levitara-white-button">Peržiūrėti</span>
