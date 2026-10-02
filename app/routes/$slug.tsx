@@ -305,7 +305,7 @@ function ProductPage({ slug }: { slug: string }) {
               </div>
             </section>
 
-            <section className="product-detail-section mt-12 border-t border-foreground/10 pt-10">
+            {product.showSpecs && product.specs.length > 0 && <section className="product-detail-section mt-12 border-t border-foreground/10 pt-10">
               <p className="mb-3 text-xs font-semibold uppercase tracking-[0.16em] text-[#398b86]">Specifikacija</p>
               <h2 className="text-3xl font-semibold tracking-[-0.06em] text-[#203b40]">Svarbiausia vienoje vietoje.</h2>
               <div className="mt-6 divide-y divide-foreground/10 border-y border-foreground/10">
@@ -316,9 +316,9 @@ function ProductPage({ slug }: { slug: string }) {
                   </div>
                 ))}
               </div>
-            </section>
+            </section>}
 
-            <section className="product-detail-section mt-12 border-t border-foreground/10 pt-10">
+            {product.showFaq && product.faq.length > 0 && <section className="product-detail-section mt-12 border-t border-foreground/10 pt-10">
               <p className="mb-3 text-xs font-semibold uppercase tracking-[0.16em] text-[#398b86]">Dažniausiai klausiama</p>
               <h2 className="text-3xl font-semibold tracking-[-0.06em] text-[#203b40]">Turite klausimų?</h2>
               <div className="mt-6 divide-y divide-foreground/10 border-y border-foreground/10">
@@ -332,7 +332,7 @@ function ProductPage({ slug }: { slug: string }) {
                   </details>
                 ))}
               </div>
-            </section>
+            </section>}
 
             <section className="mt-12 border-t border-foreground/10 px-0 py-7 text-[#171a19]">
               <p className="text-xs font-semibold uppercase tracking-[0.12em] text-foreground/50">{product.finalCtaEyebrow}</p>

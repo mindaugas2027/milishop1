@@ -43,6 +43,13 @@
       "when": 1790685885676,
       "tag": "0005_optimal_rattler",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1790925757760,
+      "tag": "0006_lyrical_captain_cross",
+      "breakpoints": true
     }
   ]
 }

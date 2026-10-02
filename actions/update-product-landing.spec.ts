@@ -36,7 +36,9 @@ const productInput = {
   features: [],
   steps: [],
   specs: [],
+  showSpecs: false,
   faq: [],
+  showFaq: true,
   deliveryInfo: "Pristatymas per 1–2 d. d.",
   returnsInfo: "14 dienų grąžinimas",
   ctaText: "Pirkti dabar",
@@ -79,6 +81,8 @@ describe("update-product-landing", () => {
     expect(insertedValues?.category).toBe(productInput.category);
     expect(result.supplierUrl).toBe(productInput.supplierUrl);
     expect(result.category).toBe(productInput.category);
+    expect(insertedValues?.showSpecs).toBe(false);
+    expect(insertedValues?.showFaq).toBe(true);
     expect(result.gallery).toEqual(productInput.gallery);
   });
 });

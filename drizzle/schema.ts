@@ -1,4 +1,4 @@
-import { index, now, table, text, uniqueIndex } from "@agent-native/core/db/schema";
+import { boolean, index, now, table, text, uniqueIndex } from "@agent-native/core/db/schema";
 
 export const storeCategories = table("store_categories", {
   id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
@@ -35,7 +35,9 @@ export const productLandings = table("product_landings", {
   features: text("features").notNull().default("[]"),
   steps: text("steps").notNull().default("[]"),
   specs: text("specs").notNull().default("[]"),
+  showSpecs: boolean("show_specs").notNull().default(true),
   faq: text("faq").notNull().default("[]"),
+  showFaq: boolean("show_faq").notNull().default(true),
   deliveryInfo: text("delivery_info").notNull().default("Pristatymas per 1–2 d. d."),
   returnsInfo: text("returns_info").notNull().default("14 dienų grąžinimas"),
   ctaText: text("cta_text").notNull().default("Pirkti dabar"),

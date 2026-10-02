@@ -23,7 +23,9 @@ type ProductDraft = {
   features: string[];
   steps: string[];
   specs: Array<{ label: string; value: string }>;
+  showSpecs: boolean;
   faq: Array<{ question: string; answer: string }>;
+  showFaq: boolean;
   deliveryInfo: string;
   returnsInfo: string;
   ctaText: string;
@@ -53,7 +55,9 @@ function createDraft(slug: string): ProductDraft {
     features: [],
     steps: [],
     specs: [],
+    showSpecs: false,
     faq: [],
+    showFaq: false,
     deliveryInfo: "Pristatymas per 1–2 d. d.",
     returnsInfo: "14 dienų grąžinimas",
     ctaText: "Pirkti dabar",
@@ -95,7 +99,7 @@ export default function AdminProductEditorRoute() {
   useEffect(() => {
     if (data) {
       const baseDraft = createDraft(slug);
-      setDraft({ ...baseDraft, ...data, category: data.category || baseDraft.category });
+      setDraft({ ...baseDraft, ...data, category: data.category || baseDraft.category, showSpecs: data.showSpecs ?? baseDraft.showSpecs, showFaq: data.showFaq ?? baseDraft.showFaq });
     }
   }, [data, slug]);
 
@@ -150,7 +154,16 @@ export default function AdminProductEditorRoute() {
       setFormError("Įkelkite nuotrauką ir pažymėkite pagrindinę.");
       return;
     }
-    mutate({ ...draft, saving: discount ? `Sutaupai ${discount.amountLabel}` : "", slug: nextSlug, name: draft.name.trim(), finalCtaTitle: draft.finalCtaTitle.trim() || draft.name.trim(), supplierUrl: draft.supplierUrl.trim() });
+    mutate({
+      ...draft,
+      saving: discount ? `Sutaupai ${discount.amountLabel}` : "",
+      slug: nextSlug,
+      name: draft.name.trim(),
+      finalCtaTitle: draft.name.trim(),
+      specs: draft.specs.filter((spec) => spec.label.trim() || spec.value.trim()).map((spec) => ({ label: spec.label.trim(), value: spec.value.trim() })),
+      faq: draft.faq.filter((item) => item.question.trim() || item.answer.trim()).map((item) => ({ question: item.question.trim(), answer: item.answer.trim() })),
+      supplierUrl: draft.supplierUrl.trim(),
+    });
   };
 
   return (
@@ -192,6 +205,25 @@ export default function AdminProductEditorRoute() {
               <Field label="Naudojimo žingsniai, po vieną eilutėje" value={draft.steps.join("\n")} onChange={(value) => updateLines("steps", value)} multiline />
               <Field label="Pristatymo informacija" value={draft.deliveryInfo} onChange={(value) => update("deliveryInfo", value)} />
               <Field label="Grąžinimo informacija" value={draft.returnsInfo} onChange={(value) => update("returnsInfo", value)} />
+            </div>
+          </section>
+          <section className="landing-editor-section mt-0">
+            <h2 className="landing-editor-heading mb-5 text-lg font-semibold">Specifikacijos ir klausimai</h2>
+            <div className="grid gap-6">
+              <div className="grid gap-3">
+                <label className="flex items-center gap-2 text-sm font-medium text-[#203b40]"><input type="checkbox" checked={draft.showSpecs} onChange={(event) => update("showSpecs", event.target.checked)} className="size-4 accent-[#2f7f7b]" />Rodyti specifikacijų skiltį</label>
+                {draft.showSpecs && <div className="grid gap-3">
+                  {draft.specs.map((spec, specIndex) => <div key={specIndex} className="grid items-end gap-3 sm:grid-cols-[1fr_1fr_auto]"><Field label="Specifikacija" value={spec.label} onChange={(value) => update("specs", draft.specs.map((item, itemIndex) => itemIndex === specIndex ? { ...item, label: value } : item))} /><Field label="Reikšmė" value={spec.value} onChange={(value) => update("specs", draft.specs.map((item, itemIndex) => itemIndex === specIndex ? { ...item, value } : item))} /><button type="button" onClick={() => update("specs", draft.specs.filter((_, itemIndex) => itemIndex !== specIndex))} className="admin-row-action">Pašalinti</button></div>)}
+                  <button type="button" onClick={() => update("specs", [...draft.specs, { label: "", value: "" }])} className="admin-row-action justify-self-start">Pridėti specifikaciją</button>
+                </div>}
+              </div>
+              <div className="grid gap-3">
+                <label className="flex items-center gap-2 text-sm font-medium text-[#203b40]"><input type="checkbox" checked={draft.showFaq} onChange={(event) => update("showFaq", event.target.checked)} className="size-4 accent-[#2f7f7b]" />Rodyti DUK skiltį</label>
+                {draft.showFaq && <div className="grid gap-4">
+                  {draft.faq.map((item, faqIndex) => <div key={faqIndex} className="grid gap-3 rounded-lg border border-[#203b40]/10 p-3 sm:grid-cols-[1fr_1fr_auto]"><Field label="Klausimas" value={item.question} onChange={(value) => update("faq", draft.faq.map((entry, entryIndex) => entryIndex === faqIndex ? { ...entry, question: value } : entry))} /><Field label="Atsakymas" value={item.answer} onChange={(value) => update("faq", draft.faq.map((entry, entryIndex) => entryIndex === faqIndex ? { ...entry, answer: value } : entry))} multiline /><button type="button" onClick={() => update("faq", draft.faq.filter((_, entryIndex) => entryIndex !== faqIndex))} className="admin-row-action">Pašalinti</button></div>)}
+                  <button type="button" onClick={() => update("faq", [...draft.faq, { question: "", answer: "" }])} className="admin-row-action justify-self-start">Pridėti klausimą</button>
+                </div>}
+              </div>
             </div>
           </section>
           {(formError || saveError) && <p role="alert" className="text-sm text-[#bd6659]">{formError || "Nepavyko išsaugoti. Patikrinkite laukus ir duomenų bazės ryšį."}</p>}

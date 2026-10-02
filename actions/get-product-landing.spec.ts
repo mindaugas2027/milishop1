@@ -10,7 +10,7 @@ vi.mock("../server/db.js", () => ({
     productLandings: Object.fromEntries([
       "id", "slug", "status", "supplierUrl", "brandName", "footerText", "name",
       "category", "eyebrow", "description", "longDescription", "price", "oldPrice", "saving",
-      "heroImage", "gallery", "features", "steps", "specs", "faq", "deliveryInfo",
+      "heroImage", "gallery", "features", "steps", "specs", "showSpecs", "faq", "showFaq", "deliveryInfo",
       "returnsInfo", "ctaText", "finalCtaEyebrow", "finalCtaTitle", "finalCtaText",
       "createdAt", "updatedAt",
     ].map((key) => [key, key])),
@@ -43,7 +43,9 @@ describe("get-product-landing public response", () => {
       features: "[]",
       steps: "[]",
       specs: "[]",
+      showSpecs: true,
       faq: "[]",
+      showFaq: false,
       deliveryInfo: "",
       returnsInfo: "",
       ctaText: "Buy",
@@ -62,5 +64,6 @@ describe("get-product-landing public response", () => {
     expect(mockDb.select.mock.calls[0][0]).not.toHaveProperty("supplierUrl");
     expect(result).not.toHaveProperty("supplierUrl");
     expect(result).toMatchObject({ category: "automobiliui" });
+    expect(result).toMatchObject({ showSpecs: true, showFaq: false });
   });
 });

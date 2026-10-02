@@ -35,6 +35,8 @@ function deserialize(row: PublicLanding) {
     steps: JSON.parse(row.steps) as string[],
     specs: JSON.parse(row.specs) as Array<{ label: string; value: string }>,
     faq: JSON.parse(row.faq) as Array<{ question: string; answer: string }>,
+    showSpecs: row.showSpecs,
+    showFaq: row.showFaq,
   };
 }
 
@@ -68,7 +70,9 @@ export default defineAction({
         features: schema.productLandings.features,
         steps: schema.productLandings.steps,
         specs: schema.productLandings.specs,
+        showSpecs: schema.productLandings.showSpecs,
         faq: schema.productLandings.faq,
+        showFaq: schema.productLandings.showFaq,
         deliveryInfo: schema.productLandings.deliveryInfo,
         returnsInfo: schema.productLandings.returnsInfo,
         ctaText: schema.productLandings.ctaText,
