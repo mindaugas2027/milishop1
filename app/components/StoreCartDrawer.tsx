@@ -20,7 +20,16 @@ type StoreCartDrawerProps = {
 };
 
 export function StoreCartDrawer({ items, open, onOpenChange, onQuantityChange, className = "" }: StoreCartDrawerProps) {
-  const [customer, setCustomer] = useState({ customerName: "", customerEmail: "", customerPhone: "", shippingAddress: "" });
+  const [customer, setCustomer] = useState({
+    customerName: "",
+    customerEmail: "",
+    customerPhone: "",
+    shippingStreet: "",
+    shippingHouseNumber: "",
+    shippingApartmentNumber: "",
+    shippingCity: "",
+    shippingPostalCode: "",
+  });
   const { mutate: createOrder, isPending, error } = useActionMutation("create-order");
   const itemCount = items.reduce((total, item) => total + item.quantity, 0);
   const total = items.reduce((sum, item) => sum + priceValue(item.price) * item.quantity, 0);
@@ -83,7 +92,11 @@ export function StoreCartDrawer({ items, open, onOpenChange, onQuantityChange, c
                 <label className="grid gap-1 text-xs font-medium text-[#203b40]/70">Vardas ir pavardė<input className="rounded-lg border border-[#203b40]/15 bg-white px-3 py-2.5 text-sm" autoComplete="name" required minLength={2} maxLength={120} value={customer.customerName} onChange={(event) => setCustomer({ ...customer, customerName: event.target.value })} /></label>
                 <label className="grid gap-1 text-xs font-medium text-[#203b40]/70">El. paštas<input className="rounded-lg border border-[#203b40]/15 bg-white px-3 py-2.5 text-sm" type="email" autoComplete="email" required maxLength={254} value={customer.customerEmail} onChange={(event) => setCustomer({ ...customer, customerEmail: event.target.value })} /></label>
                 <label className="grid gap-1 text-xs font-medium text-[#203b40]/70">Telefonas<input className="rounded-lg border border-[#203b40]/15 bg-white px-3 py-2.5 text-sm" type="tel" autoComplete="tel" required minLength={6} maxLength={30} value={customer.customerPhone} onChange={(event) => setCustomer({ ...customer, customerPhone: event.target.value })} /></label>
-                <label className="grid gap-1 text-xs font-medium text-[#203b40]/70">Pristatymo adresas<textarea className="rounded-lg border border-[#203b40]/15 bg-white px-3 py-2.5 text-sm" autoComplete="street-address" required minLength={8} maxLength={400} rows={2} value={customer.shippingAddress} onChange={(event) => setCustomer({ ...customer, shippingAddress: event.target.value })} /></label>
+                <label className="grid gap-1 text-xs font-medium text-[#203b40]/70">Gatvė<input className="rounded-lg border border-[#203b40]/15 bg-white px-3 py-2.5 text-sm" autoComplete="address-line1" required minLength={2} maxLength={120} value={customer.shippingStreet} onChange={(event) => setCustomer({ ...customer, shippingStreet: event.target.value })} /></label>
+                <label className="grid gap-1 text-xs font-medium text-[#203b40]/70">Namo numeris<input className="rounded-lg border border-[#203b40]/15 bg-white px-3 py-2.5 text-sm" required maxLength={20} value={customer.shippingHouseNumber} onChange={(event) => setCustomer({ ...customer, shippingHouseNumber: event.target.value })} /></label>
+                <label className="grid gap-1 text-xs font-medium text-[#203b40]/70">Buto numeris (nebūtina)<input className="rounded-lg border border-[#203b40]/15 bg-white px-3 py-2.5 text-sm" autoComplete="address-line2" maxLength={20} value={customer.shippingApartmentNumber} onChange={(event) => setCustomer({ ...customer, shippingApartmentNumber: event.target.value })} /></label>
+                <label className="grid gap-1 text-xs font-medium text-[#203b40]/70">Miestas<input className="rounded-lg border border-[#203b40]/15 bg-white px-3 py-2.5 text-sm" autoComplete="address-level2" required minLength={2} maxLength={100} value={customer.shippingCity} onChange={(event) => setCustomer({ ...customer, shippingCity: event.target.value })} /></label>
+                <label className="grid gap-1 text-xs font-medium text-[#203b40]/70">Pašto kodas<input className="rounded-lg border border-[#203b40]/15 bg-white px-3 py-2.5 text-sm" autoComplete="postal-code" inputMode="numeric" required minLength={5} maxLength={5} pattern="[0-9]{5}" value={customer.shippingPostalCode} onChange={(event) => setCustomer({ ...customer, shippingPostalCode: event.target.value })} /></label>
                 <p className="rounded-lg bg-[#f5f7f5] p-3 text-xs leading-5 text-[#555d59]">Saugus atsiskaitymas kortele per Stripe.</p>
                 <div className="levitara-cart-total"><span>Prekių suma</span><strong>{formatPrice(total)}</strong></div>
                 {error && <p role="alert" className="text-sm text-[#bd6659]">{actionErrorMessage(error) ?? "Užsakymo pateikti nepavyko. Patikrinkite duomenis ir bandykite dar kartą."}</p>}

@@ -10,7 +10,11 @@ const orderInput = z.object({
   customerName: z.string().trim().min(2).max(120).describe("Pirkėjo vardas ir pavardė"),
   customerEmail: z.string().trim().email().max(254).describe("Pirkėjo el. pašto adresas"),
   customerPhone: z.string().trim().min(6).max(30).describe("Pirkėjo telefono numeris"),
-  shippingAddress: z.string().trim().min(8).max(400).describe("Pristatymo adresas"),
+  shippingStreet: z.string().trim().min(2).max(120).describe("Gatvės pavadinimas"),
+  shippingHouseNumber: z.string().trim().min(1).max(20).describe("Namo numeris"),
+  shippingApartmentNumber: z.string().trim().max(20).optional().default("").describe("Buto numeris (neprivalomas)"),
+  shippingCity: z.string().trim().min(2).max(100).describe("Miestas"),
+  shippingPostalCode: z.string().trim().regex(/^\d{5}$/, "Pašto kodą turi sudaryti 5 skaitmenys.").describe("Lietuvos 5 skaitmenų pašto kodas"),
   items: z.array(z.object({
     slug: z.string().trim().min(1).max(120).describe("Produkto adresas"),
     quantity: z.number().int().min(1).max(99).describe("Prekės kiekis"),
@@ -32,7 +36,7 @@ export default defineAction({
   schema: orderInput,
   requiresAuth: false,
   agentTool: false,
-  run: async ({ customerName, customerEmail, customerPhone, shippingAddress, items }) => {
+  run: async ({ customerName, customerEmail, customerPhone, shippingStreet, shippingHouseNumber, shippingApartmentNumber, shippingCity, shippingPostalCode, items }) => {
     const quantities = new Map<string, number>();
     for (const item of items) {
       const nextQuantity = (quantities.get(item.slug) ?? 0) + item.quantity;
@@ -95,6 +99,10 @@ export default defineAction({
     }
     const id = crypto.randomUUID();
     const orderNumber = `MS-${new Date().getFullYear()}-${id.slice(0, 8).toUpperCase()}`;
+    const shippingAddress = [
+      `${shippingStreet} ${shippingHouseNumber}${shippingApartmentNumber ? `-${shippingApartmentNumber}` : ""}`,
+      `LT-${shippingPostalCode} ${shippingCity}`,
+    ].join("\n");
     const checkoutSession = await stripe.checkout.sessions.create({
       mode: "payment",
       customer_email: customerEmail,

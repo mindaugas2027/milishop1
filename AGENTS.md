@@ -97,8 +97,10 @@ navigate to `/admin?tab=orders`; `view-screen` reports that selection.
 
 Storefront checkout uses the `create-order` action to create a Stripe Checkout
 Session from current server-side prices. It requires the buyer's full name,
-email, phone, and delivery address. Orders remain unpaid until the signed
-`/api/stripe-webhook` confirms payment. Register `STRIPE_SECRET_KEY` and
+email, phone, street, house number, city, and five-digit Lithuanian postal
+code; apartment number is optional. The action combines these into a readable
+multiline delivery address saved on the order. Orders remain unpaid until the
+signed `/api/stripe-webhook` confirms payment. Register `STRIPE_SECRET_KEY` and
 `STRIPE_WEBHOOK_SECRET` as workspace secrets. Set the non-secret deployment
 setting `AGENT_VAULT_ORG_ID` to the exact workspace scope ID where those secrets
 are stored. Configure Stripe to send `checkout.session.completed` and

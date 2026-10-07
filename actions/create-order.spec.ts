@@ -65,11 +65,16 @@ describe("create-order", () => {
       customerName: "Test Pirkėjas",
       customerEmail: "buyer@example.test",
       customerPhone: "+37060000000",
-      shippingAddress: "Testų g. 1, Vilnius",
+      shippingStreet: "Testų g.",
+      shippingHouseNumber: "1",
+      shippingApartmentNumber: "5",
+      shippingCity: "Vilnius",
+      shippingPostalCode: "01100",
       items: [{ slug: "phone-mount", quantity: 2 }],
     });
 
     const savedItems = JSON.parse(String(mocks.insertedValues?.items));
+    expect(mocks.insertedValues?.shippingAddress).toBe("Testų g. 1-5\nLT-01100 Vilnius");
     expect(mocks.insertedValues?.totalCents).toBe("4980");
     expect(mocks.insertedValues?.costCents).toBe("2100");
     expect(mocks.insertedValues?.profitCents).toBe("2880");
@@ -96,11 +101,29 @@ describe("create-order", () => {
       customerName: "Test Pirkėjas",
       customerEmail: "buyer@example.test",
       customerPhone: "+37060000000",
-      shippingAddress: "Testų g. 1, Vilnius",
+      shippingStreet: "Testų g.",
+      shippingHouseNumber: "1",
+      shippingCity: "Vilnius",
+      shippingPostalCode: "01100",
       items: [{ slug: "phone-mount", quantity: 1 }],
     });
 
+    expect(mocks.insertedValues?.shippingAddress).toBe("Testų g. 1\nLT-01100 Vilnius");
     expect(mocks.insertedValues?.costCents).toBe("");
     expect(mocks.insertedValues?.profitCents).toBe("");
+  });
+
+  it("rejects an invalid Lithuanian postal code", async () => {
+    await expect(action.run({
+      customerName: "Test Pirkėjas",
+      customerEmail: "buyer@example.test",
+      customerPhone: "+37060000000",
+      shippingStreet: "Testų g.",
+      shippingHouseNumber: "1",
+      shippingApartmentNumber: "",
+      shippingCity: "Vilnius",
+      shippingPostalCode: "1100",
+      items: [{ slug: "phone-mount", quantity: 1 }],
+    })).rejects.toThrow("Pašto kodą turi sudaryti 5 skaitmenys.");
   });
 });
