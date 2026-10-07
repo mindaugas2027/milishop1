@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const mocks = vi.hoisted(() => ({
   products: [] as Array<Record<string, unknown>>,
   insertedValues: undefined as Record<string, unknown> | undefined,
+  checkoutParams: undefined as Record<string, unknown> | undefined,
 }));
 
 vi.mock("drizzle-orm", () => ({
@@ -25,6 +26,24 @@ vi.mock("../server/db.js", () => ({
   },
 }));
 
+vi.mock("../server/lib/stripe.js", () => ({
+  getStripeClient: async () => ({
+    checkout: {
+      sessions: {
+        create: async (params: Record<string, unknown>) => {
+          mocks.checkoutParams = params;
+          return { id: "cs_test_example", url: "https://checkout.stripe.test/session" };
+        },
+        expire: async () => ({}),
+      },
+    },
+  }),
+}));
+
+vi.mock("@agent-native/core/server", () => ({
+  getRequestContext: () => ({ requestOrigin: "https://shop.example.test" }),
+}));
+
 import action from "./create-order";
 
 describe("create-order", () => {
@@ -38,6 +57,7 @@ describe("create-order", () => {
       status: "active",
     }];
     mocks.insertedValues = undefined;
+    mocks.checkoutParams = undefined;
   });
 
   it("uses current database prices and stores per-order cost and profit snapshots", async () => {
@@ -56,6 +76,17 @@ describe("create-order", () => {
     expect(savedItems[0]).toMatchObject({ unitPriceCents: 2490, unitCostCents: 1050, quantity: 2 });
     expect(result.totalCents).toBe(4980);
     expect(result.status).toBe("received");
+    expect(result.paymentStatus).toBe("unpaid");
+    expect(result.checkoutUrl).toBe("https://checkout.stripe.test/session");
+    expect(mocks.insertedValues?.paymentMethod).toBe("stripe");
+    expect(mocks.insertedValues?.paymentStatus).toBe("unpaid");
+    expect(mocks.checkoutParams).toMatchObject({
+      mode: "payment",
+      customer_email: "buyer@example.test",
+      line_items: [{ price_data: { currency: "eur", unit_amount: 2490 }, quantity: 2 }],
+      success_url: expect.stringContaining("checkout=success"),
+      cancel_url: "https://shop.example.test/?checkout=cancelled",
+    });
   });
 
   it("leaves profit unknown when the product has no saved cost", async () => {

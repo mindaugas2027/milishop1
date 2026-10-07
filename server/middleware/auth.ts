@@ -28,10 +28,15 @@ export default defineEventHandler(async (event) => {
     method === "GET" &&
     (path === "/_agent-native/actions/list-product-landings" ||
       path === "/_agent-native/actions/get-product-landing");
+  const isPublicStoreCheckout =
+    method === "POST" && path === "/_agent-native/actions/create-order";
+  const isStripeWebhook = method === "POST" && path === "/api/stripe-webhook";
   const isFrameworkAuthRoute =
     path.startsWith("/_agent-native/auth/") || path === "/_agent-native/sign-in";
 
-  if (isPublicAuthRoute || isPublicCatalogRead || isFrameworkAuthRoute) {
+  if (isStripeWebhook) return;
+
+  if (isPublicAuthRoute || isPublicCatalogRead || isPublicStoreCheckout || isFrameworkAuthRoute) {
     return runAuthGuard(event);
   }
 

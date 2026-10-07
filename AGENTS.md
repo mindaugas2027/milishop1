@@ -89,10 +89,20 @@ and address details plus product slugs and quantities, then snapshots current
 server-side selling prices and costs. Use `list-orders` for the authenticated
 admin order list, `update-order` to set fulfillment (`received`,
 `processing`, `shipped`, `completed`, `cancelled`) or payment (`unpaid`, `paid`,
-`refunded`) status, and `delete-order` to permanently remove an order. Mark payment as paid only after verifying it manually;
-online payment processing is not connected. Profit is gross product margin and
+`refunded`) status, and `delete-order` to permanently remove an order. Stripe
+checkout marks payment paid only after a verified webhook; never mark it paid
+based only on the customer return page. Profit is gross product margin and
 excludes shipping and other operating costs. To open the order-management tab,
 navigate to `/admin?tab=orders`; `view-screen` reports that selection.
+
+Storefront checkout uses the `create-order` action to create a Stripe Checkout
+Session from current server-side prices. It requires the buyer's full name,
+email, phone, and delivery address. Orders remain unpaid until the signed
+`/api/stripe-webhook` confirms payment. Register `STRIPE_SECRET_KEY` and
+`STRIPE_WEBHOOK_SECRET` as workspace secrets. Set the non-secret deployment
+setting `AGENT_VAULT_ORG_ID` to the exact workspace scope ID where those secrets
+are stored. Configure Stripe to send `checkout.session.completed` and
+`checkout.session.async_payment_succeeded` events to `/api/stripe-webhook`.
 
 Add persistence or auth **only when data must survive reload or be shared
 between users**. A pure UI, copy, or layout change needs no schema, action, or

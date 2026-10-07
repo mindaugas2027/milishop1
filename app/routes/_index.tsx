@@ -128,6 +128,7 @@ export default function HomeRoute() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [activeHeroSlide, setActiveHeroSlide] = useState(0);
   const [cartOpen, setCartOpen] = useState(false);
+  const [checkoutNotice, setCheckoutNotice] = useState<{ status: "success" | "cancelled"; order?: string } | null>(null);
   const [cartItems, setCartItems] = useState<CartLine[]>([]);
   const [pageCursor, setPageCursor] = useState<string>();
   const [storefrontProducts, setStorefrontProducts] = useState<StorefrontProduct[]>(() =>
@@ -178,7 +179,18 @@ export default function HomeRoute() {
 
   useEffect(() => {
     setCartItems(readCart());
-    if (new URLSearchParams(window.location.search).get("cart") === "open") {
+    const params = new URLSearchParams(window.location.search);
+    const checkout = params.get("checkout");
+    if (checkout === "success" || checkout === "cancelled") {
+      setCheckoutNotice({ status: checkout, order: params.get("order") ?? undefined });
+      if (checkout === "success") {
+        setCartItems([]);
+        writeCart([]);
+      } else {
+        setCartOpen(true);
+      }
+      window.history.replaceState({}, "", "/");
+    } else if (params.get("cart") === "open") {
       setCartOpen(true);
       window.history.replaceState({}, "", "/");
     }
@@ -244,6 +256,15 @@ export default function HomeRoute() {
         <span>14 dienų grąžinimas</span>
       </div>
 
+      {checkoutNotice && (
+        <div role={checkoutNotice.status === "success" ? "status" : "alert"} className="border-b border-[#203b40]/10 bg-[#f5f7f5] px-4 py-3 text-center text-sm text-[#203b40]">
+          {checkoutNotice.status === "success"
+            ? <>Mokėjimo patvirtinimas apdorojamas. Užsakymas <strong>{checkoutNotice.order}</strong>.</>
+            : "Apmokėjimas atšauktas. Prekės liko krepšelyje."}
+          <button type="button" className="ml-3 font-semibold underline" onClick={() => setCheckoutNotice(null)}>Uždaryti</button>
+        </div>
+      )}
+
       <header className="levitara-header">
         <div className="levitara-header-inner">
           <Link to="/" className="levitara-logo" aria-label="Milishop pradžia">
@@ -259,7 +280,7 @@ export default function HomeRoute() {
           </nav>
 
           <div className="levitara-header-tools">
-            <StoreCartDrawer items={cartItems} open={cartOpen} onOpenChange={setCartOpen} onQuantityChange={changeCartQuantity} onOrderCreated={() => { setCartItems([]); writeCart([]); }} />
+            <StoreCartDrawer items={cartItems} open={cartOpen} onOpenChange={setCartOpen} onQuantityChange={changeCartQuantity} />
             <Link className="levitara-admin-link" to="/admin">Prisijungti</Link>
             <button
               className="levitara-menu-button"

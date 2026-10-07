@@ -1,8 +1,10 @@
 import { defineAction, fail } from "@agent-native/core/action";
+import { getRequestContext } from "@agent-native/core/server";
 import { inArray } from "drizzle-orm";
 import { z } from "zod";
 
 import { getDb, schema } from "../server/db.js";
+import { getStripeClient } from "../server/lib/stripe.js";
 
 const orderInput = z.object({
   customerName: z.string().trim().min(2).max(120).describe("Pirkėjo vardas ir pavardė"),
@@ -26,9 +28,10 @@ function parsePriceCents(price: string) {
 }
 
 export default defineAction({
-  description: "Create a guest storefront order using current server-side product prices and cost snapshots; bank transfer is handled manually.",
+  description: "Create a guest storefront order and Stripe Checkout session using current server-side product prices; payment is confirmed by the Stripe webhook.",
   schema: orderInput,
   requiresAuth: false,
+  agentTool: false,
   run: async ({ customerName, customerEmail, customerPhone, shippingAddress, items }) => {
     const quantities = new Map<string, number>();
     for (const item of items) {
@@ -75,27 +78,73 @@ export default defineAction({
       ? orderItems.reduce((sum, item) => sum + item.unitCostCents! * item.quantity, 0)
       : null;
     if (costCents !== null && !Number.isSafeInteger(costCents)) fail("Užsakymo savikainos suma per didelė.");
+    const requestOrigin = getRequestContext()?.requestOrigin;
+    if (!requestOrigin) fail("Nepavyko nustatyti parduotuvės adreso. Atnaujinkite puslapį ir bandykite dar kartą.");
+    let origin: URL;
+    try {
+      origin = new URL(requestOrigin);
+    } catch {
+      fail("Parduotuvės adresas neteisingas.");
+    }
+    if (origin.protocol !== "https:" && origin.hostname !== "localhost" && origin.hostname !== "127.0.0.1") {
+      fail("Parduotuvės adresas nesaugus.");
+    }
+    const stripe = await getStripeClient();
+    if (!stripe) {
+      fail("Stripe dar nesukonfigūruotas. Parduotuvės administratorius turi įvesti Stripe raktus nustatymuose.");
+    }
     const id = crypto.randomUUID();
     const orderNumber = `MS-${new Date().getFullYear()}-${id.slice(0, 8).toUpperCase()}`;
-    const [order] = await db.insert(schema.orders).values({
-      id,
-      orderNumber,
-      customerName,
-      customerEmail,
-      customerPhone,
-      shippingAddress,
-      items: JSON.stringify(orderItems),
-      totalCents: String(totalCents),
-      costCents: costCents === null ? "" : String(costCents),
-      profitCents: costCents === null ? "" : String(totalCents - costCents),
-    }).returning({ id: schema.orders.id, orderNumber: schema.orders.orderNumber });
+    const checkoutSession = await stripe.checkout.sessions.create({
+      mode: "payment",
+      customer_email: customerEmail,
+      line_items: orderItems.map((item) => ({
+        price_data: {
+          currency: "eur",
+          product_data: { name: item.name },
+          unit_amount: item.unitPriceCents,
+        },
+        quantity: item.quantity,
+      })),
+      metadata: { orderId: id, orderNumber },
+      success_url: `${origin.origin}/?checkout=success&order=${encodeURIComponent(orderNumber)}`,
+      cancel_url: `${origin.origin}/?checkout=cancelled`,
+    });
+    if (!checkoutSession.url) fail("Stripe nepateikė apmokėjimo nuorodos. Bandykite dar kartą.");
+    let order: { id: string; orderNumber: string } | undefined;
+    try {
+      [order] = await db.insert(schema.orders).values({
+        id,
+        orderNumber,
+        customerName,
+        customerEmail,
+        customerPhone,
+        shippingAddress,
+        paymentMethod: "stripe",
+        paymentStatus: "unpaid",
+        status: "received",
+        items: JSON.stringify(orderItems),
+        totalCents: String(totalCents),
+        costCents: costCents === null ? "" : String(costCents),
+        profitCents: costCents === null ? "" : String(totalCents - costCents),
+      }).returning({ id: schema.orders.id, orderNumber: schema.orders.orderNumber });
+    } catch (error) {
+      await stripe.checkout.sessions.expire(checkoutSession.id).catch(() => undefined);
+      throw error;
+    }
+    if (!order) {
+      await stripe.checkout.sessions.expire(checkoutSession.id).catch(() => undefined);
+      fail("Nepavyko išsaugoti užsakymo. Bandykite dar kartą.");
+    }
 
     return {
       id: order.id,
       orderNumber: order.orderNumber,
       totalCents,
       status: "received",
-      paymentMethod: "bank_transfer",
+      paymentStatus: "unpaid",
+      paymentMethod: "stripe",
+      checkoutUrl: checkoutSession.url,
     };
   },
 });
