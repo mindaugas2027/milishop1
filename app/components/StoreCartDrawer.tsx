@@ -99,7 +99,7 @@ export function StoreCartDrawer({ items, open, onOpenChange, onQuantityChange, c
                   <label className="grid gap-1 text-xs font-medium text-[#203b40]/70">Vardas ir pavardė<input className="rounded-lg border border-[#203b40]/15 bg-white px-3 py-2.5 text-sm" autoComplete="name" required minLength={2} maxLength={120} value={customer.customerName} onChange={(event) => setCustomer({ ...customer, customerName: event.target.value })} /></label>
                   <label className="grid gap-1 text-xs font-medium text-[#203b40]/70">Telefonas<input className="rounded-lg border border-[#203b40]/15 bg-white px-3 py-2.5 text-sm" type="tel" autoComplete="tel" required minLength={6} maxLength={30} value={customer.customerPhone} onChange={(event) => setCustomer({ ...customer, customerPhone: event.target.value })} /></label>
                   <label className="grid gap-1 text-xs font-medium text-[#203b40]/70">El. paštas<input className="rounded-lg border border-[#203b40]/15 bg-white px-3 py-2.5 text-sm" type="email" autoComplete="email" required maxLength={254} value={customer.customerEmail} onChange={(event) => setCustomer({ ...customer, customerEmail: event.target.value })} /></label>
-                  <button type="submit" className="w-full rounded-full bg-[#2f7f7b] px-4 py-3 text-sm font-semibold text-white">Tęsti į pristatymą</button>
+                  <button type="submit" className="w-full rounded-full bg-[#2f7f7b] px-4 py-3 text-sm font-semibold text-white">Tęsti</button>
                 </form>
               ) : (
                 <form className="grid gap-3" onSubmit={submitOrder}>
