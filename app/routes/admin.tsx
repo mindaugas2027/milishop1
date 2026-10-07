@@ -1,6 +1,7 @@
 import ProductManager from "@/components/admin/ProductManager";
 import CategoryManager from "@/components/admin/CategoryManager";
 import OrderManager from "@/components/admin/OrderManager";
+import { SecretsSection } from "@agent-native/core/client/settings";
 import { Link, Outlet, useLocation, useSearchParams } from "react-router";
 import { useActionMutation, useActionQuery } from "@agent-native/core/client/hooks";
 import { useEffect, useState } from "react";
@@ -33,20 +34,26 @@ function StoreSettingsPanel() {
   }, [data]);
 
   return (
-    <section className="admin-panel mt-6 max-w-3xl">
-      <h2 className="admin-panel-title">Parduotuvės nuorodos</h2>
-      {isLoading && <p role="status" className="mt-4 text-sm text-[#203b40]/55">Įkeliami nustatymai…</p>}
-      {loadError && <p role="alert" className="mt-4 text-sm text-[#bd6659]">Nustatymų nepavyko įkelti. Patikrinkite duomenų bazės ryšį.</p>}
-      <form className="mt-5 grid gap-4" onSubmit={(event) => { event.preventDefault(); mutate({ instagramUrl, facebookUrl }); }}>
-        <label className="grid gap-1.5 text-xs font-medium text-[#203b40]/70">Instagram<input className="rounded-lg border border-[#203b40]/15 bg-white px-3 py-2.5 text-sm" type="url" value={instagramUrl} onChange={(event) => setInstagramUrl(event.target.value)} placeholder="https://www.instagram.com/..." /></label>
-        <label className="grid gap-1.5 text-xs font-medium text-[#203b40]/70">Facebook<input className="rounded-lg border border-[#203b40]/15 bg-white px-3 py-2.5 text-sm" type="url" value={facebookUrl} onChange={(event) => setFacebookUrl(event.target.value)} placeholder="https://www.facebook.com/..." /></label>
-        <div className="flex flex-wrap items-center gap-3">
-          <button type="submit" disabled={isSaving || isLoading} className="admin-primary-action disabled:opacity-60">{isSaving ? "Saugoma…" : "Išsaugoti"}</button>
-          {isSuccess && <span role="status" className="text-sm text-[#2f7f7b]">Nuorodos išsaugotos.</span>}
-          {error && <span role="alert" className="text-sm text-[#bd6659]">Išsaugoti nepavyko. Patikrinkite HTTPS nuorodas.</span>}
-        </div>
-      </form>
-    </section>
+    <div className="mt-6 grid max-w-3xl gap-6">
+      <section className="admin-panel">
+        <h2 className="admin-panel-title">Stripe mokėjimai</h2>
+        <SecretsSection focusKey="STRIPE_SECRET_KEY" />
+      </section>
+      <section className="admin-panel">
+        <h2 className="admin-panel-title">Parduotuvės nuorodos</h2>
+        {isLoading && <p role="status" className="mt-4 text-sm text-[#203b40]/55">Įkeliami nustatymai…</p>}
+        {loadError && <p role="alert" className="mt-4 text-sm text-[#bd6659]">Nustatymų nepavyko įkelti. Patikrinkite duomenų bazės ryšį.</p>}
+        <form className="mt-5 grid gap-4" onSubmit={(event) => { event.preventDefault(); mutate({ instagramUrl, facebookUrl }); }}>
+          <label className="grid gap-1.5 text-xs font-medium text-[#203b40]/70">Instagram<input className="rounded-lg border border-[#203b40]/15 bg-white px-3 py-2.5 text-sm" type="url" value={instagramUrl} onChange={(event) => setInstagramUrl(event.target.value)} placeholder="https://www.instagram.com/..." /></label>
+          <label className="grid gap-1.5 text-xs font-medium text-[#203b40]/70">Facebook<input className="rounded-lg border border-[#203b40]/15 bg-white px-3 py-2.5 text-sm" type="url" value={facebookUrl} onChange={(event) => setFacebookUrl(event.target.value)} placeholder="https://www.facebook.com/..." /></label>
+          <div className="flex flex-wrap items-center gap-3">
+            <button type="submit" disabled={isSaving || isLoading} className="admin-primary-action disabled:opacity-60">{isSaving ? "Saugoma…" : "Išsaugoti"}</button>
+            {isSuccess && <span role="status" className="text-sm text-[#2f7f7b]">Nuorodos išsaugotos.</span>}
+            {error && <span role="alert" className="text-sm text-[#bd6659]">Išsaugoti nepavyko. Patikrinkite HTTPS nuorodas.</span>}
+          </div>
+        </form>
+      </section>
+    </div>
   );
 }
 

@@ -5,8 +5,8 @@ import Stripe from "stripe";
 export default defineNitroPlugin(() => {
   registerRequiredSecret({
     key: "STRIPE_SECRET_KEY",
-    label: "Stripe Secret Key",
-    description: "Server-side key for creating secure Checkout sessions.",
+    label: "Stripe slaptasis raktas",
+    description: "Serverio raktas saugioms Stripe Checkout sesijoms kurti.",
     docsUrl: "https://dashboard.stripe.com/apikeys",
     scope: "workspace",
     kind: "api-key",
@@ -22,8 +22,8 @@ export default defineNitroPlugin(() => {
 
   registerRequiredSecret({
     key: "STRIPE_WEBHOOK_SECRET",
-    label: "Stripe Webhook Signing Secret",
-    description: "Verifies payment confirmations from Stripe.",
+    label: "Stripe webhook pasirašymo raktas",
+    description: "Patikrina iš Stripe gautus mokėjimo patvirtinimus.",
     docsUrl: "https://dashboard.stripe.com/webhooks",
     scope: "workspace",
     kind: "api-key",
