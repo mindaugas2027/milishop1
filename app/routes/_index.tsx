@@ -236,9 +236,8 @@ export default function HomeRoute() {
     });
     document.body.append(flyer);
 
-    const distanceScale = prefersReducedMotion ? 0.55 : 1;
-    const deltaX = (cartRect.left + cartRect.width / 2 - (sourceRect.left + sourceRect.width / 2)) * distanceScale;
-    const deltaY = (cartRect.top + cartRect.height / 2 - (sourceRect.top + sourceRect.height / 2)) * distanceScale;
+    const deltaX = cartRect.left + cartRect.width / 2 - (sourceRect.left + sourceRect.width / 2);
+    const deltaY = cartRect.top + cartRect.height / 2 - (sourceRect.top + sourceRect.height / 2);
     const animation = flyer.animate([
       { transform: "translate(0, 0) scale(1)", opacity: 1 },
       { transform: `translate(${deltaX * 0.55}px, ${deltaY * 0.55}px) scale(.72)`, opacity: 0.9, offset: 0.72 },
