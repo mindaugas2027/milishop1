@@ -1080,6 +1080,8 @@
 }
 
 @media (max-width: 720px) {
+  .store-info-footer { align-items: flex-start; flex-direction: column; gap: 16px; padding: 20px 18px calc(20px + env(safe-area-inset-bottom)); }
+  .store-info-footer > div { display: flex; width: 100%; align-items: flex-start; flex-wrap: wrap; justify-content: flex-start; gap: 10px 16px; }
   .store-info-delivery .store-info-content { padding: 52px 20px 64px; }
   .store-info-delivery .store-info-content h1 { font-size: 36px; }
   .store-info-delivery .store-info-copy { margin-top: 42px; }
