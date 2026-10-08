@@ -26,6 +26,7 @@ export default function PrivacyPolicyRoute() {
         <ul>
           <li><strong>Užsakymo duomenis:</strong> vardą ir pavardę, el. pašto adresą, telefono numerį, pristatymo adresą, pasirinktas prekes, kiekius, užsakymo sumą ir būseną.</li>
           <li><strong>Susirašinėjimo duomenis:</strong> informaciją, kurią pateikiate kreipdamiesi dėl užsakymo, prekės, grąžinimo ar kito klausimo.</li>
+          <li><strong>Slapukų pasirinkimus:</strong> pasirenkamų kategorijų pasirinkimą, politikos versiją ir pasirinkimo laiką, saugomus tik jūsų naršyklėje.</li>
           <li><strong>Techninius duomenis:</strong> informaciją apie apsilankymą ir įrenginį, pavyzdžiui, IP adresą, naršyklės tipą, prisijungimo laiką ir saugumo įvykius, kai ji gaunama veikiant svetainei ar jos infrastruktūrai.</li>
           <li><strong>Krepšelio duomenis:</strong> pasirinktas prekes ir jų kiekius, kurie išsaugomi jūsų naršyklės saugykloje, kad krepšelis išliktų naršant parduotuvėje.</li>
         </ul>
@@ -62,7 +63,9 @@ export default function PrivacyPolicyRoute() {
 
       <section>
         <h2>6. Slapukai ir naršyklės saugykla</h2>
-        <p>Svetainė gali naudoti būtinus techninius slapukus ar panašias technologijas prisijungimo sesijai, saugumui ir pagrindinėms funkcijoms palaikyti. Krepšelio turinys saugomas naršyklės vietinėje saugykloje. Naršyklės nustatymuose galite išvalyti šiuos duomenis; juos išjungus kai kurios funkcijos, pavyzdžiui, krepšelio išsaugojimas, gali neveikti.</p>
+        <p>Būtinieji slapukai reikalingi svetainės saugumui, prisijungimo sesijai ir pagrindinėms funkcijoms. Pasirenkami nuostatų, statistikos ir rinkodaros slapukai naudojami tik gavus jūsų sutikimą; juos galite bet kada peržiūrėti arba pakeisti paspaudę „Slapukų nustatymai“ puslapio apačioje. Kol sutikimo nėra, pasirenkamos kategorijos išjungtos.</p>
+        <p>Slapukų pasirinkimus, politikos versiją ir pasirinkimo laiką saugome tik jūsų naršyklės vietinėje saugykloje. Šio sutikimo įrašo į serverį nesiunčiame. Automatinį statistinį sekimą įjungiame tik tada, kai galioja jūsų statistikos sutikimas.</p>
+        <p>Krepšelio turinys saugomas naršyklės vietinėje saugykloje. Naršyklės nustatymuose galite išvalyti šiuos duomenis; juos išjungus kai kurios funkcijos, pavyzdžiui, krepšelio išsaugojimas, gali neveikti.</p>
       </section>
 
       <section>

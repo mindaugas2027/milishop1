@@ -1,4 +1,3 @@
-import { configureTracking } from "@agent-native/core/client/analytics";
 import { appPath } from "@agent-native/core/client/api-path";
 import { useDbSync } from "@agent-native/core/client/hooks";
 import {
@@ -13,19 +12,13 @@ import type { LinksFunction } from "react-router";
 import { ClientOnly } from "@agent-native/core/client/ui";
 
 import { Layout as AppLayout } from "@/components/layout/Layout";
+import { CookieConsentManager } from "@/components/CookieConsentManager";
 import { AppToolkitProvider } from "@/components/ui/toolkit-provider";
 import { useNavigationState } from "@/hooks/use-navigation-state";
-import { APP_NAME, APP_TITLE } from "@/lib/app-config";
+import { APP_TITLE } from "@/lib/app-config";
 import { TAB_ID } from "@/lib/tab-id";
 
 import stylesheet from "./global.css?url";
-
-configureTracking({
-  getDefaultProps: (_name, properties) => ({
-    ...properties,
-    app: APP_NAME,
-  }),
-});
 
 export const links: LinksFunction = () => [
   { rel: "stylesheet", href: stylesheet },
@@ -41,13 +34,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <meta
           name="viewport"
           content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
-        />
-        <script
-          id="Cookiebot"
-          src="https://consent.cookiebot.com/uc.js"
-          data-cbid="79d4825b-c3c2-4343-9114-ad737b1639ed"
-          data-blockingmode="auto"
-          type="text/javascript"
         />
         <script
           suppressHydrationWarning
@@ -97,6 +83,7 @@ export default function Root() {
         <AppLayout>
           <Outlet />
         </AppLayout>
+        {isPublicPath && <CookieConsentManager />}
       </AppProviders>
     </AppToolkitProvider>
   );

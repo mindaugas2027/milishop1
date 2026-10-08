@@ -1,9 +1,14 @@
 export function CookieSettingsLink() {
   return (
-    <span
-      dangerouslySetInnerHTML={{
-        __html: '<a class="cookie-settings-link" href="#" onclick="window.Cookiebot.show(); return false;">Privacy settings</a>',
+    <a
+      className="cookie-settings-link"
+      href="#"
+      onClick={(event) => {
+        event.preventDefault();
+        window.dispatchEvent(new Event("milishop-cookies:settings"));
       }}
-    />
+    >
+      Slapukų nustatymai
+    </a>
   );
 }
