@@ -1134,6 +1134,7 @@
 }
 
 @media (max-width: 720px) {
+  .agent-native-app-main.cookie-consent-active { padding-bottom: calc(240px + env(safe-area-inset-bottom)); }
   .levitara-announcement { gap: 10px; padding: 0 12px; font-size: 8px; letter-spacing: .1em; }
   .levitara-announcement span:nth-of-type(n + 4) { display: none; }
   .levitara-header-inner { min-height: 68px; grid-template-columns: 1fr auto; padding-inline: 18px; }

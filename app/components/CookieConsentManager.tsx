@@ -110,6 +110,14 @@ export function CookieConsentManager() {
   };
 
   const needsConsent = !consent || consent.policyVersion !== policyVersion;
+
+  useEffect(() => {
+    const scroller = document.querySelector<HTMLElement>(".agent-native-app-main");
+    if (!scroller) return;
+    scroller.classList.toggle("cookie-consent-active", needsConsent);
+    return () => scroller.classList.remove("cookie-consent-active");
+  }, [needsConsent]);
+
   if (!hasLoaded || (!needsConsent && !settingsOpen)) return null;
 
   const acceptAll = () => save({ preferences: true, statistics: true, marketing: true });
