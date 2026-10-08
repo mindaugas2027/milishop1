@@ -206,7 +206,55 @@ export default function HomeRoute() {
     return () => window.removeEventListener("milishop-cart:open", openCart);
   }, []);
 
-  const addToCart = (product: StorefrontProduct) => {
+  const animateProductToCart = (source: HTMLButtonElement, image: string) => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    const sourceImage = source.closest(".levitara-product-media")?.querySelector("img");
+    const cart = document.querySelector<HTMLButtonElement>(".levitara-cart");
+    if (!sourceImage || !cart) return;
+
+    const sourceRect = sourceImage.getBoundingClientRect();
+    const cartRect = cart.getBoundingClientRect();
+    const size = Math.min(88, sourceRect.width, sourceRect.height);
+    const flyer = document.createElement("img");
+    flyer.src = image;
+    flyer.alt = "";
+    flyer.setAttribute("aria-hidden", "true");
+    Object.assign(flyer.style, {
+      position: "fixed",
+      left: `${sourceRect.left + (sourceRect.width - size) / 2}px`,
+      top: `${sourceRect.top + (sourceRect.height - size) / 2}px`,
+      width: `${size}px`,
+      height: `${size}px`,
+      borderRadius: "8px",
+      background: "#fff",
+      objectFit: "contain",
+      pointerEvents: "none",
+      transformOrigin: "center",
+      willChange: "transform, opacity",
+      zIndex: "1000",
+    });
+    document.body.append(flyer);
+
+    const deltaX = cartRect.left + cartRect.width / 2 - (sourceRect.left + sourceRect.width / 2);
+    const deltaY = cartRect.top + cartRect.height / 2 - (sourceRect.top + sourceRect.height / 2);
+    const animation = flyer.animate([
+      { transform: "translate(0, 0) scale(1)", opacity: 1 },
+      { transform: `translate(${deltaX * 0.55}px, ${deltaY * 0.55}px) scale(.72)`, opacity: 0.9, offset: 0.72 },
+      { transform: `translate(${deltaX}px, ${deltaY}px) scale(.16)`, opacity: 0.15 },
+    ], { duration: 620, easing: "cubic-bezier(.2,.75,.25,1)", fill: "forwards" });
+
+    animation.addEventListener("finish", () => {
+      flyer.remove();
+      cart.querySelector("strong")?.animate(
+        [{ transform: "scale(1)" }, { transform: "scale(1.3)" }, { transform: "scale(1)" }],
+        { duration: 300, easing: "ease-out" },
+      );
+    }, { once: true });
+    animation.addEventListener("cancel", () => flyer.remove(), { once: true });
+  };
+
+  const addToCart = (product: StorefrontProduct, source: HTMLButtonElement) => {
     setCartItems((current) =>
       addCartItem(current, {
         slug: product.slug,
@@ -215,6 +263,7 @@ export default function HomeRoute() {
         image: product.image,
       }),
     );
+    animateProductToCart(source, product.image);
   };
 
   const changeCartQuantity = (slug: string, amount: number) => {
@@ -403,7 +452,7 @@ export default function HomeRoute() {
                     <span className="levitara-sale-badge">{product.tag}</span>
                     <span className="levitara-quick-add"><span>Peržiūrėti</span><span aria-hidden="true">↗</span></span>
                   </Link>
-                  <button className="levitara-add-to-cart" type="button" onClick={() => addToCart(product)} aria-label={`Įdėti į krepšelį: ${product.name}`} title="Įdėti į krepšelį">
+                  <button className="levitara-add-to-cart" type="button" onClick={(event) => addToCart(product, event.currentTarget)} aria-label={`Įdėti į krepšelį: ${product.name}`} title="Įdėti į krepšelį">
                     <IconShoppingCartPlus size={20} stroke={1.8} aria-hidden="true" />
                   </button>
                 </div>
