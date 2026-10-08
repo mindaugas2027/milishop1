@@ -8,6 +8,7 @@ type OrderItem = {
   quantity: number;
   unitPriceCents: number;
   unitCostCents: number | null;
+  supplierUrl: string;
 };
 
 type AdminOrder = {
@@ -110,9 +111,12 @@ export default function OrderManager() {
                 </div>
                 <div className="grid content-start gap-2">
                   {order.items.map((item) => (
-                    <div key={item.slug} className="flex justify-between gap-4 text-xs">
-                      <span className="text-[#203b40]/65">{item.name} × {item.quantity}</span>
-                      <strong className="shrink-0 text-[#203b40]">{formatCents(item.unitPriceCents * item.quantity)}</strong>
+                    <div key={item.slug} className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2 text-xs">
+                      <span className="min-w-0 text-[#203b40]/65">{item.name} × {item.quantity}</span>
+                      <div className="flex shrink-0 items-center gap-3">
+                        <strong className="text-[#203b40]">{formatCents(item.unitPriceCents * item.quantity)}</strong>
+                        {item.supplierUrl && <a href={item.supplierUrl} className="admin-row-action" target="_blank" rel="noopener noreferrer">Užsakyti ↗</a>}
+                      </div>
                     </div>
                   ))}
                   <dl className="mt-2 grid grid-cols-2 gap-y-1 border-t border-[#203b40]/8 pt-3 text-xs">
