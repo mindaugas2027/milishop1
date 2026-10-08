@@ -1,6 +1,7 @@
 import { useActionQuery } from "@agent-native/core/client/hooks";
 import type { ReactNode } from "react";
 import { Link } from "react-router";
+import { CookieSettingsLink } from "@/components/CookieSettingsLink";
 
 export function StoreSocialLinks() {
   const { data } = useActionQuery("get-store-social-links", {});
@@ -61,6 +62,7 @@ export function StoreInfoPage({
         </Link>
         <div className="flex items-center gap-4">
           <Link to="/privatumo-politika" className="store-info-back">Privatumo politika</Link>
+          <CookieSettingsLink />
           <StoreSocialLinks />
         </div>
       </footer>

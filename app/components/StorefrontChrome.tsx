@@ -1,4 +1,5 @@
 import { Link } from "react-router";
+import { CookieSettingsLink } from "@/components/CookieSettingsLink";
 import { StoreSocialLinks } from "@/components/StoreInfoPage";
 
 export function StorePaymentStrip() {
@@ -40,7 +41,10 @@ export function StoreFooter({ year = new Date().getFullYear() }: { year?: number
         <div><h3>Informacija</h3><Link to="/apie-mus">Apie mus</Link><Link to="/pristatymas">Pristatymas</Link><Link to="/grazinimas">Grąžinimas</Link><Link to="/privatumo-politika">Privatumo politika</Link></div>
         <div><h3>Pagalba</h3><Link to="/admin">Prisijungti</Link><StoreSocialLinks /></div>
       </div>
-      <div className="levitara-footer-bottom"><span>© {year} Milishop. Visos teisės saugomos.</span></div>
+      <div className="levitara-footer-bottom">
+        <span>© {year} Milishop. Visos teisės saugomos.</span>
+        <CookieSettingsLink />
+      </div>
     </footer>
   );
 }
