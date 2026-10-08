@@ -1,4 +1,4 @@
-import { IconMinus, IconPlus, IconShoppingCart, IconX } from "@tabler/icons-react";
+import { IconMinus, IconPlus, IconShoppingCart, IconTrash, IconX } from "@tabler/icons-react";
 import { useState } from "react";
 import { actionErrorMessage, useActionMutation } from "@agent-native/core/client/hooks";
 import {
@@ -76,7 +76,7 @@ export function StoreCartDrawer({ items, open, onOpenChange, onQuantityChange, c
           </div>
         ) : (
           <>
-            <div className="grid min-h-0 gap-5 overflow-y-auto">
+            <div className="levitara-cart-body">
               <div className="levitara-cart-items">
                 {items.map((item) => (
                   <article className="levitara-cart-item" key={item.slug}>
@@ -90,6 +90,9 @@ export function StoreCartDrawer({ items, open, onOpenChange, onQuantityChange, c
                         <button type="button" onClick={() => onQuantityChange(item.slug, 1)} aria-label={`Padidinti ${item.name} kiekį`}><IconPlus size={14} /></button>
                       </div>
                     </div>
+                    <button type="button" className="levitara-cart-remove" onClick={() => onQuantityChange(item.slug, -item.quantity)} aria-label={`Pašalinti ${item.name} iš krepšelio`} title={`Pašalinti ${item.name}`}>
+                      <IconTrash size={17} stroke={1.8} />
+                    </button>
                   </article>
                 ))}
               </div>

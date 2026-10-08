@@ -610,15 +610,19 @@
 .levitara-category-filters a:hover { border-color: #171a19; color: #171a19; }
 .levitara-category-filters a[aria-current="page"] { border-color: #171a19; background: #171a19; color: #fff; }
 .levitara-empty-category { padding: 30px 0; color: #777e7a; font-size: 13px; }
-.levitara-cart-sheet { display: flex; width: min(100vw, 420px); flex-direction: column; gap: 20px; overflow: hidden; border-color: #e7e7e5; background: #fff; padding: 24px; color: #171a19; }
-.levitara-cart-sheet-header { display: flex; flex-direction: row; align-items: center; justify-content: space-between; border-bottom: 1px solid #e8e8e6; padding: 2px 32px 18px 0; }
+.levitara-cart-sheet { display: flex; width: min(100vw, 420px); height: 100dvh; min-height: 0; flex-direction: column; gap: 20px; overflow: hidden; border-color: #e7e7e5; background: #fff; padding: 24px; color: #171a19; }
+.levitara-cart-sheet-header { display: flex; flex: 0 0 auto; flex-direction: row; align-items: center; justify-content: space-between; border-bottom: 1px solid #e8e8e6; padding: 2px 32px 18px 0; }
 .levitara-cart-sheet-header h2 { display: flex; align-items: center; gap: 9px; margin: 0; color: #171a19; font-size: 20px; font-weight: 600; }
 .levitara-cart-sheet-header h2 span { display: grid; min-width: 22px; height: 22px; place-items: center; border-radius: 50%; background: #f0f1ef; padding-inline: 5px; color: #525956; font-size: 11px; }
 .levitara-cart-close { display: grid; width: 34px; height: 34px; place-items: center; border: 1px solid #e7e7e5; border-radius: 50%; background: #fff; color: #303633; cursor: pointer; }
-.levitara-cart-items { display: grid; min-height: 0; gap: 16px; }
-.levitara-cart-item { display: flex; gap: 14px; border-bottom: 1px solid #ededeb; padding-bottom: 16px; }
+.levitara-cart-body { display: grid; flex: 1 1 0%; min-height: 0; align-content: start; gap: 20px; overflow-y: auto; overscroll-behavior: contain; scrollbar-gutter: stable; -webkit-overflow-scrolling: touch; }
+.levitara-cart-items { display: grid; align-content: start; gap: 16px; }
+.levitara-cart-item { display: flex; align-items: flex-start; gap: 14px; border-bottom: 1px solid #ededeb; padding-bottom: 16px; }
 .levitara-cart-item > img { width: 76px; height: 76px; flex: 0 0 auto; border-radius: 4px; background: #f6f5f2; object-fit: contain; }
 .levitara-cart-item-info { display: grid; min-width: 0; flex: 1; align-content: start; gap: 5px; }
+.levitara-cart-remove { display: grid; width: 34px; height: 34px; flex: 0 0 auto; place-items: center; border: 1px solid #e7e7e5; border-radius: 4px; background: #fff; color: #737a76; cursor: pointer; }
+.levitara-cart-remove:hover { border-color: #bd6659; color: #bd6659; }
+.levitara-cart-remove:focus-visible { outline: 2px solid #2f7f7b; outline-offset: 2px; }
 .levitara-cart-item-info h3 { margin: 0; color: #171a19; font-size: 13px; font-weight: 500; line-height: 1.4; }
 .levitara-cart-item-info > strong { color: #171a19; font-size: 13px; }
 .levitara-cart-quantity { display: inline-flex; width: fit-content; height: 28px; align-items: center; gap: 13px; margin-top: 3px; border: 1px solid #e3e4e1; border-radius: 3px; padding-inline: 6px; }
@@ -1130,7 +1134,11 @@
   .levitara-price-row span { font-size: 11px; }
   .levitara-quick-add { display: none; }
   .levitara-add-to-cart { right: 8px; bottom: 8px; width: 40px; height: 40px; opacity: 1; transform: none; }
-  .levitara-cart-sheet { width: min(100vw, 420px); max-height: 100dvh; padding: max(16px, env(safe-area-inset-top)) 16px max(16px, env(safe-area-inset-bottom)); }
+  .levitara-cart-sheet { width: 100vw; max-height: 100dvh; padding: max(16px, env(safe-area-inset-top)) 16px max(16px, env(safe-area-inset-bottom)); }
+  .levitara-cart-sheet-header { padding-bottom: 14px; }
+  .levitara-cart-item { gap: 10px; padding-bottom: 12px; }
+  .levitara-cart-item > img { width: 64px; height: 64px; }
+  .levitara-cart-remove { width: 32px; height: 32px; }
   .levitara-trust-inner { display: grid; gap: 24px; grid-template-columns: 1fr 1fr; padding-block: 32px; }
   .levitara-trust-intro { grid-column: span 2; }
   .levitara-trust-item { padding-left: 12px; }
