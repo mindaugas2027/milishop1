@@ -207,7 +207,7 @@ export default function HomeRoute() {
   }, []);
 
   const animateProductToCart = (source: HTMLButtonElement, image: string) => {
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     const sourceImage = source.closest(".levitara-product-media")?.querySelector("img");
     const cart = document.querySelector<HTMLButtonElement>(".levitara-cart");
@@ -217,7 +217,7 @@ export default function HomeRoute() {
     const cartRect = cart.getBoundingClientRect();
     const size = Math.min(88, sourceRect.width, sourceRect.height);
     const flyer = document.createElement("img");
-    flyer.src = image;
+    flyer.src = sourceImage.currentSrc || image;
     flyer.alt = "";
     flyer.setAttribute("aria-hidden", "true");
     Object.assign(flyer.style, {
@@ -236,13 +236,14 @@ export default function HomeRoute() {
     });
     document.body.append(flyer);
 
-    const deltaX = cartRect.left + cartRect.width / 2 - (sourceRect.left + sourceRect.width / 2);
-    const deltaY = cartRect.top + cartRect.height / 2 - (sourceRect.top + sourceRect.height / 2);
+    const distanceScale = prefersReducedMotion ? 0.55 : 1;
+    const deltaX = (cartRect.left + cartRect.width / 2 - (sourceRect.left + sourceRect.width / 2)) * distanceScale;
+    const deltaY = (cartRect.top + cartRect.height / 2 - (sourceRect.top + sourceRect.height / 2)) * distanceScale;
     const animation = flyer.animate([
       { transform: "translate(0, 0) scale(1)", opacity: 1 },
       { transform: `translate(${deltaX * 0.55}px, ${deltaY * 0.55}px) scale(.72)`, opacity: 0.9, offset: 0.72 },
       { transform: `translate(${deltaX}px, ${deltaY}px) scale(.16)`, opacity: 0.15 },
-    ], { duration: 620, easing: "cubic-bezier(.2,.75,.25,1)", fill: "forwards" });
+    ], { duration: prefersReducedMotion ? 380 : 620, easing: "cubic-bezier(.2,.75,.25,1)", fill: "forwards" });
 
     animation.addEventListener("finish", () => {
       flyer.remove();
