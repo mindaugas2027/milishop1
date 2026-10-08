@@ -215,7 +215,6 @@ export default function HomeRoute() {
         image: product.image,
       }),
     );
-    setCartOpen(true);
   };
 
   const changeCartQuantity = (slug: string, amount: number) => {
