@@ -1185,7 +1185,7 @@
   .levitara-footer-grid { gap: 31px 18px; grid-template-columns: 1fr 1fr; }
   .levitara-footer-brand { grid-column: span 2; }
   .levitara-footer-bottom { align-items: flex-start; flex-direction: column; gap: 8px; margin-top: 34px; }
-  .cookie-consent-banner { bottom: max(10px, env(safe-area-inset-bottom)); width: calc(100% - 20px); gap: 14px; padding: 16px; }
+  .cookie-consent-banner { bottom: max(10px, env(safe-area-inset-bottom)); width: calc(100% - 20px); gap: 14px; grid-template-columns: minmax(0, 1fr); padding: 16px; }
   .cookie-consent-banner-copy h2 { font-size: 15px; }
   .cookie-consent-banner-copy p { font-size: 12px; }
   .cookie-consent-banner-actions { display: grid; gap: 7px; grid-template-columns: 1fr 1fr; }
